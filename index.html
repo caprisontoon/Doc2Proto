@@ -4,38 +4,67 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Doc2Proto</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234a55e0'/%3E%3Cpath d='M9 10h9a5 5 0 0 1 0 12h-4v-4h4a1 1 0 0 0 0-4h-5v10H9z' fill='%23fff'/%3E%3C/svg%3E">
 <style>
 :root{
-  --bg:#e9ebef; --card:#ffffff; --ink:#1b1d22; --muted:#8a909c; --line:#dde0e6;
-  --brand:#4a55e0; --shadow:0 2px 14px rgba(20,24,40,.10);
+  --bg:#e9ebef; --card:#ffffff; --ink:#1b1d22; --ink2:#4a4f5a; --muted:#8a909c; --line:#dde0e6;
+  --brand:#4a55e0; --brand-soft:#eceefe; --shadow:0 2px 14px rgba(20,24,40,.10);
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#121317; --card:#1b1d23; --ink:#eceef2; --muted:#7d8391; --line:#2c2f38;
-    --brand:#7b84ff; --shadow:0 2px 18px rgba(0,0,0,.5);
+    --bg:#121317; --card:#1b1d23; --ink:#eceef2; --ink2:#b8bdc8; --muted:#7d8391; --line:#2c2f38;
+    --brand:#7b84ff; --brand-soft:#262a4a; --shadow:0 2px 18px rgba(0,0,0,.5);
   }
 }
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;
-  background:var(--bg);color:var(--ink);font:15px/1.6 'Malgun Gothic','맑은 고딕','Noto Sans KR',sans-serif}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
-  padding:32px 28px;text-align:center;max-width:420px;width:100%}
-h1{margin:0 0 20px;font-size:22px}
-.btn{display:inline-block;padding:12px 22px;border-radius:8px;background:var(--brand);color:#fff;
-  font-weight:700;text-decoration:none}
-.btn:hover{opacity:.9}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);
+  font:15px/1.65 'Malgun Gothic','맑은 고딕','Noto Sans KR',sans-serif}
+#landing{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  padding:38px 34px;max-width:560px;width:100%}
+h1{margin:0 0 6px;font-size:26px}
+h1 b{color:var(--brand)}
+.sub{margin:0 0 22px;color:var(--ink2)}
+#drop{border:2px dashed var(--line);border-radius:12px;padding:34px 20px;text-align:center;cursor:pointer;
+  transition:border-color .15s, background .15s}
+#drop:hover,#drop.over{border-color:var(--brand);background:var(--brand-soft)}
+#drop .big{font-weight:700;font-size:16px}
+#drop .small{color:var(--muted);font-size:13px;margin-top:4px}
+.row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:9px;padding:10px 16px}
+button:hover{border-color:var(--brand)}
+.primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+ul.feat{margin:22px 0 0;padding:0 0 0 2px;list-style:none;color:var(--ink2);font-size:13.5px}
+ul.feat li{margin:5px 0;padding-left:20px;position:relative}
+ul.feat li::before{content:'✓';position:absolute;left:0;color:var(--brand);font-weight:700}
+#status{margin-top:14px;color:var(--brand);font-weight:700}
 </style>
 </head>
 <body>
-<main class="card">
-  <h1>Doc2Proto</h1>
-  <a class="btn" id="sampleBtn" href="sample.html" target="_blank" rel="noopener">샘플</a>
-</main>
-<script>
-document.getElementById('sampleBtn').addEventListener('click', function (e) {
-  var w = window.open(this.href, 'sample', 'width=1200,height=900,resizable=yes,scrollbars=yes');
-  if (w) { e.preventDefault(); w.focus(); }
-});
-</script>
+<div id="landing">
+  <main class="card">
+    <h1><b>Doc2Proto</b></h1>
+    <p class="sub">상세기획서 PDF를 올리면, 클릭할 수 있는 인터랙티브 기획서로 바꿔서 디자이너·개발자에게 URL로 전달할 수 있어요.</p>
+    <div id="drop">
+      <div class="big">PDF를 여기로 끌어오거나 클릭해서 선택</div>
+      <div class="small">파워포인트로 만든 상세기획서 PDF (도형 기반)</div>
+      <input type="file" id="file" accept="application/pdf,.pdf" hidden>
+    </div>
+    <div class="row">
+      <button class="primary" id="trySample">샘플 기획서로 체험하기</button>
+    </div>
+    <ul class="feat">
+      <li>화면 기획의 영역을 클릭하면 해당 디스크립션이 하이라이트</li>
+      <li>버튼·기능 요소를 클릭하면 연결된 상세 페이지로 이동하는 프로토타입 동작</li>
+      <li>인터랙션 모드 / 인쇄 모드(원본 그대로) 전환</li>
+      <li>변환 결과를 URL 하나로 공유</li>
+    </ul>
+    <div id="status" hidden></div>
+  </main>
+</div>
+<div id="app"></div>
+<script src="js/app.js"></script>
+<script type="module" src="js/main.mjs"></script>
 </body>
 </html>
