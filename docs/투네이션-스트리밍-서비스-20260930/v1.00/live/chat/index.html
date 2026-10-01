@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>투네이션 채팅 — 동작 프로토타입</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#fff}</style>
+</head>
+<body>
+<div id="frame"></div>
+<script>
+/* 투네이션 채팅 동작 프로토타입 (스트리밍 서비스 기획서 v1.00 29~39p)
+   좌표·크기 단위 = 기획서 슬라이드의 pt (프레임 285.6 × 456.4). data-spec="페이지:항목" 은 기획서 표의 항목. */
+(function () {
+'use strict';
+const FW = 285.6, FH = 456.4;
+const q = new URLSearchParams(location.search || location.hash.slice(1));
+const EMBED = q.has('embed');
+const POPUP = q.has('popup');
+const u = (n) => `calc(${n}*var(--u))`;
+
+const CSS = `
+:root{--u:1px;--ink:#1b1d22;--blue:#3d4fe0;--lav:#eceffa;--line:#e3e5ee}
+*{box-sizing:border-box}
+body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#frame{position:relative;width:${u(FW)};height:${u(FH)};overflow:hidden;background:#fff;font-size:${u(7.5)};border:${u(.75)} solid #bbb}
+${EMBED ? '' : '#frame{margin:0 auto;box-shadow:0 2px 18px rgba(0,0,0,.18)}body{display:flex;align-items:center;justify-content:center;background:#e9ebef}'}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input{font:inherit;color:inherit}
+.abs{position:absolute}
+/* 채널 탭 */
+#tabs{left:0;top:0;width:100%;height:${u(30)};border-bottom:${u(.75)} solid #d6d8e0;display:flex;align-items:center;gap:${u(5)};padding-left:${u(4)};background:#fff;z-index:5}
+#tabs .tb{height:${u(19)};padding:0 ${u(8)};border-radius:999px;border:${u(.75)} solid #c9ccd6;font-size:${u(8)};color:#555;display:flex;align-items:center;gap:${u(4)};white-space:nowrap}
+#tabs .tb::before{content:'';width:${u(4)};height:${u(4)};border-radius:50%;background:#e00}
+#tabs .tb.on{background:var(--blue);border-color:var(--blue);color:#fff}
+#tabs .tb.on::before{background:#fff}
+#tabs .ico{position:absolute;top:${u(7)};width:${u(16)};height:${u(16)};display:flex;align-items:center;justify-content:center;border-radius:${u(3)}}
+#tabs .ico:hover{background:#f0f1f6}
+#pop{left:${u(245)}} #more{left:${u(268)};font-weight:900;font-size:${u(11)};line-height:1}
+/* 공지 */
+#notice{left:0;top:${u(30.5)};width:100%;height:${u(32)};background:var(--lav);display:flex;align-items:center;gap:${u(6)};padding:0 ${u(7)} 0 ${u(10)};z-index:4}
+#notice .mg{font-size:${u(7)}}
+#notice .tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:${u(7.5)}}
+#notice .tx b{margin-right:${u(3)}}
+#notice .ed{font-size:${u(7.5)};color:#e46a1c} #notice .rm{color:#aaa;font-size:${u(8)}}
+#notice .add{color:var(--blue);font-weight:700;font-size:${u(7.5)}}
+#notice input{flex:1;height:${u(19)};border:${u(1.2)} solid #7d88f0;border-radius:${u(4)};padding:0 ${u(6)};font-size:${u(7)};outline:0;background:#fff}
+#notice .b1{background:var(--blue);color:#fff;font-weight:700;font-size:${u(6.5)};border-radius:${u(3)};padding:${u(3)} ${u(5)}}
+#notice .b2{color:#888;font-size:${u(6.5)};padding:${u(3)} ${u(3)}}
+.donator #notice .ed,.donator #notice .rm,.donator #notice .add,.guest #notice .ed,.guest #notice .rm,.guest #notice .add{display:none}
+/* 투표 패널 */
+#poll{left:0;top:${u(63)};width:100%;z-index:4;background:var(--lav);border-bottom:${u(.75)} solid #d9dcef;display:none}
+#poll.on{display:block}
+#poll .ph{height:${u(28)};display:flex;align-items:center;gap:${u(6)};padding:0 ${u(8)};cursor:pointer}
+#poll .ph b{font-size:${u(8)}} #poll .ph span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#poll .ph i{font-style:normal;font-weight:700;font-size:${u(7.5)}}
+#poll .pb{display:none;padding:${u(2)} ${u(8)} ${u(8)}}
+#poll.open .pb{display:block}
+#poll .meta{font-size:${u(7)};color:#888;display:flex;justify-content:space-between;align-items:center}
+#poll .qq{font-weight:700;font-size:${u(9)};margin:${u(5)} 0 ${u(6)}}
+#poll .op{position:relative;height:${u(25)};border-radius:${u(5)};background:#fff;margin-bottom:${u(5)};overflow:hidden;display:flex;align-items:center;justify-content:space-between;padding:0 ${u(9)};cursor:pointer;border:${u(1)} solid transparent}
+#poll .op .bar{position:absolute;left:0;top:0;bottom:0;background:#d4d8fa;transition:width .4s}
+#poll .op span{position:relative;font-weight:700;font-size:${u(8.5)}} #poll .op em{position:relative;font-style:normal;color:#8a8fa8;font-size:${u(7.5)}}
+#poll .op.me{border-color:#6f7cf2}
+#poll .op.me span::after{content:' ✓'}
+#poll .ft{display:flex;justify-content:flex-end;align-items:center;gap:${u(4)};margin-top:${u(2)}}
+#poll .ft b{flex:1;font-size:${u(7.5)}}
+#poll .ft button{font-weight:700;font-size:${u(6.8)};border-radius:${u(3)};padding:${u(3)} ${u(6)};color:#fff;background:var(--blue)}
+#poll .ft .del{background:#e0454a}
+.donator #poll .ft .cr,.guest #poll .ft .cr{display:none}
+/* 메시지 목록 */
+#list{left:0;top:${u(63)};width:100%;bottom:${u(32)};overflow-y:auto;overflow-x:hidden;padding:${u(4)} ${u(5)} ${u(32)};scrollbar-width:thin}
+#list.ptop{padding-top:${u(36)}}
+.ln{display:flex;align-items:flex-start;gap:${u(4)};padding:${u(3.5)} ${u(3)};line-height:1.5;border-radius:${u(3)};position:relative}
+.big .ln{font-size:${u(9.5)}}
+.bd{flex:none;min-width:${u(24)};height:${u(12)};border-radius:999px;font-size:${u(6.5)};font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 ${u(5)};margin-top:${u(.5)}}
+.bd.VIP{background:#5fd3e3;color:#fff} .bd.FR{background:#555;color:#fff} .bd.SVIP{background:#fff7e3;color:#b55a00;border:${u(1)} solid #f0a020}
+.bd.CR{background:#e0454a;color:#fff} .bd.MG{background:#4a55e0;color:#fff}
+.nk{font-weight:700;cursor:pointer;flex:none;white-space:nowrap}
+.nk:hover{text-decoration:underline}
+.nk.VIP{color:#1fb3cc} .nk.SVIP{color:#e06000} .nk.FR{color:#222} .nk.CR{color:#e0454a} .nk.MG{color:#4a55e0}
+.tx{min-width:0;word-break:break-all}
+.tx .mn{color:#3d4fe0;font-weight:700}
+.tx .stk{font-size:${u(14)};line-height:1;vertical-align:middle}
+.ln.mine{background:var(--lav)} .ln.mine .nk{color:#3d4fe0}
+.ln.ment{background:#fff6d6;box-shadow:inset ${u(2.5)} 0 0 #f2a900}
+.ln.del .tx,.ln.del .nk{text-decoration:line-through;opacity:.45}
+.ln.blind .tx{color:#999;font-style:italic}
+.ln.blind .see{flex:none;font-size:${u(6.2)};background:#eee;border-radius:${u(2)};padding:0 ${u(3)};color:#777;margin-left:${u(4)};font-style:normal}
+.enter{align-self:center;margin:${u(2)} auto;background:#f0f2f8;border-radius:999px;color:#999;font-size:${u(7)};padding:${u(2)} ${u(10)};display:table}
+.sys{margin:${u(2)} auto;color:#5560c8;font-size:${u(7)};text-align:center;font-weight:700}
+.dn{margin:${u(4)} 0;border-radius:${u(6)};padding:${u(6)} ${u(8)} ${u(7)};position:relative;background:#bdbdbd}
+.dn .t1{display:flex;align-items:center;gap:${u(4)}}
+.dn .am{position:absolute;right:${u(9)};top:50%;transform:translateY(-50%);font-weight:700;font-size:${u(9)}}
+.dn .t2{margin-top:${u(6)};padding-right:${u(60)}}
+.dn .t2 b{margin-right:${u(3)}}
+.dn.t2c{background:#a0e3d0} .dn.t3c{background:#ead5fb} .dn.t4c{background:#cc7a00;color:#fff} .dn.t4c .nk{color:#fff}
+.hide{display:none!important}
+/* 최근 후원 (스크롤 시) */
+#recent{left:${u(5)};right:${u(5)};top:${u(66)};height:${u(18)};z-index:3;background:#fff;border:${u(.75)} solid #f0d6a8;border-radius:${u(4)};display:none;align-items:center;gap:${u(4)};padding:0 ${u(6)};font-size:${u(6.8)};box-shadow:0 ${u(1)} ${u(3)} rgba(0,0,0,.08)}
+#recent.on{display:flex}
+#recent b{color:#cc7a00}
+/* 최신 미리보기 바 */
+#peek{left:${u(5)};right:${u(5)};bottom:${u(36)};height:${u(26.5)};border-radius:${u(7)};background:var(--lav);display:none;align-items:center;padding:0 ${u(8)} 0 ${u(15)};gap:${u(4)};cursor:pointer;z-index:4;box-shadow:0 ${u(1)} ${u(4)} rgba(0,0,0,.08)}
+#peek.on{display:flex}
+#peek .pt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#peek .n{background:#e0454a;color:#fff;border-radius:999px;font-size:${u(6)};font-weight:700;padding:0 ${u(4)}}
+#peek .dw{width:${u(13)};height:${u(13)};border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:${u(6)}}
+/* 입력 */
+#inbar{left:0;bottom:0;width:100%;height:${u(32)};display:flex;align-items:center;gap:${u(4)};padding:0 ${u(5)} 0 ${u(9.5)};background:#fff}
+#emo{width:${u(17)};height:${u(20)};border-radius:${u(4)};background:#f3f3f6;font-size:${u(9)};flex:none}
+#txt{flex:1;height:${u(22.5)};border:0;border-radius:${u(6)};background:#eef0f6;padding:0 ${u(28)} 0 ${u(10)};font-size:${u(7.5)};outline:0;min-width:0}
+#txt:focus{box-shadow:inset 0 0 0 ${u(1)} #8d97f3}
+#txt:disabled{color:#aaa}
+#cnt{position:absolute;right:${u(46)};font-size:${u(6)};color:#aaa;pointer-events:none}
+#send{height:${u(19)};padding:0 ${u(8)};border-radius:${u(3)};background:var(--blue);color:#fff;font-weight:700;font-size:${u(7)};flex:none}
+#send:disabled{background:#b9bef2;cursor:default}
+#block{left:${u(9)};right:${u(9)};bottom:${u(34)};z-index:6;background:#fdf2df;border:${u(.75)} solid #f0c98a;color:#b56500;border-radius:${u(5)};font-size:${u(7)};font-weight:700;padding:${u(4)} ${u(8)};display:none}
+#block.on{display:block}
+/* 자동완성 */
+#ac{left:${u(31)};right:${u(46)};bottom:${u(33)};z-index:7;background:#fff;border:${u(.75)} solid #dcdfea;border-radius:${u(5)};box-shadow:0 ${u(2)} ${u(8)} rgba(0,0,0,.12);display:none;padding:${u(3)}}
+#ac.on{display:block}
+#ac div{padding:${u(3.5)} ${u(6)};border-radius:${u(3)};font-size:${u(7.5)};font-weight:700;cursor:pointer;display:flex;gap:${u(5)};align-items:center}
+#ac div i{font-style:normal;color:#5560c8}
+#ac div.on{background:var(--lav)}
+/* 이모티콘 */
+#emopan{left:${u(5)};right:${u(5)};bottom:${u(33)};height:${u(118)};z-index:6;background:#fff;border-top:${u(.75)} solid #e0e2ea;display:none;grid-template-columns:repeat(8,1fr);gap:${u(4)};padding:${u(6)};overflow-y:auto;align-content:start}
+#emopan.on{display:grid}
+#emopan button{aspect-ratio:1;border-radius:${u(5)};background:#f6f7fb;font-size:${u(14)};display:flex;align-items:center;justify-content:center;border:${u(.75)} solid #eceef4}
+#emopan button:hover{background:#e7e9fb}
+/* 시트 (설정·편집·차단 목록) */
+.sheet{position:absolute;left:${u(6)};right:${u(6)};top:${u(32)};z-index:20;background:#fff;border:${u(.75)} solid #dcdfea;border-radius:${u(7)};box-shadow:0 ${u(3)} ${u(14)} rgba(0,0,0,.18);display:none;max-height:${u(410)};overflow-y:auto}
+.sheet.on{display:block}
+.sheet .sh{height:${u(26)};display:flex;align-items:center;justify-content:space-between;padding:0 ${u(10)};border-bottom:${u(.75)} solid #eee;font-weight:800;font-size:${u(9)}}
+.sheet .sh button{color:#aaa;font-size:${u(9)}}
+.sheet .sb{padding:${u(6)} ${u(10)} ${u(10)}}
+.sheet .gl{font-weight:700;font-size:${u(7.5)};margin:${u(7)} 0 ${u(5)}}
+.srow{display:flex;gap:${u(5)};margin-bottom:${u(5)}}
+.pill{flex:1;height:${u(19)};border-radius:${u(5)};background:#f1f1f4;color:#888;font-size:${u(7.5)};display:flex;align-items:center;justify-content:center;gap:${u(3)}}
+.pill::before{content:'●';font-size:${u(5)}}
+.pill.on{background:#e4e7fd;color:var(--blue)}
+.pill:disabled{opacity:.4;cursor:not-allowed}
+.sel{width:${u(50)};height:${u(19)};border:${u(.75)} solid #ddd;border-radius:${u(3)};font-size:${u(7.5)};padding:0 ${u(4)};color:#555;background:#fff}
+.fi{width:100%;height:${u(20)};border:0;border-radius:${u(5)};background:#f2f3f7;padding:0 ${u(7)};font-size:${u(7.5)};outline:0;margin-bottom:${u(5)}}
+.fi:focus{box-shadow:inset 0 0 0 ${u(1)} #8d97f3;background:#fff}
+.fl{font-size:${u(6.5)};color:#999;margin:${u(5)} 0 ${u(3)}}
+.irow{display:flex;gap:${u(4)}} .irow .fi{flex:1}
+.irow .x{width:${u(18)};height:${u(20)};border:${u(.75)} solid #e2e4ea;border-radius:${u(4)};color:#aaa}
+.addi{width:100%;height:${u(19)};border:${u(.75)} dashed #d7dae4;border-radius:${u(5)};color:var(--blue);font-weight:700;font-size:${u(7)};margin:${u(1)} 0 ${u(6)}}
+.addi:disabled{opacity:.4}
+.bt2{display:flex;gap:${u(6)}} .bt2 button{flex:1;height:${u(21)};border-radius:${u(5)};font-weight:700;font-size:${u(7.5)};background:#f1f2f6}
+.bt2 .pri{background:var(--blue);color:#fff} .bt2 .red{background:#e0303a;color:#fff}
+.err{color:#e0303a;font-size:${u(6.5)};min-height:${u(9)}}
+.bl{display:flex;align-items:center;gap:${u(5)};border:${u(.75)} solid #eceef4;border-radius:${u(5)};padding:${u(5)} ${u(7)};margin-bottom:${u(5)};font-weight:700}
+.bl span{flex:1}
+.bl button{background:#e7e9f6;border-radius:${u(3)};padding:${u(2)} ${u(5)};font-size:${u(6.5)};font-weight:700}
+.rr{display:flex;align-items:center;gap:${u(6)};border:${u(.75)} solid #eceef4;border-radius:${u(5)};padding:${u(5)} ${u(8)};margin-bottom:${u(4)};cursor:pointer;font-size:${u(7.5)}}
+.rr input{margin:0}
+/* 프로필 */
+#prof{left:${u(30)};top:${u(150)};width:${u(190)};z-index:21;background:#fff;border:${u(.75)} solid #dcdfea;border-radius:${u(6)};box-shadow:0 ${u(3)} ${u(14)} rgba(0,0,0,.2);display:none;padding:${u(8)}}
+#prof.on{display:block}
+#prof .top{display:flex;align-items:center;gap:${u(6)};padding-bottom:${u(8)};border-bottom:${u(.75)} solid #eee}
+#prof .av{width:${u(22)};height:${u(22)};border-radius:${u(5)};background:#b28cf3}
+#prof .top .nk{flex:1}
+#prof .top button{color:#aaa}
+#prof .acts{display:flex;gap:${u(5)};margin-top:${u(8)}}
+#prof .acts button{flex:1;height:${u(19)};border-radius:${u(5)};border:${u(.75)} solid #e2e4ea;font-size:${u(7.5)};font-weight:700}
+#prof .acts .rp{color:#e0303a;border-color:#f3b9bd;background:#fff6f6}
+.donator #prof .dl,.guest #prof .dl{display:none}
+/* 팝업 분리 */
+#popped{left:0;top:${u(30.5)};right:0;bottom:0;z-index:15;background:#f4f5f8;display:none;flex-direction:column;align-items:center;justify-content:center;gap:${u(5)}}
+#popped.on{display:flex}
+#popped .w{width:${u(22)};height:${u(16)};border:${u(1.2)} solid #8a8fa0;border-top-width:${u(3)};border-radius:${u(2)};margin-bottom:${u(8)}}
+#popped b{font-size:${u(9)}} #popped span{font-size:${u(6.8)};color:#888}
+#popped button{margin-top:${u(8)};background:var(--blue);color:#fff;font-weight:700;font-size:${u(7.5)};border-radius:${u(5)};padding:${u(5)} ${u(9)}}
+#toast{position:absolute;left:50%;bottom:${u(44)};transform:translateX(-50%);background:rgba(20,20,20,.88);color:#fff;font-size:${u(7)};padding:${u(4)} ${u(9)};border-radius:${u(4)};z-index:90;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+[data-chg]{outline:${u(1.4)} dashed #e08a00!important;outline-offset:${u(1)}}
+.spec-flash{outline:${u(2)} solid #f2c94c!important;outline-offset:${u(-1)};animation:flash 1s ease 3}
+@keyframes flash{50%{outline-color:transparent}}
+.inspect [data-spec]:hover{outline:${u(1)} dashed #4a55e0;outline-offset:${u(-1)}}
+#chip{position:absolute;z-index:95;background:#4a55e0;color:#fff;font-size:${u(6)};padding:${u(1.5)} ${u(4)};border-radius:${u(3)};pointer-events:none;display:none;white-space:nowrap}
+`;
+document.head.insertAdjacentHTML('beforeend', `<style>${CSS}</style>`);
+
+/* ---------------- 데이터 ---------------- */
+const CH = [{ id: 'toon', name: '투네이션' }, { id: 'yt', name: '유튜브' }, { id: 'tw', name: '트위치' }];
+const USERS = [
+  { nick: '단골도네', badge: 'VIP' }, { nick: '열혈팬', badge: 'FR' }, { nick: '열혈팬1호', badge: 'SVIP' }, { nick: '구독팬A', badge: 'FR' },
+  { nick: '응원해요', badge: 'VIP' }, { nick: '분탕러', badge: 'FR' }, { nick: '새벽시청자', badge: 'FR' },
+];
+const ME = { creator: { nick: '팬텀하츠', badge: 'CR' }, donator: { nick: '키위77', badge: 'FR' }, guest: null };
+const LINES = ['다음 방송 언제예요?', '방송 잘 보고 있어요', '오늘도 화이팅', 'ㅋㅋㅋㅋㅋ', '화질 좋아졌네요', '오늘 컨텐츠 뭐예요', '여기 분위기 좋다', '노래 한 곡 해주세요', '와 이건 레전드', '잠깐 화장실 다녀올게요'];
+const STICKERS = [['wow', '😮'], ['daebak', '🤩'], ['good', '😎'], ['love', '🥰'], ['kk', '😆'], ['best', '👍'], ['hmm', '🤔'], ['cry', '😭'], ['party', '🥳'], ['heart', '❤️'], ['fire', '🔥'], ['clap', '👏'], ['ok', '👌'], ['sleep', '😴'], ['angry', '😡'], ['cool', '🆒'], ['star', '⭐'], ['gift', '🎁'], ['cake', '🎂'], ['music', '🎵'], ['game', '🎮'], ['coffee', '☕'], ['moon', '🌙'], ['hi', '👋']];
+const STK = Object.fromEntries(STICKERS);
+const BAD = ['시발', '씨발', '병신', '개새', '좆', 'ㅅㅂ'];   // 금칙어 사전 (데모)
+const TH = { low: 100, mid: 60, high: 35 };   // 32p 강도별 임계값
+
+const S = {
+  role: 'creator', ch: 'toon', msgs: [], id: 1,
+  notice: '채팅 매너 지켜주세요. 투표 참여 부탁드려요', noticeEdit: false,
+  clean: true, strength: 'mid', slow: false, slowSec: 5, freeze: false, enter: true, big: false,
+  blocked: new Set(), revealed: new Set(), sanction: false,
+  atBottom: true, unread: 0, lockUntil: 0, sheet: null, poll: null, prof: null, popped: false, popWin: null,
+};
+const me = () => ME[S.role];
+const F = document.getElementById('frame');
+F.innerHTML = `
+<div id="tabs" class="abs" data-spec="29:채널 탭 표시">
+  ${CH.map((c) => `<button class="tb" data-ch="${c.id}" data-spec="29:채널 탭 표시 29:채널 전환 29:대화 이력 보존">${c.name} <span class="c"></span></button>`).join('')}
+  <button class="ico" id="pop" title="채팅 팝업" data-spec="33:채널 영역"><svg viewBox="0 0 16 16" width="80%"><rect x="1.5" y="3.5" width="9" height="11" rx="1.2" fill="none" stroke="#555" stroke-width="1.3"/><path d="M7 1.5h7.5V9" fill="none" stroke="#555" stroke-width="1.3"/><path d="M9 7l5-5" stroke="#3d4fe0" stroke-width="1.5"/></svg></button>
+  <button class="ico" id="more" title="설정" data-spec="29:관리 메뉴 31:항목">⋮</button>
+</div>
+<div id="notice" class="abs" data-spec="29:공지 (고정) 34:공지 표시"></div>
+<div id="poll" class="abs" data-spec="35:시작 35:참여 / 변경 35:실시간 집계"></div>
+<div id="list" class="abs" data-spec="29:채팅 36:메시지 라인 구성"></div>
+<div id="recent" class="abs" data-spec="29:스크롤 시 최근 후원"></div>
+<div id="peek" class="abs" data-spec="38:스크롤 잠금 38:최신 복귀"><span class="pt"></span><span class="n"></span><span class="dw">▼</span></div>
+<div id="block" class="abs" data-spec="39:전송 차단 안내"></div>
+<div id="ac" class="abs"></div>
+<div id="emopan" class="abs" data-spec="39:이모티콘">${STICKERS.map(([k, e]) => `<button data-stk="${k}" title=":${k}:">${e}</button>`).join('')}</div>
+<div id="inbar" class="abs" data-spec="29:채팅 39:텍스트 전송">
+  <button id="emo" title="이모티콘" data-spec="29:이모티콘 39:이모티콘">😛</button>
+  <input id="txt" maxlength="120" placeholder="채팅 입력" autocomplete="off" data-spec="39:텍스트 전송 39:멘션 자동완성">
+  <span id="cnt"></span>
+  <button id="send">보내기</button>
+</div>
+<div class="sheet" id="sh-set" data-spec="31:항목 30:설정"></div>
+<div class="sheet" id="sh-poll" data-spec="35:편집 창"></div>
+<div class="sheet" id="sh-block" data-spec="38:차단 31:차단 목록"></div>
+<div class="sheet" id="sh-report" data-spec="38:신고"></div>
+<div id="prof" class="abs" data-spec="29:채팅 38:신고 38:차단"></div>
+<div id="popped" class="abs" data-spec="33:채널 영역"><div class="w"></div><b>채팅이 팝업으로 분리되었습니다</b><span>오른쪽 플로팅 창에서 계속 채팅할 수 있어요</span><button id="unpop">채팅 되돌리기</button></div>
+<div id="toast"></div><div id="chip"></div>`;
+const $ = (s) => F.querySelector(s);
+const $$ = (s) => [...F.querySelectorAll(s)];
+let toastT;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
+function fit() { const k = EMBED || POPUP ? Math.min(innerWidth / FW, innerHeight / FH) : Math.min(innerWidth / FW, (innerHeight - 8) / FH); document.documentElement.style.setProperty('--u', k + 'px'); }
+addEventListener('resize', fit); fit();
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const won = (n) => n.toLocaleString('en-US');
+
+/* ---------------- 클린봇 판정 (32p) ---------------- */
+function judge(m) {
+  if (m.kind !== 'chat' || !m.user) return null;
+  const norm = (t) => t.replace(/\s+/g, '').replace(/(.)\1{2,}/g, '$1$1').toLowerCase();
+  const hits = [];
+  if (BAD.some((w) => m.text.includes(w))) hits.push([100, '욕설/비속어']);
+  const same = S.msgs.filter((x) => x.kind === 'chat' && x.user && x.user.nick === m.user.nick && x.id !== m.id && m.at - x.at <= 8000 && m.at >= x.at && norm(x.text) === norm(m.text));
+  if (same.length >= 1) hits.push([60, '도배']);
+  const burst = S.msgs.filter((x) => x.kind === 'chat' && x.user && x.user.nick === m.user.nick && m.at - x.at <= 3000 && m.at >= x.at);
+  if (burst.length >= 4) hits.push([50, '도배']);
+  if (/(https?:\/\/|www\.|카톡|텔레|010-?\d{3,4})/i.test(m.text)) hits.push([40, '광고/연락처']);
+  if (!hits.length) return null;
+  hits.sort((a, b) => b[0] - a[0]);
+  return { score: hits[0][0], reason: hits[0][1] };
+}
+const blinded = (m) => S.clean && m.judge && m.judge.score >= TH[S.strength] && !S.revealed.has(m.id);
+
+/* ---------------- 메시지 ---------------- */
+function push(m) {
+  m.id = S.id++; m.at = m.at || Date.now(); m.ch = m.ch || S.ch;
+  if (m.kind === 'chat') m.judge = judge(m);
+  S.msgs.push(m);
+  if (S.msgs.length > 400) S.msgs.shift();
+  if (m.ch === S.ch) appendLine(m);
+  renderTabs();
+  return m;
+}
+function body(t) {
+  let h = esc(t);
+  h = h.replace(/:([a-z]+):/g, (all, k) => (STK[k] ? `<span class="stk" title=":${k}:">${STK[k]}</span>` : all));
+  h = h.replace(/@([\w가-힣]+)/g, '<span class="mn">@$1</span>');
+  return h;
+}
+function lineHTML(m) {
+  const meNick = me() && me().nick;
+  if (m.kind === 'enter') return `<div class="enter${S.enter ? '' : ' hide'}" data-spec="31:입장표시">🔔 ${esc(m.user.nick)} 님이 입장하였습니다</div>`;
+  if (m.kind === 'sys') return `<div class="sys" data-spec="35:시작">${esc(m.text)}</div>`;
+  const hidden = m.user && S.blocked.has(m.user.nick) ? ' hide' : '';
+  const nick = `<span class="nk ${m.user.badge}" data-nick="${esc(m.user.nick)}" data-mid="${m.id}">${esc(m.user.nick)}</span>`;
+  const bd = m.mine ? '' : `<span class="bd ${m.user.badge}">${m.user.badge === 'CR' ? '크리에이터' : m.user.badge}</span>`;
+  if (m.kind === 'donate') {
+    const tier = m.amount >= 100000 ? 4 : m.amount >= 50000 ? 3 : m.amount >= 10000 ? 2 : 1;
+    return `<div class="dn t${tier}c${hidden}" data-spec="29:채팅" title="후원 금액 구간 ${['', '~9,999', '10,000~49,999', '50,000~99,999', '100,000~'][tier]} 캐시 색상" data-mid="${m.id}" data-tier="${tier}">
+      <div class="t1">${bd}${nick}</div><div class="am">${won(m.amount)} 캐시</div><div class="t2"><b>${m.type || '텍스트후원'}</b>${body(m.text)}</div></div>`;
+  }
+  const bl = blinded(m);
+  const ment = meNick && !m.mine && m.text.includes('@' + meNick);
+  const cls = ['ln', m.mine ? 'mine' : '', ment ? 'ment' : '', m.deleted ? 'del' : '', bl ? 'blind' : ''].filter(Boolean).join(' ');
+  const spec = bl ? '36:블라인드 표시' : m.deleted ? '36:삭제 / 차단 표시' : ment ? '36:멘션 하이라이트' : '36:메시지 라인 구성';
+  const tx = bl ? `클린봇이 가린 메시지 (${m.judge.reason})` : body(m.text);
+  return `<div class="${cls}${hidden}" data-mid="${m.id}" data-spec="${spec}">${m.mine ? `<span class="nk mine">나</span>` : bd + nick}<span class="tx">${tx}</span>${bl ? `<button class="see" data-see="${m.id}">보기</button>` : ''}</div>`;
+}
+function appendLine(m) {
+  const L = $('#list'); const wasBottom = S.atBottom;
+  L.insertAdjacentHTML('beforeend', lineHTML(m));
+  if (wasBottom) L.scrollTop = L.scrollHeight;
+  else if ((m.kind === 'chat' || m.kind === 'donate') && !S.blocked.has(m.user.nick)) { S.unread++; renderPeek(m); }
+  if (m.kind === 'donate') renderRecent();
+}
+function renderList() {
+  const L = $('#list'); const keep = S.atBottom ? null : L.scrollTop;
+  L.innerHTML = S.msgs.filter((m) => m.ch === S.ch).map(lineHTML).join('');
+  if (keep == null) L.scrollTop = L.scrollHeight; else L.scrollTop = keep;
+  renderRecent();
+}
+function renderTabs() {
+  $$('#tabs .tb').forEach((b) => {
+    b.classList.toggle('on', b.dataset.ch === S.ch);
+    const n = S.msgs.filter((m) => m.ch === b.dataset.ch && m.kind !== 'enter' && m.kind !== 'sys').length;
+    b.querySelector('.c').textContent = Math.min(999, n + { toon: 840, yt: 312, tw: 527 }[b.dataset.ch]);   // 현재 채팅 숫자
+  });
+}
+function renderPeek(m) {
+  const p = $('#peek');
+  if (S.atBottom) { p.classList.remove('on'); return; }
+  const ok = (x) => x && (x.kind === 'chat' || x.kind === 'donate') && x.user;
+  const last = ok(m) ? m : [...S.msgs].reverse().find((x) => x.ch === S.ch && (x.kind === 'chat' || x.kind === 'donate') && !(x.user && S.blocked.has(x.user.nick)));
+  if (last) p.querySelector('.pt').innerHTML = last.mine ? `<b style="color:#3d4fe0">나</b> ${body(last.text)}` : `<b class="nk ${last.user.badge}" style="margin-right:3px">${esc(last.user.nick)}</b>${blinded(last) ? '<i style="color:#999">클린봇이 가린 메시지</i>' : body(last.text)}`;
+  p.querySelector('.n').textContent = S.unread ? `+${S.unread}` : '';
+  p.querySelector('.n').style.display = S.unread ? '' : 'none';
+  p.classList.add('on');
+}
+function renderRecent() {
+  const r = $('#recent'), d = [...S.msgs].reverse().find((x) => x.ch === S.ch && x.kind === 'donate');
+  const on = !S.atBottom && d && !S.poll;
+  r.classList.toggle('on', !!on);
+  if (on) r.innerHTML = `💰 최근 후원 <b>${esc(d.user.nick)}</b> ${won(d.amount)} 캐시 — ${esc(d.text).slice(0, 18)}`;
+}
+$('#list').addEventListener('scroll', () => {
+  const L = $('#list'); const bottom = L.scrollHeight - L.scrollTop - L.clientHeight < 6;
+  if (bottom !== S.atBottom) { S.atBottom = bottom; if (bottom) S.unread = 0; renderPeek(); renderRecent(); }
+});
+function toBottom() { S.atBottom = true; S.unread = 0; const L = $('#list'); L.scrollTop = L.scrollHeight; renderPeek(); renderRecent(); }
+$('#peek').addEventListener('click', toBottom);   // 38p 최신 복귀
+
+/* ---------------- 공지 (34p) ---------------- */
+function renderNotice() {
+  const n = $('#notice');
+  if (S.noticeEdit) {
+    n.innerHTML = `<span class="mg">📢</span><input id="ntxt" maxlength="120" placeholder="공지 내용을 입력하세요" value="${esc(S.notice || '')}"><button class="b1" id="nok">등록</button><button class="b2" id="nno">취소</button>`;
+    const i = $('#ntxt'); i.focus(); i.setSelectionRange(i.value.length, i.value.length);
+    i.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) saveNotice(); if (e.key === 'Escape') { S.noticeEdit = false; renderNotice(); } });
+    return;
+  }
+  n.innerHTML = S.notice
+    ? `<span class="mg">📢</span><span class="tx"><b>공지</b>${esc(S.notice)}</span><button class="ed" id="ned" title="수정">✏️</button><button class="rm" id="nrm" title="삭제">✕</button>`
+    : `<span class="mg">📢</span><button class="add" id="nadd">＋ 공지 등록</button><span class="tx"></span>`;
+}
+function saveNotice() {
+  const v = $('#ntxt').value.trim();
+  if (!v) { toast('공지 내용을 입력해 주세요'); return; }
+  S.notice = v; S.noticeEdit = false; renderNotice(); toast('공지를 등록했어요 — 모든 채널에 공통 적용');
+}
+$('#notice').addEventListener('click', (e) => {
+  const id = e.target.closest('button') && e.target.closest('button').id;
+  if (id === 'ned' || id === 'nadd') { S.noticeEdit = true; renderNotice(); }
+  else if (id === 'nrm') { S.notice = ''; renderNotice(); toast('공지를 내렸어요'); }
+  else if (id === 'nok') saveNotice();
+  else if (id === 'nno') { S.noticeEdit = false; renderNotice(); }
+});
+
+/* ---------------- 설정 시트 (30·31p) ---------------- */
+const CREATOR_ONLY = ['strength', 'slow', 'freeze', 'poll', 'pred'];
+function renderSettings() {
+  const cr = S.role === 'creator';
+  const dis = (k) => (!cr && CREATOR_ONLY.includes(k) ? 'disabled title="크리에이터만 설정할 수 있어요"' : '');
+  $('#sh-set').innerHTML = `<div class="sh">설정<button data-close>✕</button></div><div class="sb">
+    <div class="gl">노출 설정</div>
+    <div class="srow"><button class="pill ${S.clean ? 'on' : ''}" data-t="clean" data-spec="31:클린봇">클린봇</button><select class="sel" id="str" ${dis('strength')} data-spec="31:클린봇 강도 32:강도">${['low:약', 'mid:중', 'high:강'].map((x) => { const [k, v] = x.split(':'); return `<option value="${k}" ${S.strength === k ? 'selected' : ''}>${v}</option>`; }).join('')}</select></div>
+    <div class="srow"><button class="pill ${S.slow ? 'on' : ''}" data-t="slow" ${dis('slow')} data-spec="31:채팅입력제한">채팅입력제한</button><select class="sel" id="slowsec" ${dis('slow')} data-spec="31:채팅입력제한">${[5, 10, 30, 60].map((s) => `<option ${S.slowSec === s ? 'selected' : ''}>${s}초</option>`).join('')}</select></div>
+    <div class="srow"><button class="pill ${S.freeze ? 'on' : ''}" data-t="freeze" ${dis('freeze')} style="flex:none;width:calc(100% - ${u(55)})" data-spec="31:채팅 얼리기">채팅 얼리기</button></div>
+    <div class="srow"><button class="pill ${S.enter ? 'on' : ''}" data-t="enter" data-spec="31:입장표시">입장 표시</button><button class="pill ${S.big ? 'on' : ''}" data-t="big" data-spec="31:글자 크게">글자 크게</button></div>
+    <div class="gl">차단 설정</div>
+    <div class="srow"><button class="pill" data-open="block" style="flex:none;width:calc(100% - ${u(55)})" data-spec="31:차단 목록 38:차단">차단 목록 (${S.blocked.size})</button></div>
+    <div class="gl">부가 기능</div>
+    <div class="srow"><button class="pill on" data-open="poll" ${dis('poll')} data-spec="31:부가 기능 35:편집 창">투표 만들기</button><button class="pill on" data-open="pred" ${dis('pred')} data-spec="31:부가 기능 35:편집 창">승부 예측</button></div>
+    ${cr ? '' : '<div class="fl">채팅입력제한·얼리기·클린봇 강도·부가 기능은 크리에이터만 바꿀 수 있어요</div>'}
+  </div>`;
+}
+function openSheet(id) { S.sheet = id; $$('.sheet').forEach((s) => s.classList.toggle('on', s.id === 'sh-' + id)); $('#prof').classList.remove('on'); $('#emopan').classList.remove('on'); }
+const closeSheets = () => { S.sheet = null; $$('.sheet').forEach((s) => s.classList.remove('on')); };
+$('#more').addEventListener('click', () => { if (S.sheet === 'set') return closeSheets(); renderSettings(); openSheet('set'); });
+$('#sh-set').addEventListener('click', (e) => {
+  const t = e.target.closest('[data-t]'), o = e.target.closest('[data-open]');
+  if (e.target.closest('[data-close]')) return closeSheets();
+  if (t && !t.disabled) {
+    const k = t.dataset.t; S[k] = !S[k];
+    const msg = { clean: S.clean ? '클린봇 ON — 판정된 메시지를 가려요' : '클린봇 OFF — 판정 대상도 원문 그대로 보여요', slow: S.slow ? `채팅입력제한 ON — 보낸 뒤 ${S.slowSec}초 동안 입력 잠금 (크리에이터 제외)` : '채팅입력제한 OFF', freeze: S.freeze ? '채팅을 얼렸어요 — 도네이터 입력 제한' : '채팅 얼리기를 풀었어요', enter: S.enter ? '입장 알림을 표시해요' : '입장 알림을 숨겨요', big: S.big ? '글자를 크게 보여요' : '기본 글자 크기' }[k];
+    if (k === 'freeze' || k === 'slow') push({ kind: 'sys', text: k === 'freeze' ? (S.freeze ? '❄ 크리에이터가 채팅을 얼렸습니다' : '채팅 얼리기가 해제되었습니다') : (S.slow ? `⏳ 저속 모드 ${S.slowSec}초가 켜졌습니다` : '저속 모드가 꺼졌습니다') });
+    toast(msg); applyView(); renderSettings();
+  }
+  if (o && !o.disabled) { if (o.dataset.open === 'block') { renderBlock(); openSheet('block'); } else { openEditor(o.dataset.open); } }
+});
+$('#sh-set').addEventListener('change', (e) => {
+  if (e.target.id === 'str') { S.strength = e.target.value; toast(`클린봇 강도: ${{ low: '약 (확정 욕설·강한 도배만)', mid: '중 (반복 도배까지)', high: '강 (광고·의심까지)' }[S.strength]}`); renderList(); }
+  if (e.target.id === 'slowsec') { S.slowSec = parseInt(e.target.value, 10); toast(`전송 간격 ${S.slowSec}초`); }
+});
+function applyView() { F.classList.toggle('big', S.big); renderList(); renderInput(); }
+
+/* ---------------- 차단 목록 / 프로필 / 신고 (38p) ---------------- */
+function renderBlock() {
+  const list = [...S.blocked];
+  $('#sh-block').innerHTML = `<div class="sh">차단 목록<button data-close>✕</button></div><div class="sb">
+    ${list.length ? list.map((n) => { const us = USERS.find((x) => x.nick === n) || { badge: 'FR' }; return `<div class="bl"><span class="bd ${us.badge}">${us.badge}</span><span>${esc(n)}</span><button data-unb="${esc(n)}">차단 해제</button></div>`; }).join('') : '<div class="fl" style="text-align:center;margin:14px 0">차단한 유저가 없어요</div>'}
+    <div class="bt2"><button data-close>닫기</button></div></div>`;
+}
+$('#sh-block').addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]')) return closeSheets();
+  const b = e.target.closest('[data-unb]');
+  if (b) { S.blocked.delete(b.dataset.unb); toast(`${b.dataset.unb} 님 차단을 해제했어요 — 메시지가 다시 보여요`); renderBlock(); renderList(); }
+});
+$('#list').addEventListener('click', (e) => {
+  const see = e.target.closest('[data-see]');
+  if (see) { S.revealed.add(+see.dataset.see); renderList(); return; }
+  const n = e.target.closest('.nk[data-nick]'); if (!n) return;
+  const m = S.msgs.find((x) => x.id === +n.dataset.mid);
+  S.prof = { nick: n.dataset.nick, badge: m.user.badge, mid: m.id };
+  const p = $('#prof'); const r = n.getBoundingClientRect(), fr = F.getBoundingClientRect(), k = fr.width / FW;
+  p.innerHTML = `<div class="top"><div class="av"></div><span class="bd ${m.user.badge}">${m.user.badge === 'CR' ? '크리에이터' : m.user.badge}</span><span class="nk ${m.user.badge}">${esc(S.prof.nick)}</span><button data-close>✕</button></div>
+    <div class="acts"><button class="bk">🚫 차단</button><button class="rp">🚩 신고</button><button class="dl">🗑 삭제</button></div>`;
+  p.style.top = u(Math.min((r.bottom - fr.top) / k + 4, FH - 90));
+  p.classList.add('on'); closeSheets();
+});
+$('#prof').addEventListener('click', (e) => {
+  const p = $('#prof'); const P = S.prof;
+  if (e.target.closest('[data-close]')) { p.classList.remove('on'); return; }
+  if (e.target.closest('.bk')) {
+    if (me() && P.nick === me().nick) { toast('나는 차단할 수 없어요'); return; }
+    S.blocked.add(P.nick); p.classList.remove('on'); renderList(); toast(`${P.nick} 님을 차단했어요 — 이 유저의 메시지가 숨겨져요`);
+  }
+  if (e.target.closest('.rp')) { p.classList.remove('on'); openReport(P); }
+  if (e.target.closest('.dl')) { const m = S.msgs.find((x) => x.id === P.mid); if (m) m.deleted = true; p.classList.remove('on'); renderList(); toast('매니저 권한으로 메시지를 삭제했어요'); }
+});
+function openReport(P) {
+  const m = S.msgs.find((x) => x.id === P.mid);
+  $('#sh-report').innerHTML = `<div class="sh">신고하기<button data-close>✕</button></div><div class="sb">
+    <div class="fl">${m && m.kind === 'chat' ? `메시지: "${esc(m.text).slice(0, 30)}"` : `유저: ${esc(P.nick)}`}</div>
+    ${['스팸/도배', '욕설/비하', '음란·부적절', '광고/홍보', '기타'].map((r, i) => `<label class="rr"><input type="radio" name="rr" value="${r}" ${i === 0 ? 'checked' : ''}>${r}</label>`).join('')}
+    <div class="bt2" style="margin-top:${u(6)}"><button data-close>취소</button><button class="red" id="rsend">신고 제출</button></div></div>`;
+  openSheet('report');
+}
+$('#sh-report').addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]')) return closeSheets();
+  if (e.target.closest('#rsend')) { closeSheets(); toast('신고가 접수되었습니다'); }   // 운영 검토 큐로 전달, 즉시 제재 없음
+});
+
+/* ---------------- 투표 · 승부예측 (35p) ---------------- */
+let ed = null;
+function openEditor(kind) {
+  ed = { kind, q: kind === 'poll' ? '점심 뭐 먹을까?' : '다음 판 결과 예측', items: kind === 'poll' ? ['치킨', '피자', '국밥'] : ['승리', '패배'], err: '' };
+  renderEditor(); openSheet('poll');
+}
+function renderEditor() {
+  const k = ed.kind === 'poll';
+  $('#sh-poll').innerHTML = `<div class="sh">${k ? '📊 투표 만들기' : '⚔️ 승부예측 만들기'}<button data-close>✕</button></div><div class="sb">
+    <div class="fl">질문 (최대 40자)</div><input class="fi" id="eq" maxlength="40" value="${esc(ed.q)}">
+    <div class="fl">항목 (${k ? '선택지' : '응원 대상'} · 2~6개, 각 24자)</div>
+    ${ed.items.map((t, i) => `<div class="irow"><input class="fi" data-i="${i}" maxlength="24" value="${esc(t)}" placeholder="항목 ${i + 1}"><button class="x" data-rm="${i}" ${ed.items.length <= 2 ? 'disabled' : ''}>✕</button></div>`).join('')}
+    <button class="addi" id="eadd" ${ed.items.length >= 6 ? 'disabled' : ''}>＋ 항목 추가</button>
+    <div class="err">${ed.err}</div>
+    <div class="bt2"><button data-close>취소</button><button class="pri" id="estart">시작하기</button></div></div>`;
+}
+$('#sh-poll').addEventListener('input', (e) => { if (e.target.id === 'eq') ed.q = e.target.value; if (e.target.dataset.i != null) ed.items[+e.target.dataset.i] = e.target.value; });
+$('#sh-poll').addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]')) return closeSheets();
+  const rm = e.target.closest('[data-rm]');
+  if (rm && !rm.disabled) { ed.items.splice(+rm.dataset.rm, 1); renderEditor(); }
+  if (e.target.closest('#eadd') && ed.items.length < 6) { ed.items.push(''); renderEditor(); $$('#sh-poll .fi[data-i]').pop().focus(); }
+  if (e.target.closest('#estart')) {
+    const items = ed.items.map((x) => x.trim());
+    if (!ed.q.trim()) { ed.err = '질문을 입력해 주세요'; return renderEditor(); }
+    if (items.some((x) => !x)) { ed.err = '비어 있는 항목이 있어요'; return renderEditor(); }
+    if (new Set(items).size !== items.length) { ed.err = '같은 항목이 있어요'; return renderEditor(); }
+    startPoll(ed.kind, ed.q.trim(), items); closeSheets();
+  }
+});
+function startPoll(kind, qText, items) {
+  S.poll = { kind, q: qText, items: items.map((t) => ({ t, n: 0 })), mine: null, open: true, ended: false };
+  push({ kind: 'sys', text: `${kind === 'poll' ? '📊 투표' : '⚔️ 승부예측'}가 시작되었습니다 — ${qText}` });
+  $('#poll').classList.add('open'); renderPoll();
+}
+function renderPoll() {
+  const P = S.poll, el = $('#poll');
+  el.classList.toggle('on', !!P);
+  if (!P) { padList(); renderList(); return; }
+  const tot = P.items.reduce((a, b) => a + b.n, 0), lab = P.kind === 'poll' ? '투표' : '승부예측';
+  el.innerHTML = `<div class="ph" id="ptog"><b>${P.kind === 'poll' ? '📊' : '⚔️'} ${lab}</b><span>${esc(P.q)}</span><i>${el.classList.contains('open') ? '접기 ▴' : '결과 보기 ▾'}</i></div>
+    <div class="pb"><div class="meta"><span>${P.ended ? '종료됨' : '진행 중'} · 총 ${tot}표</span></div><div class="qq">${esc(P.q)}</div>
+    ${P.items.map((it, i) => { const pc = tot ? Math.round(it.n / tot * 100) : 0; return `<div class="op ${P.mine === i ? 'me' : ''}" data-op="${i}" data-spec="35:참여 / 변경 35:실시간 집계"><div class="bar" style="width:${pc}%"></div><span>${esc(it.t)}</span><em>${pc}% · ${it.n}표</em></div>`; }).join('')}
+    <div class="ft">${P.ended ? `<b>${lab} 결과를 어떻게 할까요?</b><button class="cr" id="ppin">📌 상단 고정</button><button class="cr del" id="pdel">🗑 삭제</button>` : '<button class="cr" id="pend">종료</button>'}</div></div>`;
+  padList();
+}
+// 투표 패널이 있으면 목록 위쪽을 그만큼 비운다
+function padList() { const el = $('#poll'), k = F.getBoundingClientRect().width / FW; $('#list').style.paddingTop = S.poll ? (el.offsetHeight / k + 4) + 'px' : ''; if (S.poll) $('#list').style.paddingTop = u(el.offsetHeight / k + 4); }
+$('#poll').addEventListener('click', (e) => {
+  const P = S.poll; if (!P) return;
+  if (e.target.closest('#ptog')) { $('#poll').classList.toggle('open'); renderPoll(); return; }
+  const op = e.target.closest('[data-op]');
+  if (op && !P.ended) {
+    if (!me()) { toast('로그인 후 참여할 수 있어요'); return; }
+    const i = +op.dataset.op; if (P.mine === i) return;
+    if (P.mine != null) P.items[P.mine].n--; P.items[i].n++; P.mine = i;   // 1인 1표, 변경 가능
+    toast(`'${P.items[i].t}'에 참여했어요`); renderPoll();
+  }
+  if (e.target.closest('#pend')) { P.ended = true; push({ kind: 'sys', text: `${P.kind === 'poll' ? '투표' : '승부예측'}가 종료되었습니다` }); renderPoll(); }
+  if (e.target.closest('#ppin')) { $('#poll').classList.remove('open'); toast('결과를 상단에 고정했어요'); renderPoll(); }
+  if (e.target.closest('#pdel')) { S.poll = null; toast('투표를 삭제했어요'); renderPoll(); }
+});
+
+/* ---------------- 입력 (39p) ---------------- */
+function blockReason() {
+  if (!me()) return '🔒 로그인 후 채팅할 수 있어요';
+  if (S.sanction) return '⛔ 운영 정책 위반으로 채팅이 제한되었습니다 (남은 기간 3일)';
+  if (S.freeze && S.role !== 'creator') return '❄ 크리에이터가 채팅을 얼렸어요. 잠시 기다려 주세요.';
+  const left = Math.ceil((S.lockUntil - Date.now()) / 1000);
+  if (left > 0) return `⏳ 저속모드: ${left}초 후에 다시 보낼 수 있어요.`;
+  return '';
+}
+function renderInput() {
+  const why = blockReason(), b = $('#block');
+  b.textContent = why; b.classList.toggle('on', !!why);
+  $('#txt').disabled = !!why; $('#send').disabled = !!why || !$('#txt').value.trim();
+  $('#txt').placeholder = !me() ? '로그인이 필요해요' : '채팅 입력';
+  const n = $('#txt').value.length; $('#cnt').textContent = n ? `${n}/120` : '';
+  F.classList.toggle('donator', S.role === 'donator'); F.classList.toggle('guest', S.role === 'guest');
+}
+setInterval(() => { if (S.lockUntil && Date.now() < S.lockUntil + 1000) renderInput(); }, 500);
+function send() {
+  const t = $('#txt').value.trim(); if (!t || blockReason()) return;
+  const m = push({ kind: 'chat', user: me(), text: t, mine: true });
+  $('#txt').value = ''; closeAc(); toBottom();
+  if (S.slow && S.role !== 'creator') S.lockUntil = Date.now() + S.slowSec * 1000;   // 크리에이터는 제외
+  if (m.judge && blinded(m)) toast(`클린봇 판정: ${m.judge.reason} (${m.judge.score}점) — 다른 사람에게 가려져 보여요`);
+  renderInput();
+}
+$('#send').addEventListener('click', send);
+$('#txt').addEventListener('input', () => { renderInput(); suggest(); });
+$('#txt').addEventListener('keydown', (e) => {
+  const ac = $('#ac');
+  if (ac.classList.contains('on')) {
+    const items = [...ac.children]; let i = items.findIndex((x) => x.classList.contains('on'));
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); i = (i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length; items.forEach((x, k) => x.classList.toggle('on', k === i)); return; }
+    if ((e.key === 'Enter' || e.key === 'Tab') && !e.isComposing) { e.preventDefault(); pickAc(items[Math.max(0, i)]); return; }
+    if (e.key === 'Escape') { closeAc(); return; }
+  }
+  if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); send(); }
+});
+// ':' 뒤 글자 → 스티커 후보, '@' 뒤 글자 → 참여자 닉 후보
+function suggest() {
+  const i = $('#txt'), v = i.value.slice(0, i.selectionStart), ac = $('#ac');
+  let m = /(?:^|\s):([a-z]{1,10})$/.exec(v), html = '';
+  if (m) { const c = STICKERS.filter(([k]) => k.startsWith(m[1])).slice(0, 5); html = c.map(([k, e], n) => `<div class="${n ? '' : 'on'}" data-ins=":${k}: " data-len="${m[1].length + 1}"><span>${e}</span>:${k}:</div>`).join(''); ac.dataset.spec = '39:이모티콘'; }
+  else if ((m = /(?:^|\s)@([\w가-힣]{0,10})$/.exec(v))) {
+    const nicks = [...new Set(S.msgs.filter((x) => x.user && !x.mine).map((x) => x.user.nick))].filter((n) => n.includes(m[1])).slice(0, 5);
+    html = nicks.map((n, k) => `<div class="${k ? '' : 'on'}" data-ins="@${n} " data-len="${m[1].length + 1}"><i>@</i>${esc(n)}</div>`).join(''); ac.dataset.spec = '39:멘션 자동완성';
+  }
+  ac.innerHTML = html; ac.classList.toggle('on', !!html);
+}
+function pickAc(d) {
+  if (!d) return; const i = $('#txt'), pos = i.selectionStart, len = +d.dataset.len;
+  i.value = i.value.slice(0, pos - len) + d.dataset.ins + i.value.slice(pos); const np = pos - len + d.dataset.ins.length;
+  i.focus(); i.setSelectionRange(np, np); closeAc(); renderInput();
+}
+const closeAc = () => $('#ac').classList.remove('on');
+$('#ac').addEventListener('mousedown', (e) => { e.preventDefault(); pickAc(e.target.closest('[data-ins]')); });
+$('#emo').addEventListener('click', () => { $('#emopan').classList.toggle('on'); closeSheets(); });
+$('#emopan').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-stk]'); if (!b) return;
+  if (blockReason()) { toast(blockReason()); return; }
+  const i = $('#txt'); i.value = (i.value + (i.value && !i.value.endsWith(' ') ? ' ' : '') + `:${b.dataset.stk}: `).slice(0, 120); i.focus(); renderInput();
+});
+
+/* ---------------- 채널 전환 / 팝업 분리 ---------------- */
+$('#tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('.tb'); if (!b || b.dataset.ch === S.ch) return;
+  S.ch = b.dataset.ch; S.atBottom = true; S.unread = 0; renderTabs(); renderList(); renderPeek();   // 대화 이력은 채널별로 그대로 유지
+});
+$('#pop').addEventListener('click', () => {
+  if (POPUP) { toast('이미 팝업 창이에요'); return; }
+  S.popped = true; $('#popped').classList.add('on');
+  try { S.popWin = window.open(location.pathname + '?popup=1', 'd2p-chat', 'width=330,height=540'); } catch (_) {}
+  toast(S.popWin ? '채팅을 팝업 창으로 분리했어요' : '팝업이 막혀 있어요 — 브라우저 팝업 허용 후 다시 눌러 주세요');
+});
+$('#unpop').addEventListener('click', () => { S.popped = false; $('#popped').classList.remove('on'); try { S.popWin && S.popWin.close(); } catch (_) {} toast('채팅을 원래 자리로 되돌렸어요'); });
+
+/* ---------------- 가상 참여자 ---------------- */
+let botT;
+function bot() {
+  const ch = Math.random() < 0.7 ? S.ch : CH[Math.floor(Math.random() * 3)].id;
+  const us = USERS[Math.floor(Math.random() * (USERS.length - 1))];
+  const r = Math.random();
+  if (r < 0.07) push({ kind: 'enter', user: { nick: ['키위77', '초코칩', '밤산책', '라면왕'][Math.floor(Math.random() * 4)] }, ch });
+  else if (r < 0.12) push({ kind: 'donate', user: USERS[2], amount: [1000, 3000, 10000, 50000, 100000][Math.floor(Math.random() * 5)], text: '오늘 방송 미쳤다 후원 받아라~', ch });
+  else { const last = [...S.msgs].reverse().find((x) => x.user && x.user.nick === us.nick); let ln; do { ln = LINES[Math.floor(Math.random() * LINES.length)]; } while (last && last.text.startsWith(ln)); push({ kind: 'chat', user: us, text: ln + (Math.random() < 0.2 ? ' :' + STICKERS[Math.floor(Math.random() * 6)][0] + ':' : ''), ch }); }
+  if (S.poll && !S.poll.ended && Math.random() < 0.5) { const P = S.poll; P.items[Math.floor(Math.random() * P.items.length)].n++; renderPoll(); }   // 실시간 집계
+  botT = setTimeout(bot, 1600 + Math.random() * 2200);
+}
+
+/* ---------------- 기획서 연결 ---------------- */
+const post = (m) => { try { parent.postMessage(Object.assign({ d2p: true }, m), '*'); } catch (_) {} };
+F.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-spec]'); if (!el) return;
+  post({ type: 'spec', refs: el.dataset.spec.split(/\s+(?=\d+:)/), label: (el.title || el.textContent || '').trim().slice(0, 30) });
+}, true);
+F.addEventListener('mouseover', (e) => {
+  if (!F.classList.contains('inspect')) return;
+  const el = e.target.closest('[data-spec]'), chip = $('#chip');
+  if (!el) { chip.style.display = 'none'; return; }
+  const r = el.getBoundingClientRect(), fr = F.getBoundingClientRect();
+  chip.textContent = el.dataset.spec.split(/\s+(?=\d+:)/).map((x) => x.replace(':', 'p ')).join(' · ');
+  chip.style.display = 'block'; chip.style.left = Math.max(0, Math.min(r.left - fr.left, fr.width - chip.offsetWidth)) + 'px'; chip.style.top = Math.max(0, r.top - fr.top - 12) + 'px';
+});
+const refsOf = (x) => x.dataset.spec.split(/\s+(?=\d+:)/);
+addEventListener('message', (e) => {
+  const m = e.data; if (!m || !m.d2p) return;
+  if (m.type === 'focus') {
+    const els = $$('[data-spec]').filter((x) => refsOf(x).includes(m.ref) && x.offsetParent !== null).slice(0, 6);
+    els.forEach((x) => { x.classList.remove('spec-flash'); void x.offsetWidth; x.classList.add('spec-flash'); setTimeout(() => x.classList.remove('spec-flash'), 3200); });
+    if (!els.length) { const hint = { '31:': () => { renderSettings(); openSheet('set'); }, '35:': () => { if (!S.poll) openEditor('poll'); } }[m.ref.slice(0, 3)]; if (hint) hint(); }
+    post({ type: 'focused', ref: m.ref, count: els.length });
+  } else if (m.type === 'inspect') F.classList.toggle('inspect', !!m.on);
+  else if (m.type === 'event') runEvent(m.name, m.value);
+  else if (m.type === 'state') applyState(m.state);
+  else if (m.type === 'changed') {
+    $$('[data-chg]').forEach((x) => x.removeAttribute('data-chg'));
+    const set = new Set(m.refs || []);
+    $$('[data-spec]').forEach((x) => { if (refsOf(x).some((r) => set.has(r))) x.setAttribute('data-chg', '변경'); });
+  }
+});
+function runEvent(name, value) {
+  const us = USERS[1];
+  switch (name) {
+    case 'role': S.role = value; S.lockUntil = 0; closeSheets(); toast({ creator: '크리에이터로 보기 — 공지 편집·관리 메뉴 사용 가능', donator: '도네이터로 보기 — 공지는 열람만, 일부 설정 제한', guest: '비로그인 — 입력창 잠김' }[value]); renderNotice(); renderList(); renderPoll(); break;
+    case 'donate': push({ kind: 'donate', user: USERS[2], amount: +value, text: '오늘 방송 미쳤다 후원 받아라~', ch: S.ch }); break;
+    case 'spam': { const t = Date.now(); for (let i = 0; i < 5; i++) push({ kind: 'chat', user: USERS[5], text: 'ㅋㅋㅋㅋ 도배 테스트', at: t + i * 400 }); toast('분탕러가 3초 안에 5번 보냄 → 동일 반복(60)·초당 다발(50)'); break; }
+    case 'ad': push({ kind: 'chat', user: USERS[5], text: '싸게 팝니다 카톡 abc123 www.example.com' }); toast('광고/연락처 패턴 40점 → 강도 "강"에서만 가려져요'); break;
+    case 'bad': push({ kind: 'chat', user: USERS[5], text: '아 시발 진짜' }); toast('금칙어 100점 → 클린봇이 켜져 있으면 강도와 무관하게 가려요'); break;
+    case 'mention': push({ kind: 'chat', user: USERS[0], text: `@${(me() || ME.creator).nick} 오늘 몇 시까지 해요?` }); break;
+    case 'enter': push({ kind: 'enter', user: { nick: '키위77' } }); break;
+    case 'sanction': S.sanction = !S.sanction; toast(S.sanction ? '채팅 제재 상태 — 입력창 하단에 사유 안내' : '제재 해제'); renderInput(); break;
+  }
+  renderInput();
+}
+
+/* ---------------- 초기 상태 ---------------- */
+function seed() {
+  S.msgs = []; S.id = 1; const t0 = Date.now(); let k = 0;
+  const add = (m) => { m.at = t0 - 900000 + (k++) * 12000; push(m); };
+  for (const c of CH) {
+    S.ch = c.id;
+    add({ kind: 'chat', user: USERS[0], text: '다음 방송 언제예요?' });
+    add({ kind: 'chat', user: USERS[1], text: '방송 잘 보고 있어요 :daebak:' });
+    add({ kind: 'chat', user: USERS[2], text: c.id === 'toon' ? '오늘도 화이팅' : `${c.name}에서 보는 중!` });
+    add({ kind: 'donate', user: USERS[2], amount: 1000, text: '오늘 방송 미쳤다 후원 받아라~' });
+    add({ kind: 'chat', user: USERS[0], text: '다음 방송 언제예요?' });
+    add({ kind: 'chat', user: USERS[1], text: '방송 잘 보고 있어요 :daebak:' });
+    add({ kind: 'enter', user: { nick: '키위77' } });
+    if (c.id === 'toon') {
+      add({ kind: 'chat', user: USERS[5], text: '도배도배도배' }); push({ kind: 'chat', user: USERS[5], text: '도배도배도배', at: S.msgs[S.msgs.length - 1].at + 2000 });
+      add({ kind: 'chat', user: USERS[5], text: '야 시발 뭐하냐' });
+      add({ kind: 'chat', user: USERS[5], text: '010-1234-5678 카톡 문의' });
+      add({ kind: 'chat', user: USERS[3], text: '이 메시지는 매니저가 지웠어요' }); S.msgs[S.msgs.length - 1].deleted = true;
+      add({ kind: 'chat', user: USERS[4], text: '@팬텀하츠 오늘 노래도 해주세요!' });
+    }
+    add({ kind: 'chat', user: USERS[0], text: '다음 방송 언제예요?' });
+    add({ kind: 'donate', user: USERS[2], amount: 100000, text: '오늘 방송 미쳤다 후원 받아라~' });
+    add({ kind: 'chat', user: USERS[0], text: '다음 방송 언제예요?' });
+  }
+  S.ch = 'toon';
+}
+function applyState(st) {
+  Object.assign(S, { role: 'creator', ch: 'toon', clean: true, strength: 'mid', slow: false, freeze: false, enter: true, big: false, sanction: false, poll: null, noticeEdit: false, popped: false, atBottom: true, unread: 0, lockUntil: 0, notice: '채팅 매너 지켜주세요. 투표 참여 부탁드려요' });
+  S.blocked = new Set(['구독팬A']); S.revealed = new Set();
+  closeSheets(); $('#prof').classList.remove('on'); $('#emopan').classList.remove('on'); $('#popped').classList.remove('on'); $('#poll').classList.remove('open');
+  seed(); renderNotice(); renderTabs(); applyView(); renderPoll();
+  switch (st) {
+    case 'settings': renderSettings(); openSheet('set'); break;
+    case 'popout': S.popped = true; $('#popped').classList.add('on'); break;
+    case 'notice': S.noticeEdit = true; renderNotice(); break;
+    case 'poll': startPoll('poll', '점심 뭐 먹을까?', ['치킨', '피자', '국밥']); S.poll.items[0].n = 4; S.poll.items[1].n = 2; S.poll.items[2].n = 3; renderPoll(); break;
+    case 'scroll': setTimeout(() => { const L = $('#list'); L.scrollTop = Math.max(0, L.scrollHeight - L.clientHeight - 160); }, 50); break;
+    case 'emoji': $('#emopan').classList.add('on'); break;
+    case 'tiers': [10000, 50000].forEach((a) => push({ kind: 'donate', user: USERS[2], amount: a, type: a === 10000 ? '룰렛후원' : '텍스트후원', text: '오늘 방송 미쳤다 후원 받아라~' })); break;
+    case 'slow': S.slow = true; S.role = 'donator'; S.lockUntil = Date.now() + 2000; break;
+  }
+  renderInput();
+  clearTimeout(botT); botT = setTimeout(bot, 1500);
+}
+applyState(q.get('state') || 'live');
+if (q.has('inspect')) F.classList.add('inspect');
+post({ type: 'ready' });
+})();
+</script>
+</body>
+</html>

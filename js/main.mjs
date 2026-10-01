@@ -23,7 +23,8 @@ async function openDoc(docPath) {
   if (!res || !res.ok) { status('문서를 찾을 수 없어요: ' + docPath); return; }
   const data = await res.json();
   const live = await fetch(base + 'live.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  if (live) live.src = base + live.src;
+  if (live && live.src) live.src = base + live.src;
+  if (live && live.apps) for (const a of Object.values(live.apps)) a.src = base + a.src;
   // 버전 비교: 새 버전 폴더의 diff.json (이전 버전 대비)
   const diff = await fetch(base + 'diff.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const versions = await versionsOf(data.slug, data.version);

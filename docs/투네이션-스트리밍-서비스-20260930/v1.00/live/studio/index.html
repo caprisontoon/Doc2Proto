@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>크리에이터 스튜디오 — 동작 프로토타입</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#fff}</style>
+</head>
+<body>
+<div id="frame"></div>
+<script>
+/* 크리에이터 스튜디오 > 라이브 방송 동작 프로토타입 (스트리밍 서비스 기획서 v1.00 21~27p)
+   좌표·크기 단위 = 기획서 슬라이드의 pt (프레임 732.1 × 453.5). data-spec="페이지:번호" 는 Description 항목. */
+(function () {
+'use strict';
+const FW = 732.1, FH = 453.5;
+const q = new URLSearchParams(location.search || location.hash.slice(1));
+const EMBED = q.has('embed');
+const u = (n) => `calc(${n}*var(--u))`;
+const CHANNEL = '팬텀하츠';
+const BLACK = ['바보', '멍청', '시발', '씨발', '도박', '욕설'];   // 필터링 시스템 연동 (데모용 금칙어)
+const KEEP_MONTHS = 6;   // 26p 1번: 최근 몇 개월까지 조회 가능한지 개발팀 확인 필요 → 프로토타입은 6개월로 가정
+
+/* ---------------- 스타일 ---------------- */
+const CSS = `
+:root{--u:1px;--ink:#1b1d22;--ink2:#555;--muted:#9a9a9a;--line:#d9d9d9;--blue:#519cff;--blue2:#3d7ff0;--red:#c00000;--navy:#1d1f2b;
+  --good:#1fae5b;--mid:#e0a800;--bad:#ff3b1f}
+*{box-sizing:border-box}
+body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#frame{position:relative;width:${u(FW)};height:${u(FH)};overflow:hidden;background:#fff;font-size:${u(8)};border:${u(.75)} solid #c8c8c8}
+${EMBED ? '' : '#frame{margin:0 auto;box-shadow:0 2px 18px rgba(0,0,0,.18)}body{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#e9ebef}'}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,select{font:inherit;color:inherit}
+.abs{position:absolute}
+svg{display:block}
+/* LNB */
+#lnb{left:0;top:0;width:${u(131)};height:100%;border-right:${u(.75)} solid #d0d0d0;background:#fff}
+#lnb .logo{position:absolute;left:${u(12)};top:${u(10)};display:flex;align-items:center;gap:${u(4)};font-weight:800;font-size:${u(9)};letter-spacing:-.01em}
+#lnb .logo i{font-style:normal;color:#4a6cf7;font-weight:900;font-size:${u(11)};letter-spacing:-.08em}
+#lnb .fold{position:absolute;left:${u(112)};top:${u(11)};color:#999;font-size:${u(8)}}
+#lnb .sep{position:absolute;left:0;right:0;top:${u(32)};border-top:${u(.75)} solid #e6e6e6}
+#lnb .grp{position:absolute;left:${u(16)};top:${u(39)};font-weight:700;font-size:${u(11)};display:flex;align-items:center;gap:${u(6)}}
+#lnb .grp::before{content:'';width:${u(6)};height:${u(6)};border-radius:50%;background:#111}
+#lnb .it{position:absolute;left:${u(30)};width:${u(90)};height:${u(16)};font-size:${u(10)};color:#333;text-align:left;padding-left:${u(10)};border-radius:${u(3)}}
+#lnb .it::before{content:'-';position:absolute;left:0}
+#lnb .it:hover{background:#f2f4f8}
+#lnb .it.on{color:var(--blue2);font-weight:700}
+/* 헤더 */
+#head{left:${u(131)};top:0;right:0;height:${u(28.5)};border-bottom:${u(.75)} solid #d0d0d0;display:flex;align-items:center;padding-left:${u(14)};font-weight:700;font-size:${u(11)}}
+.view{position:absolute;left:${u(131)};top:${u(28.5)};right:0;bottom:0;display:none;background:#fff}
+.view.on{display:block}
+.view .abs{position:absolute}
+/* 방송 관리: 미리보기 */
+#pv{left:${u(10.5)};top:${u(8.5)};width:${u(383.5)};height:${u(132)};background:var(--navy);overflow:hidden}
+#pv .bn{position:absolute;left:0;right:0;top:0;height:${u(14)};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${u(7.5)};background:#808080;z-index:3}
+.st-live #pv .bn,.st-net #pv .bn{background:var(--red)}
+.st-sanction #pv .bn{background:#fdf0dc;color:#b45a00}
+#pv canvas{position:absolute;left:0;top:${u(14)};width:100%;height:${u(118)};display:none}
+.st-live #pv canvas{display:block}
+#pv .msg{position:absolute;left:0;right:0;top:${u(14)};bottom:0;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;gap:${u(5)}}
+#pv .msg b{font-size:${u(9.5)};font-weight:700;line-height:1.6}
+#pv .msg span{font-size:${u(7)};color:#aab2d0}
+#pv .msg button{margin-top:${u(6)};background:#fff;color:#3045d0;font-weight:700;font-size:${u(7.5)};border-radius:999px;padding:${u(3.5)} ${u(9)}}
+#pv .msg button:hover{background:#e9edff}
+.st-off #m-off,.st-net #m-net,.st-sanction #m-san{display:flex}
+#m-san span{font-size:${u(8)};color:#fff}
+/* 방송 정보 */
+#stats{left:${u(10.5)};top:${u(144.5)};width:${u(383.5)};height:${u(41)};background:#f3f3f3;border:${u(.75)} solid #ddd;border-radius:${u(2)};display:grid;grid-template-columns:repeat(5,1fr);align-items:center}
+#stats .s{display:flex;flex-direction:column;align-items:center;gap:${u(2)}}
+#stats .s .l{font-size:${u(9)};color:#333;display:flex;align-items:center;gap:${u(2)}}
+#stats .s .v{font-size:${u(13)};font-weight:800;color:#111;font-variant-numeric:tabular-nums;line-height:1.1;min-height:${u(15)}}
+#stats .s .v.dash{color:#3d4b9a;font-weight:400;font-size:${u(8)}}
+#stats .s .v.good{color:var(--good)} #stats .s .v.mid{color:var(--mid)} #stats .s .v.bad{color:var(--bad)}
+.q{width:${u(8.5)};height:${u(8.5)};border-radius:50%;background:#8c8c8c;color:#fff;font-size:${u(6.5)};font-weight:800;display:inline-flex;align-items:center;justify-content:center;cursor:help;position:relative}
+.tip{position:absolute;z-index:80;background:#333;color:#fff;font-size:${u(7)};line-height:1.45;padding:${u(5)} ${u(7)};border-radius:${u(5)};width:${u(110)};pointer-events:none;display:none;font-weight:400;text-align:left}
+/* 방송 정보 입력 폼 */
+#form{left:${u(10.5)};top:${u(192.5)};width:${u(383.5)};height:${u(201.5)};border:${u(.75)} solid #ddd;border-radius:${u(2)};padding:${u(7)} ${u(9)}}
+.fr{display:flex;align-items:center;min-height:${u(25.5)}}
+.fr > label{width:${u(53)};font-size:${u(9)};color:#555;flex:none}
+.fr .box{flex:1;min-width:0;position:relative}
+.inp{width:100%;height:${u(21)};border:${u(.75)} solid #d9d9d9;background:#fff;padding:0 ${u(6)};font-size:${u(8)};outline:0}
+.inp:focus{border-color:var(--blue)}
+.inp.err{border-color:#e53935}
+.cnt{position:absolute;right:${u(7)};top:50%;transform:translateY(-50%);font-size:${u(7.5)};color:#888;pointer-events:none}
+.ferr{color:#e53935;font-size:${u(6.8)};margin:${u(1)} 0 0 ${u(53)};min-height:0;display:none}
+.ferr.on{display:block}
+select.inp{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0h10L5 6z' fill='%23111'/%3E%3C/svg%3E") no-repeat right ${u(7)} center;background-size:${u(6)} ${u(4)};cursor:pointer}
+.tagin{display:flex;gap:${u(6)}} .tagin .box{flex:1}
+.addb{width:${u(47)};height:${u(21)};background:#8c8c8c;color:#fff;font-size:${u(8.5)};font-weight:700;flex:none}
+.addb.on{background:var(--blue)}
+.addb:disabled{background:#c9c9c9;cursor:not-allowed}
+#tags{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:${u(4)};margin:${u(2)} 0 ${u(3)} ${u(53)}}
+#tags:empty{display:none}
+#tags span{background:#111;color:#fff;font-weight:700;font-size:${u(7)};border-radius:999px;padding:${u(2)} ${u(4)} ${u(2)} ${u(7)};display:inline-flex;align-items:center;gap:${u(3)}}
+#tags span button{font-weight:800;font-size:${u(7.5)};line-height:1;padding:0 ${u(2)}}
+.thumbrow{align-items:flex-start;padding-top:${u(3)}}
+.thumbrow > label{padding-top:${u(2)}}
+#thumb{display:flex;align-items:flex-end;gap:${u(6)}}
+#tbox{width:${u(86)};height:${u(35)};background:#eee;border:${u(.75)} solid #ddd;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#aaa;font-size:${u(7)};cursor:pointer;flex:none;overflow:hidden;position:relative}
+#tbox:hover{background:#e6e9f2}
+#tbox b{font-size:${u(10)};font-weight:400;line-height:1}
+#tbox img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#tbtns{display:none;gap:${u(3)};align-self:flex-start}
+#tbtns button{width:${u(16)};height:${u(16)};background:#e9e9e9;border-radius:${u(2)};display:flex;align-items:center;justify-content:center}
+#tbtns button:hover{background:#dcdcdc}
+#tbtns svg{width:${u(8)};height:${u(8)}}
+.has-thumb #tbtns{display:flex}
+#tnote{font-size:${u(7)};color:#888;padding-bottom:${u(2)}}
+.fr.rr{min-height:${u(20)}}
+.radio{display:flex;gap:${u(20)};font-size:${u(9)}}
+.radio label{display:flex;align-items:center;gap:${u(4)};cursor:pointer}
+.radio input{appearance:none;width:${u(7)};height:${u(7)};border-radius:50%;border:${u(.75)} solid #333;margin:0;cursor:pointer}
+.radio input:checked{background:#222;box-shadow:inset 0 0 0 ${u(1)} #fff}
+#save{left:${u(10.5)};top:${u(398.5)};width:${u(383.5)};height:${u(21.5)};background:#d9d9d9;color:#fff;font-size:${u(9)};font-weight:700;border-radius:${u(3)}}
+#save.on{background:var(--blue)}
+#save:disabled{cursor:default}
+/* 채팅 패널 */
+#chat{left:${u(406.5)};top:${u(9)};width:${u(184.5)};height:${u(407)};background:#f5f6f8;border:${u(.75)} solid #e1e3e8;border-radius:${u(3)};overflow:hidden}
+#chat .h{position:absolute;left:${u(11)};top:${u(9)};font-weight:700;font-size:${u(10)};color:#8f9bff}
+#chat .ic{position:absolute;right:${u(9)};top:${u(11)};color:#bbb;font-size:${u(7)};letter-spacing:${u(3)}}
+#chat .ms{position:absolute;left:${u(13)};top:${u(37)};right:${u(10)};display:flex;flex-direction:column;gap:${u(9.5)};font-size:${u(7)};color:#c0c4cc}
+#chat .ref{position:absolute;left:0;right:0;top:${u(180)};text-align:center;transform:rotate(-8deg);font-weight:700;font-size:${u(11)};color:#a7aab3}
+#chat .in{position:absolute;left:${u(11)};right:${u(9)};bottom:${u(9)};height:${u(18)};border:${u(.75)} solid #e1e3e8;background:#fff;font-size:${u(7)};color:#c0c4cc;display:flex;align-items:center;padding-left:${u(7)}}
+#chat .off{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(245,246,248,.92);color:#777;font-size:${u(8)};z-index:2}
+.chat-off #chat .off{display:flex}
+/* 제재 */
+.st-sanction #mg > :not(#pv):not(#popup-san):not(#chat){opacity:.45;pointer-events:none;filter:grayscale(1)}
+.st-sanction #chat{opacity:.6}
+#popup-san{left:${u(170)};top:${u(100)};width:${u(178.5)};height:${u(221.5)};background:#fff;border-radius:${u(7)};box-shadow:0 ${u(3)} ${u(12)} rgba(0,0,0,.35);display:none;flex-direction:column;align-items:center;text-align:center;overflow:hidden;z-index:30}
+#popup-san.on{display:flex}
+#popup-san h4{margin:${u(11)} 0 ${u(4)};font-size:${u(11.5)}}
+#popup-san p{margin:0;font-size:${u(7.6)};line-height:1.6;color:#222}
+#popup-san .k{font-weight:700;font-size:${u(9.5)};margin-top:${u(11)}}
+#popup-san .lk{text-decoration:underline;cursor:pointer}
+#popup-san button{position:absolute;left:0;right:0;bottom:0;height:${u(25)};background:#404040;color:#fff;font-weight:700;font-size:${u(9)}}
+/* 방송 설정 */
+#card{left:${u(10.5)};top:${u(14)};width:${u(579.5)};height:${u(104.5)};border:${u(.75)} solid #dcdcdc;border-radius:${u(6)}}
+#card .t{position:absolute;left:${u(10)};top:${u(9)};font-weight:700;font-size:${u(10)}}
+.krow{position:absolute;left:${u(26)};right:${u(10)};height:${u(26)};display:flex;align-items:center;gap:${u(8)}}
+.krow > b{width:${u(48)};font-size:${u(9.5)};flex:none}
+.kv{flex:1;height:100%;background:#f5f5f5;border-radius:${u(2)};display:flex;align-items:center;padding:0 ${u(7)};font-size:${u(7.8)};color:#333;min-width:0;overflow:hidden;white-space:nowrap}
+.kv.mask{background:#9e9e9e;color:#fff;justify-content:center;font-size:${u(9.5)};font-weight:700;cursor:pointer;position:relative;letter-spacing:.01em}
+.kv.mask i{position:absolute;left:${u(8)};font-style:normal;color:#c9c9c9;letter-spacing:${u(1)};font-size:${u(9)}}
+.kv.mask:hover{background:#8f8f8f}
+.kv.shown{background:#f5f5f5;color:#222;justify-content:flex-start;font-weight:400;font-size:${u(7.8)};font-family:Consolas,monospace;cursor:text}
+.kb{width:${u(54.5)};height:100%;border-radius:${u(2)};background:#e8f1ff;color:var(--blue);font-weight:700;font-size:${u(8.5)};flex:none}
+.kb:hover{background:#d8e7ff}
+.kb.pri{background:var(--blue);color:#fff} .kb.pri:hover{background:var(--blue2)}
+#obs{left:${u(13)};top:${u(228.5)};width:${u(572)};border:${u(.75)} solid #dcdcdc;border-radius:${u(5)};background:#f4f4f4;overflow:hidden}
+#obs .oh{height:${u(29.5)};display:flex;align-items:center;gap:${u(6)};padding:0 ${u(10)};font-weight:700;font-size:${u(9)};color:#444;cursor:pointer;width:100%}
+#obs .oh .i{width:${u(9)};height:${u(9)};border:${u(.75)} solid #777;border-radius:50%;font-size:${u(6)};display:inline-flex;align-items:center;justify-content:center;color:#777}
+#obs .oh .ar{margin-left:auto;transition:transform .15s;color:#888}
+#obs.open .oh .ar{transform:rotate(180deg)}
+#obs .ob{display:none;background:#fff;padding:${u(6)} ${u(10)} ${u(8)};border-top:${u(.75)} solid #e2e2e2}
+#obs.open .ob{display:block}
+#obs .ob div{display:flex;align-items:center;gap:${u(8)};height:${u(23)};font-size:${u(8.5)};color:#555}
+#obs .ob div i{width:${u(15)};height:${u(15)};border-radius:50%;background:#666;color:#fff;font-style:normal;font-size:${u(7)};display:inline-flex;align-items:center;justify-content:center;flex:none}
+#obs .ob code{background:#f0f2f7;border-radius:${u(2)};padding:0 ${u(3)};font-size:${u(7.5)}}
+/* 재발급 팝업 */
+#dim{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:60;display:none}
+.modal{position:absolute;z-index:61;background:#fff;border-radius:${u(6)};box-shadow:0 ${u(3)} ${u(14)} rgba(0,0,0,.3);display:none}
+#m-re{left:${u(265)};top:${u(150)};width:${u(200)};height:${u(110)};text-align:center}
+#m-re .h{height:${u(26)};border-bottom:${u(.75)} solid #eee;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${u(8.5)};position:relative}
+#m-re .h button{position:absolute;right:${u(8)};top:${u(7)};font-size:${u(10)};color:#555}
+#m-re p{margin:${u(11)} ${u(10)} 0;font-size:${u(6.8)};color:#444;line-height:1.6}
+#m-re .bs{position:absolute;left:${u(8)};right:${u(8)};bottom:${u(8)};display:flex;gap:${u(6)}}
+#m-re .bs button{flex:1;height:${u(18)};border-radius:${u(2)};font-weight:700;font-size:${u(7.5)}}
+#m-re .c{background:#e4e6fb;color:#4b54c8} #m-re .ok{background:#4b46d6;color:#fff}
+/* 방송 분석 */
+#flt{left:${u(8.5)};top:${u(11.5)};width:${u(583.5)};height:${u(32.5)};border:${u(.75)} solid #e2e2e2;display:flex;align-items:center;gap:${u(3)};padding:0 ${u(5)}}
+.pb{height:${u(20)};padding:0 ${u(9)};border:${u(.75)} solid #d4d4d4;border-radius:${u(3)};font-size:${u(9)};color:#444;background:#fff}
+.pb.on{border-color:var(--blue);color:var(--blue);font-weight:700}
+.dt{height:${u(20)};border:${u(.75)} solid #e2e2e2;font-size:${u(6.8)};padding:0 ${u(3)};width:${u(68)};color:#333;background:#fff}
+.go{height:${u(20)};padding:0 ${u(11)};border-radius:${u(3)};background:var(--blue);color:#fff;font-size:${u(9)};font-weight:700}
+.go:hover{background:var(--blue2)}
+.lim{font-size:${u(8)};color:#555;margin-left:${u(4)}}
+.csv{margin-left:auto;height:${u(20)};border:${u(.75)} solid #e2e2e2;border-radius:${u(3)};padding:0 ${u(7)};font-size:${u(7)};color:#9aa3c0;font-weight:700;display:flex;align-items:center;gap:${u(4)};background:#fff}
+.csv:hover{border-color:var(--blue);color:var(--blue)}
+.csv svg{width:${u(8)};height:${u(8)}}
+.sum{position:absolute;left:${u(9.5)};width:${u(582.5)};border:${u(.75)} solid #e2e2e2;display:grid}
+.sum .c{border-right:${u(.75)} solid #e2e2e2;border-bottom:${u(.75)} solid #e2e2e2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:${u(3)}}
+.sum .c .l{font-size:${u(9)};color:#333;display:flex;align-items:center;gap:${u(2)}}
+.sum .c .v{font-size:${u(15.5)};font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.sum .c .v small{font-size:${u(8)};font-weight:400;margin-left:${u(2)}}
+#asum{top:${u(51)};height:${u(84.5)};grid-template-columns:repeat(4,1fr)}
+#tbl{left:${u(9.5)};top:${u(155)};width:${u(582.5)};border-collapse:collapse;font-size:${u(7.3)};table-layout:fixed}
+#tbl th{background:#4d4d4d;color:#fff;font-weight:700;height:${u(24)};border-right:${u(.75)} solid #888;line-height:1.15;padding:0 ${u(2)}}
+#tbl td{height:${u(23.5)};text-align:center;border-right:${u(.75)} solid #fff;border-bottom:${u(1.5)} solid #fff;background:#efefef;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 ${u(3)}}
+#tbl tr:nth-child(odd) td{background:#dedede}
+#tbl td.tt{text-align:left;cursor:pointer}
+#tbl td.tt:hover{color:var(--blue2);text-decoration:underline}
+#empty{left:0;right:0;top:${u(378)};text-align:center;font-size:${u(8)};color:#888;display:none}
+#pg{left:0;right:${u(10)};top:${u(402)};display:flex;justify-content:center;gap:${u(5)};font-size:${u(8.5)};color:#333}
+#pg button{min-width:${u(9)};padding:0 ${u(1)}}
+#pg button.on{color:var(--blue2);font-weight:800;text-decoration:underline}
+#pg button:disabled{color:#ccc;cursor:default}
+/* 일별 분석 */
+#dflt{left:${u(8.5)};top:${u(11.5)};width:${u(583.5)};height:${u(32.5)};border:${u(.75)} solid #e2e2e2;display:flex;align-items:center;gap:${u(5)};padding:0 ${u(5)}}
+#dsum{top:${u(51)};height:${u(107.5)};grid-template-columns:repeat(3,1fr);grid-template-rows:${u(23)} 1fr 1fr}
+#dsum .hd{grid-column:1/-1;background:#f2f2f2;border-bottom:${u(.75)} solid #e2e2e2;display:flex;align-items:center;justify-content:space-between;padding:0 ${u(7)};font-size:${u(9)}}
+#dsum .hd b{font-size:${u(9.5)}} #dsum .hd span{font-size:${u(8)}} #dsum .hd span b{font-size:${u(8)}}
+#metric{left:${u(475)};top:${u(176)};width:${u(108)};height:${u(22)};border:${u(.75)} solid #ddd}
+#chart{left:${u(9)};top:${u(204)};width:${u(583.5)};height:${u(197)};border:${u(.75)} solid #e6e6e6;border-radius:${u(3)}}
+#chart svg{width:100%;height:100%}
+#ctip{position:absolute;z-index:5;background:#fff;border:${u(.75)} solid #ddd;box-shadow:0 ${u(1)} ${u(4)} rgba(0,0,0,.15);border-radius:${u(2)};padding:${u(3)} ${u(6)};font-size:${u(6.5)};display:none;pointer-events:none;white-space:nowrap}
+#ctip b{font-size:${u(7.5)};margin-left:${u(4)}}
+#nodata{left:${u(9)};top:${u(60)};right:${u(10)};text-align:center;color:#888;font-size:${u(9)};display:none}
+/* 토스트 / 연결 표시 */
+#toast{position:absolute;left:50%;bottom:${u(26)};transform:translateX(-50%);background:rgba(20,20,20,.88);color:#fff;font-size:${u(8)};padding:${u(5)} ${u(12)};border-radius:${u(4)};z-index:90;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+[data-chg]{outline:${u(1.6)} dashed #e08a00!important;outline-offset:${u(1)}}
+.spec-flash{outline:${u(2)} solid #f2c94c!important;outline-offset:${u(1)};animation:flash 1s ease 3}
+@keyframes flash{50%{outline-color:transparent}}
+.inspect [data-spec]:hover{outline:${u(1)} dashed #4a55e0;outline-offset:${u(1)}}
+#chip{position:absolute;z-index:95;background:#4a55e0;color:#fff;font-size:${u(6.5)};padding:${u(1.5)} ${u(5)};border-radius:${u(3)};pointer-events:none;display:none;white-space:nowrap}
+`;
+document.head.insertAdjacentHTML('beforeend', `<style>${CSS}</style>`);
+
+const I = {
+  cal: '<svg viewBox="0 0 12 12"><rect x="1" y="2" width="10" height="9" rx="1" stroke="#777" fill="none"/><path d="M1 5h10M4 1v2M8 1v2" stroke="#777"/></svg>',
+  dl: '<svg viewBox="0 0 12 12"><path d="M6 1v7M3 5l3 3 3-3M1.5 10.5h9" stroke="currentColor" fill="none" stroke-width="1.2"/></svg>',
+  pen: '<svg viewBox="0 0 12 12"><path d="M2 10l1-3 5.5-5.5 2 2L5 9z" stroke="#555" fill="none"/></svg>',
+  bin: '<svg viewBox="0 0 12 12"><path d="M2.5 3.5h7M4.5 3.5V2h3v1.5M3.5 3.5l.5 7h4l.5-7" stroke="#555" fill="none"/></svg>',
+};
+const TIPS = {   // 21p · 26p 툴팁 표
+  '상태': '서버가 판단한 현재 방송 상태입니다. 송출 프로그램의 표시와 최대 몇 초 차이가 날 수 있어요.',
+  '방송 시간': '이번 회차가 시작된 뒤 지난 시간입니다. 일시중단 구간도 포함합니다.',
+  '동시 시청자': '지금 이 방송을 보고 있는 동시 시청자 수입니다. 중복 접속은 제외되었습니다.',
+  '비트트레이': '서버가 실제로 수신한 초당 데이터량(kbps)입니다. 송출 프로그램이 보내는 설정값이 아니라 도착한 값입니다.',
+  '해상도': '수신한 영상 원본의 해상도입니다. 시청자는 화질 단계에 따라 더 낮은 값으로 볼 수 있어요.',
+  '진행한 방송': '기간 내 종료된 회차 수', '최고 동시 시청자': '기간 내 회차 방송 시간의 합계', '평균 동시 시청자': '시간 가중 평균',
+  '누적 시청자': '기간 내 중복을 제거한 시청자 수', '총 방송 시간': '기간 내 회차 방송 시간의 합계', '채팅 참여자': '회차 동안 중복을 제거한 채팅 이용자 수',
+  '방송 중 후원 횟수': '회차 동안 누적 후원 횟수 합계', '방송 중 후원액': '회차 동안 누적 후원 액수 합계',
+};
+const qm = (key, page) => `<span class="q" data-tipkey="${key}" data-spec="${page}:${key}">?</span>`;
+
+/* ---------------- 화면 ---------------- */
+const F = document.getElementById('frame');
+F.innerHTML = `
+<div id="lnb" class="abs">
+  <div class="logo"><i>+OO</i>toonation</div><span class="fold">‹</span><div class="sep"></div>
+  <div class="grp">라이브 방송</div>
+  <button class="it" data-go="manage" style="top:${u(61)}">방송 관리</button>
+  <button class="it" data-go="settings" style="top:${u(79)}">방송 설정</button>
+  <button class="it" data-go="analysis" style="top:${u(97)}">방송 분석</button>
+</div>
+<div id="head" class="abs">방송 관리</div>
+
+<section class="view" id="v-manage"><div id="mg">
+  <div id="pv" class="abs" data-spec="21:2">
+    <div class="bn" id="banner" data-spec="21:1"></div>
+    <canvas id="video" width="384" height="118"></canvas>
+    <div class="msg" id="m-off"><b>스트리밍 소프트웨어를 연결하면 방송이 시작됩니다</b><span>방송 시작 · 종료는 스트리밍 소프트웨어(OBS 등)에서 가능합니다</span><button id="toguide" data-spec="21:2">스트림 설정 안내</button></div>
+    <div class="msg" id="m-net" data-spec="22:3"><b>오프라인 상태입니다.<br>인터넷 연결를 확인하고 다시 시도해 보세요.</b></div>
+    <div class="msg" id="m-san" data-spec="24:1"><span>채널 정지 중에는 사용할 수 없습니다</span></div>
+  </div>
+  <div id="stats" class="abs" data-spec="21:3">
+    ${['상태', '방송 시간', '동시 시청자', '비트트레이', '해상도'].map((k, i) => `<div class="s"><div class="l">${k === '비트트레이' ? '비트레이트' : k}${qm(k, 21)}</div><div class="v" id="sv${i}"></div></div>`).join('')}
+  </div>
+  <div id="form" class="abs" data-spec="24:2">
+    <div class="fr"><label>제목</label><div class="box" data-spec="23:1"><input class="inp" id="f-title" maxlength="80"><span class="cnt" id="c-title">0/80</span></div></div>
+    <div class="ferr" id="e-title">부적절한 표현이 포함되어 있습니다.</div>
+    <div class="fr"><label>카테고리</label><div class="box" data-spec="23:2"><select class="inp" id="f-cat">${['선택', '게임', '인물/블로그', '토크/캠방', '음악', '먹방', '스포츠', '교육'].map((c) => `<option>${c}</option>`).join('')}</select></div></div>
+    <div class="fr tagin"><label>태그</label><div class="box" data-spec="23:3"><input class="inp" id="f-tag" placeholder="최대 15자, 공백 및 특수 문자 불가"><span class="cnt" id="c-tag">0/10</span></div><button class="addb" id="addtag" data-spec="23:3">추가</button></div>
+    <div class="ferr" id="e-tag"></div>
+    <div id="tags" data-spec="23:3"></div>
+    <div class="fr thumbrow"><label>썸네일</label><div class="box" id="thumb" data-spec="23:4">
+      <div id="tbox"><b>+</b>업로드</div>
+      <div id="tbtns"><button id="tchg" title="변경">${I.pen}</button><button id="tdel" title="삭제">${I.bin}</button></div>
+      <span id="tnote">등록하지 않으면 방송 중인 화면으로 썸네일이 노출됩니다.</span>
+      <input type="file" id="tfile" accept="image/*" hidden>
+    </div></div>
+    <div class="ferr" id="e-thumb">5MB 이하 JPG · PNG 파일만 업로드할 수 있습니다</div>
+    <div class="fr rr"><label>연령 제한</label><div class="radio" data-spec="23:5"><label><input type="radio" name="age" value="all">전체 이용가</label><label><input type="radio" name="age" value="19">19세 이상으로 제한합니다.</label></div></div>
+    <div class="fr rr"><label>공개 상태</label><div class="radio" data-spec="23:6"><label><input type="radio" name="pub" value="pub">공개</label><label style="margin-left:${u(35)}"><input type="radio" name="pub" value="priv">비공개</label></div></div>
+    <div class="fr rr"><label>채팅 사용</label><div class="radio" data-spec="23:7"><label><input type="radio" name="chat" value="on">사용</label><label style="margin-left:${u(35)}"><input type="radio" name="chat" value="off">사용 안 함</label></div></div>
+  </div>
+  <button id="save" class="abs" disabled>저장하기</button>
+  <div id="chat" class="abs" data-spec="23:7">
+    <div class="h">채팅</div><div class="ic">⚙ ⧉</div>
+    <div class="ms"><span>유저A : 오늘 컨텐츠 뭐예요</span><span>유저B : 화질 좋아졌네요</span><span>유저C : ㅋㅋㅋㅋ</span><span>유저D : 응원합니다!</span><span>유저E : 다음 방송 언제</span><span>유저F : 👍👍</span></div>
+    <div class="ref">채팅 구성안 참조</div>
+    <div class="in">채팅 입력...</div>
+    <div class="off">채팅 사용 안 함으로 설정되어 있어요</div>
+  </div>
+  <div id="popup-san" class="abs" data-spec="24:1">
+    <h4>제재 안내</h4>
+    <p>회원님은 운영정책 위반에 따라<br>서비스 이용이 제한되었습니다.</p>
+    <div class="k">사유</div><p id="san-why">욕설 및 비하 발언 (운영정책 3조)</p>
+    <div class="k">제재 기간</div><p id="san-when">2026.09.20 ~ 2026.10.20</p>
+    <p style="margin-top:${u(11)}">자세한 내용은 <span class="lk" id="cs">고객센터</span>로 문의해 주시기<br>바랍니다.</p>
+    <button id="san-ok">확인</button>
+  </div>
+</div></section>
+
+<section class="view" id="v-settings">
+  <div id="card" class="abs">
+    <div class="t">스트림 설정</div>
+    <div class="krow" style="top:${u(31)}" data-spec="25:1"><b>서버 주소</b><div class="kv" id="srv">rtmp://live.toon.at/app</div><button class="kb" id="cp-srv">복사</button></div>
+    <div class="krow" style="top:${u(67)}" data-spec="25:2"><b>스트림키</b><div class="kv mask" id="key"><i>●●●●●●●●●●●●●●●</i>클릭하여 스트림키 확인</div><button class="kb" id="cp-key">복사</button><button class="kb pri" id="re" data-spec="25:3">재발급</button></div>
+  </div>
+  <div id="obs" class="abs" data-spec="25:4">
+    <button class="oh" id="obs-h"><span class="i">i</span>OBS Studio 설정 가이드<span class="ar">⌄</span></button>
+    <div class="ob">
+      <div><i>1</i>OBS 실행 → 좌측 상단 메뉴 '파일' → 설정 → 방송</div>
+      <div><i>2</i>서비스에서 '사용자 지정...' 선택</div>
+      <div><i>3</i>서버 칸에 위 서버 주소를 붙여넣기 <code id="g-srv"></code></div>
+      <div><i>4</i>스트림 키 칸에 위 스트림키를 붙여넣기 → 확인</div>
+      <div><i>5</i>'방송 시작' 클릭 — 투네이션이 신호를 받으면 자동으로 라이브가 시작됩니다</div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-analysis">
+  <div id="flt" class="abs" data-spec="26:1">
+    <button class="pb" data-d="7">7일</button><button class="pb on" data-d="30">30일</button><button class="pb" data-d="60">60일</button>
+    <input type="date" class="dt" id="d1"><span>-</span><input type="date" class="dt" id="d2">
+    <button class="go" id="a-go">조회</button><span class="lim">최근 ${KEEP_MONTHS}개월까지 조회 가능합니다.</span>
+    <button class="csv" id="a-csv">${I.dl}엑셀파일(*.csv) 다운로드</button>
+  </div>
+  <div id="asum" class="sum" data-spec="26:2"></div>
+  <table id="tbl" class="abs" data-spec="26:3"><thead><tr>
+    <th style="width:${u(61)}">방송 일시</th><th style="width:${u(172)}">제목</th><th style="width:${u(50)}">방송 시간</th><th>최고 동시<br>시청자</th><th>평균 동시<br>시청자</th><th>누적<br>시청자</th><th>채팅<br>참여자</th><th>후원 수</th><th>후원 액</th>
+  </tr></thead><tbody id="tb"></tbody></table>
+  <div id="empty" class="abs">⋮&nbsp; 데이터가 없어요.</div>
+  <div id="pg" class="abs" data-spec="26:3"></div>
+</section>
+
+<section class="view" id="v-daily">
+  <div id="dflt" class="abs" data-spec="27:1"><input type="date" class="dt" id="dd"><button class="go" id="d-go">조회</button><button class="csv" id="d-csv">${I.dl}엑셀파일(*.csv) 다운로드</button></div>
+  <div id="dsum" class="sum" data-spec="27:2"></div>
+  <div id="nodata" class="abs">선택한 날짜에 방송 기록이 없어요. 캘린더에서 다른 날짜를 골라 주세요.</div>
+  <select id="metric" class="abs inp" data-spec="27:3">${['최고 동시 시청자', '평균 동시 시청자', '누적 시청자', '채팅 참여자', '방송 중 후원 횟수', '방송 중 후원액'].map((m) => `<option>${m}</option>`).join('')}</select>
+  <div id="chart" class="abs" data-spec="27:3"></div>
+</section>
+
+<div id="dim"></div>
+<div id="m-re" class="modal" data-spec="25:3">
+  <div class="h">스트림 키 재발급 안내<button id="re-x">✕</button></div>
+  <p>방송을 시작하려면 새로 발급된 스트림 키로<br>스트리밍 소프트웨어를 업데이트 해야 합니다.<br>스트림 키를 재발급하려면 <b>재발급</b>을 클릭해주세요.</p>
+  <div class="bs"><button class="c" id="re-c">취소</button><button class="ok" id="re-ok">재발급</button></div>
+</div>
+<div class="tip" id="tip"></div>
+<div id="toast"></div>
+<div id="chip"></div>`;
+
+const $ = (s) => F.querySelector(s);
+const $$ = (s) => [...F.querySelectorAll(s)];
+let toastT;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
+function fit() { const k = EMBED ? innerWidth / FW : Math.min(innerWidth / FW, (innerHeight - 8) / FH); document.documentElement.style.setProperty('--u', k + 'px'); }
+addEventListener('resize', fit); fit();
+const fmt = (n) => (n == null ? '-' : Math.round(n).toLocaleString('en-US'));
+const hms = (s) => [s / 3600, (s % 3600) / 60, s % 60].map((x) => String(Math.floor(x)).padStart(2, '0')).join(':');
+const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const TODAY = new Date(2026, 8, 28);   // 기획서 기준일 2026-09-28
+
+/* ---------------- 상태 ---------------- */
+const S = {
+  view: 'manage', mode: 'off',       // off | live | net | sanction
+  quality: 'good', fail: false, startAt: 0, viewers: 0, bitrate: 6000, res: 1080,
+  saved: null, thumb: null, tags: [], chatOn: true, sanPopup: true,
+  period: 30, page: 1, rows: [], daily: null, metric: 0, key: 'live_7Hq2xV9cKp3mT8aZ',
+};
+// 1번 디폴트 제목: ① 직전 방송 제목 ② 없으면 채널명 + '의 라이브 방송'
+const LAST_TITLE = '오늘도 즐거운 겜방';
+function formState() { return { title: $('#f-title').value, cat: $('#f-cat').value, tags: S.tags.join(','), thumb: S.thumb ? S.thumb.name : '', age: val('age'), pub: val('pub'), chat: val('chat') }; }
+const val = (n) => (F.querySelector(`input[name="${n}"]:checked`) || {}).value;
+function setRadio(n, v) { const r = F.querySelector(`input[name="${n}"][value="${v}"]`); if (r) r.checked = true; }
+function resetForm(live) {
+  $('#f-title').value = live ? LAST_TITLE : `${CHANNEL}의 라이브 방송`;
+  $('#f-cat').value = live ? '인물/블로그' : '선택';
+  S.tags = live ? ['엑셀방송', '먹방', '토크'] : [];
+  setThumb(live ? { name: 'thumb.jpg', url: sampleThumb() } : null);
+  setRadio('age', 'all'); setRadio('pub', 'pub'); setRadio('chat', 'on'); S.chatOn = true;
+  $('#e-title').classList.remove('on'); $('#e-tag').classList.remove('on'); $('#e-thumb').classList.remove('on'); $('#f-tag').value = '';
+  S.saved = formState();
+}
+function sampleThumb() {
+  const c = document.createElement('canvas'); c.width = 172; c.height = 70; const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, 70); g.addColorStop(0, '#b9c3c9'); g.addColorStop(1, '#6f7a5a'); x.fillStyle = g; x.fillRect(0, 0, 172, 70);
+  x.fillStyle = '#7b7f86'; x.beginPath(); x.moveTo(40, 70); x.lineTo(80, 25); x.lineTo(95, 25); x.lineTo(150, 70); x.fill();
+  x.fillStyle = '#4f7a3a'; x.fillRect(130, 20, 42, 50); x.fillStyle = '#e8d24a'; x.fillRect(60, 62, 20, 3);
+  return c.toDataURL();
+}
+
+/* ---------------- 그리기 ---------------- */
+function render() {
+  const cl = F.classList;
+  ['off', 'live', 'net', 'sanction'].forEach((m) => cl.toggle('st-' + m, S.mode === m));
+  $$('.view').forEach((v) => v.classList.toggle('on', v.id === 'v-' + S.view));
+  $$('#lnb .it').forEach((b) => b.classList.toggle('on', b.dataset.go === (S.view === 'daily' ? 'analysis' : S.view)));
+  $('#head').textContent = { manage: '방송 관리', settings: '방송 설정', analysis: '방송 분석', daily: '방송 분석' }[S.view];
+  $('#banner').innerHTML = S.mode === 'sanction' ? '⚠ 채널이 정지되었습니다' : S.mode === 'off' ? 'OFF AIR' : 'ON AIR';
+  $('#banner').dataset.spec = S.mode === 'sanction' ? '24:1 22:4' : S.mode === 'off' ? '21:1 22:1' : S.mode === 'net' ? '21:1 22:3' : '21:1 22:2';
+  renderStats();
+  $('#popup-san').classList.toggle('on', S.mode === 'sanction' && S.sanPopup);
+  F.classList.toggle('chat-off', !S.chatOn);
+  renderForm();
+}
+// 3번 방송 정보: 오프라인·제재 시 숨기지 않고 '-', 조회 실패 항목은 '-'
+function renderStats() {
+  const on = S.mode === 'live' || S.mode === 'net';
+  const q = S.mode === 'net' ? 'bad' : S.quality;
+  const vals = on ? [{ good: '양호', mid: '보통', bad: '불안정' }[q], hms(Math.floor((Date.now() - S.startAt) / 1000)), fmt(S.viewers), fmt(S.bitrate), S.res] : ['-', '-', '-', '-', '-'];
+  vals.forEach((v, i) => {
+    const n = $('#sv' + i); const dash = v === '-' || (S.fail && on && i >= 2);
+    n.textContent = dash ? '-' : v;
+    n.className = 'v' + (dash ? ' dash' : i === 0 ? ' ' + q : '');
+  });
+  $('#sv0').dataset.spec = on ? `21:3 22:${{ good: '양호', mid: '보통', bad: '불안정' }[q]}` : '21:3';
+}
+function renderForm() {
+  const t = $('#f-title').value;
+  $('#c-title').textContent = `${t.length}/80`;
+  const bad = BLACK.some((w) => t.includes(w));
+  $('#e-title').classList.toggle('on', bad); $('#f-title').classList.toggle('err', bad);
+  $('#tags').innerHTML = S.tags.map((g, i) => `<span>#${g}<button data-rm="${i}" title="삭제">✕</button></span>`).join('');
+  $('#c-tag').textContent = `${S.tags.length}/10`;
+  const full = S.tags.length >= 10;
+  $('#f-tag').disabled = full; $('#f-tag').placeholder = full ? '태그는 최대 10개까지 등록할 수 있어요' : '최대 15자, 공백 및 특수 문자 불가';
+  $('#addtag').disabled = full; $('#addtag').classList.toggle('on', !!$('#f-tag').value.trim() && !full);
+  const dirty = JSON.stringify(formState()) !== JSON.stringify(S.saved);
+  const blocked = bad || S.mode === 'sanction';
+  $('#save').disabled = !dirty || blocked; $('#save').classList.toggle('on', dirty && !blocked);
+  $$('#form input, #form select, #form button').forEach((n) => { if (S.mode === 'sanction') n.disabled = true; else if (n.id !== 'f-tag' && n.id !== 'addtag') n.disabled = false; });
+}
+
+/* ---------------- 방송 관리 폼 동작 ---------------- */
+$('#f-title').addEventListener('input', renderForm);
+$('#f-cat').addEventListener('change', renderForm);
+F.addEventListener('change', (e) => { if (e.target.name) renderForm(); });
+$('#f-tag').addEventListener('input', () => { const v = $('#f-tag').value; if (/[,，]/.test(v)) { addTag(v.replace(/[,，]/g, '')); return; } $('#e-tag').classList.remove('on'); renderForm(); });
+$('#f-tag').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); addTag($('#f-tag').value); } });
+$('#addtag').addEventListener('click', () => addTag($('#f-tag').value));
+// 3번 태그: Enter·쉼표로 생성, 최대 10개 · 15자, 중복 불가, 공백·특수문자 불가, 금칙어 차단
+function addTag(raw) {
+  const v = raw.trim().replace(/^#/, ''); const err = (m) => { $('#e-tag').textContent = m; $('#e-tag').classList.add('on'); };
+  $('#f-tag').value = ''; $('#e-tag').classList.remove('on');
+  if (!v) return renderForm();
+  if (S.tags.length >= 10) { err('태그는 최대 10개까지 등록할 수 있어요'); return renderForm(); }
+  if (/[\s!-/:-@[-`{-~]/.test(v)) { err('공백 및 특수 문자는 사용할 수 없어요'); $('#f-tag').value = v; return renderForm(); }
+  if (v.length > 15) { err('태그는 15자까지 입력할 수 있어요'); $('#f-tag').value = v.slice(0, 15); return renderForm(); }
+  if (S.tags.includes(v)) { err('이미 추가된 태그입니다'); return renderForm(); }
+  if (BLACK.some((w) => v.includes(w))) { err('부적절한 표현이 포함되어 있습니다.'); return renderForm(); }
+  S.tags.push(v); renderForm();
+}
+$('#tags').addEventListener('click', (e) => { const b = e.target.closest('[data-rm]'); if (b) { S.tags.splice(+b.dataset.rm, 1); renderForm(); } });
+// 4번 썸네일: 5MB 이하 JPG·PNG, 업로드 후 미리보기 + [변경][삭제]
+const pick = () => { if (S.mode !== 'sanction') $('#tfile').click(); };
+$('#tbox').addEventListener('click', pick); $('#tchg').addEventListener('click', pick);
+$('#tdel').addEventListener('click', () => { setThumb(null); renderForm(); toast('썸네일을 삭제했어요'); });
+$('#tfile').addEventListener('change', () => {
+  const f = $('#tfile').files[0]; $('#tfile').value = ''; if (!f) return;
+  const ok = /^image\/(jpeg|png)$/.test(f.type) && f.size <= 5 * 1024 * 1024;
+  $('#e-thumb').classList.toggle('on', !ok);
+  if (!ok) return;
+  setThumb({ name: f.name, url: URL.createObjectURL(f) }); renderForm();
+});
+function setThumb(t) {
+  S.thumb = t; const b = $('#tbox');
+  b.innerHTML = t ? `<img src="${t.url}" alt="">` : '<b>+</b>업로드';
+  $('#thumb').classList.toggle('has-thumb', !!t);
+  $('#tnote').style.display = t ? 'none' : '';
+}
+$('#save').addEventListener('click', () => {
+  const prev = S.saved, now = formState();
+  if (!now.title.trim()) { $('#f-title').value = `${CHANNEL}의 라이브 방송`; now.title = $('#f-title').value; }   // ③ 미입력 시 채널명 + '의 라이브 방송'
+  S.saved = formState(); S.chatOn = now.chat === 'on';
+  const notes = [];
+  if (prev.age !== now.age && now.age === '19') notes.push("라이브 목록 카드에 '19' 배지 노출 · 미인증 시청자 진입 차단");
+  if (prev.pub !== now.pub && now.pub === 'priv') notes.push('라이브 목록에 노출되지 않아요');
+  if (prev.chat !== now.chat) notes.push(now.chat === 'on' ? '채팅을 켰어요' : '채팅을 껐어요');
+  toast('저장되었습니다' + (notes.length ? ' — ' + notes.join(' · ') : '') + ((S.mode === 'live' || S.mode === 'net') && notes.length ? ' (방송 중 즉시 적용)' : ''));
+  render();
+});
+$('#toguide').addEventListener('click', () => go('settings'));   // 2번: [방송 설정] 메뉴로 현재 창 이동
+
+/* ---------------- 툴팁 ---------------- */
+F.addEventListener('mouseover', (e) => {
+  const q = e.target.closest('.q'); const tip = $('#tip');
+  if (!q) { tip.style.display = 'none'; return; }
+  tip.textContent = TIPS[q.dataset.tipkey] || ''; tip.style.display = 'block';
+  const r = q.getBoundingClientRect(), fr = F.getBoundingClientRect();
+  let left = r.left - fr.left - tip.offsetWidth / 2 + r.width / 2; left = Math.max(4, Math.min(left, fr.width - tip.offsetWidth - 4));
+  tip.style.left = left + 'px'; tip.style.top = (r.bottom - fr.top + 5) + 'px';
+});
+
+/* ---------------- 방송 설정 ---------------- */
+function copy(t, msg) { try { navigator.clipboard && navigator.clipboard.writeText(t); } catch (_) {} toast(msg || '복사되었습니다'); }
+$('#cp-srv').addEventListener('click', () => copy($('#srv').textContent));
+$('#key').addEventListener('click', () => { if ($('#key').classList.contains('shown')) return; $('#key').className = 'kv shown'; $('#key').textContent = S.key; });
+$('#cp-key').addEventListener('click', () => copy(S.key));
+const modal = (on) => { $('#dim').style.display = on ? 'block' : 'none'; $('#m-re').style.display = on ? 'block' : 'none'; };
+$('#re').addEventListener('click', () => modal(true));
+$('#re-c').addEventListener('click', () => modal(false)); $('#re-x').addEventListener('click', () => modal(false)); $('#dim').addEventListener('click', () => modal(false));
+$('#re-ok').addEventListener('click', () => {
+  modal(false);
+  S.key = 'live_' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 8);
+  if ($('#key').classList.contains('shown')) $('#key').textContent = S.key;
+  toast('재발급되었습니다. 송출 프로그램에 새 스트림키를 입력해 주세요');
+});
+$('#obs-h').addEventListener('click', () => $('#obs').classList.toggle('open'));
+$('#g-srv').textContent = $('#srv').textContent;
+
+/* ---------------- 방송 분석 데이터 (가상) ---------------- */
+const TITLES = ['오늘도 즐거운 겜방', '발로란트 랭크 올리기', '신청곡 받는 노래방송', '야식 먹방 같이 먹어요', '주말 저챗 수다', '공포게임 정주행', '구독자 이벤트 방송', '새벽 감성 토크'];
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const ALL = [];
+for (let k = 0; k < 190; k++) {
+  if (rnd() < 0.55) continue;
+  const d = new Date(TODAY); d.setDate(d.getDate() - k);
+  const dur = Math.round(3600 + rnd() * 5 * 3600), peak = Math.round(300 + rnd() * 1500);
+  const start = new Date(d); start.setHours(17 + Math.floor(rnd() * 5), Math.floor(rnd() * 60), Math.floor(rnd() * 60));
+  ALL.push({ date: ymd(d), start, dur, title: TITLES[Math.floor(rnd() * TITLES.length)], peak, avg: Math.round(peak * (0.35 + rnd() * 0.3)), total: Math.round(peak * (3 + rnd() * 5)), chat: Math.round(peak * (0.6 + rnd())), dn: Math.round(10 + rnd() * 120), da: Math.round(10 + rnd() * 120) * 1000 });
+}
+function setPeriod(days) {
+  S.period = days; const a = new Date(TODAY); a.setDate(a.getDate() - (days - 1));
+  $('#d1').value = ymd(a); $('#d2').value = ymd(TODAY);
+  $$('.pb').forEach((b) => b.classList.toggle('on', +b.dataset.d === days));
+}
+function query() {
+  const a = $('#d1').value, b = $('#d2').value;
+  const limit = new Date(TODAY); limit.setMonth(limit.getMonth() - KEEP_MONTHS);
+  if (!a || !b) { toast('조회 기간을 선택해 주세요'); return; }
+  if (a > b) { toast('시작일이 종료일보다 늦어요'); return; }
+  if (a < ymd(limit)) { toast(`최근 ${KEEP_MONTHS}개월까지만 조회할 수 있어요`); return; }
+  S.rows = ALL.filter((r) => r.date >= a && r.date <= b); S.page = 1; renderAnalysis();
+}
+function sumOf(rows) {
+  const s = (k) => rows.reduce((t, r) => t + r[k], 0);
+  const dur = s('dur');
+  return { n: rows.length, peak: rows.length ? Math.max(...rows.map((r) => r.peak)) : 0, avg: dur ? rows.reduce((t, r) => t + r.avg * r.dur, 0) / dur : 0, total: s('total'), dur, chat: s('chat'), dn: s('dn'), da: s('da') };
+}
+const tile = (k, v, page, unit) => `<div class="c" data-spec="${page}:${page === 26 ? '2' : '2'} ${page}:${k}"><div class="l">${k}${page === 26 ? qm(k, 26) : ''}</div><div class="v">${v}${unit ? `<small>${unit}</small>` : ''}</div></div>`;
+function renderAnalysis() {
+  const t = sumOf(S.rows);
+  $('#asum').innerHTML = [tile('진행한 방송', fmt(t.n), 26), tile('최고 동시 시청자', fmt(t.peak), 26), tile('평균 동시 시청자', fmt(t.avg), 26), tile('누적 시청자', fmt(t.total), 26),
+    tile('총 방송 시간', hms(t.dur), 26), tile('채팅 참여자', fmt(t.chat), 26), tile('방송 중 후원 횟수', fmt(t.dn), 26), tile('방송 중 후원액', fmt(t.da), 26, '캐시')].join('');
+  const per = 5, pages = Math.max(1, Math.ceil(S.rows.length / per));
+  S.page = Math.min(S.page, pages);
+  const rows = S.rows.slice((S.page - 1) * per, S.page * per);
+  $('#tb').innerHTML = rows.map((r) => `<tr><td>${r.date}</td><td class="tt" data-open="${ALL.indexOf(r)}" title="일별 상세 보기">${r.title}</td><td>${hms(r.dur)}</td><td>${fmt(r.peak)}</td><td>${fmt(r.avg)}</td><td>${fmt(r.total)}</td><td>${fmt(r.chat)}</td><td>${fmt(r.dn)}</td><td>${fmt(r.da)}</td></tr>`).join('');
+  $('#empty').style.display = S.rows.length ? 'none' : 'block';
+  // 페이지 번호: 5개씩 묶음
+  const g0 = Math.floor((S.page - 1) / 5) * 5 + 1, nums = []; for (let p = g0; p < g0 + 5 && p <= pages; p++) nums.push(p);
+  $('#pg').innerHTML = `<button data-p="1" ${S.page === 1 ? 'disabled' : ''}>⏮</button><button data-p="${S.page - 1}" ${S.page === 1 ? 'disabled' : ''}>◀</button>` +
+    nums.map((p) => `<button data-p="${p}" class="${p === S.page ? 'on' : ''}">${p}</button>`).join('') +
+    `<button data-p="${S.page + 1}" ${S.page === pages ? 'disabled' : ''}>▶</button><button data-p="${pages}" ${S.page === pages ? 'disabled' : ''}>⏭</button>`;
+}
+$$('.pb').forEach((b) => b.addEventListener('click', () => { setPeriod(+b.dataset.d); query(); }));
+$('#d1').addEventListener('change', () => $$('.pb').forEach((b) => b.classList.remove('on')));
+$('#d2').addEventListener('change', () => $$('.pb').forEach((b) => b.classList.remove('on')));
+$('#a-go').addEventListener('click', query);
+$('#pg').addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b && !b.disabled) { S.page = +b.dataset.p; renderAnalysis(); } });
+$('#tb').addEventListener('click', (e) => { const t = e.target.closest('[data-open]'); if (t) openDaily(ALL[+t.dataset.open]); });   // 3번: 제목 클릭 → 일별 분석
+function download(name, rows) {
+  const csv = '﻿' + rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.setAttribute('download', name); a.style.display = 'none'; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  toast(`${name} 을(를) 내려받았어요`);
+}
+$('#a-csv').addEventListener('click', () => {
+  if (!S.rows.length) { toast('내려받을 데이터가 없어요'); return; }
+  download(`방송분석_${$('#d1').value}_${$('#d2').value}.csv`, [['방송 일시', '제목', '방송 시간', '최고 동시 시청자', '평균 동시 시청자', '누적 시청자', '채팅 참여자', '후원 수', '후원 액'], ...S.rows.map((r) => [r.date, r.title, hms(r.dur), r.peak, r.avg, r.total, r.chat, r.dn, r.da])]);
+});
+
+/* ---------------- 일별 분석 ---------------- */
+function series(r) {   // 5분 단위 가상 그래프 데이터
+  const n = Math.max(8, Math.round(r.dur / 300)), out = [];
+  let s2 = r.peak; const rr = () => (s2 = (s2 * 48271) % 2147483647) / 2147483647;
+  let acc = 0, chat = 0, dn = 0, da = 0;
+  for (let i = 0; i <= n; i++) {
+    const x = i / n, shape = Math.sin(Math.PI * (0.04 + 0.92 * x)) ** 0.7;
+    const v = Math.round(r.peak * shape * (0.82 + rr() * 0.18));
+    acc += Math.round(v * 0.08); chat += Math.round(v * 0.04 * rr()); if (rr() < 0.5) { dn += 1; da += Math.round(1 + rr() * 9) * 1000; }
+    out.push({ t: Math.round(r.dur * x), v: [v, Math.round(v * (0.55 + rr() * 0.1)), acc, chat, dn, da] });
+  }
+  return out;
+}
+function openDaily(r) { S.view = 'daily'; S.daily = r; $('#dd').value = r ? r.date : ymd(TODAY); render(); renderDaily(); }
+function renderDaily() {
+  const r = S.daily;
+  $('#nodata').style.display = r ? 'none' : 'block';
+  $('#dsum').style.visibility = $('#chart').style.visibility = $('#metric').style.visibility = r ? 'visible' : 'hidden';
+  if (!r) return;
+  const end = new Date(r.start.getTime() + r.dur * 1000), ts = (d) => `${ymd(d)} ${d.toTimeString().slice(0, 8)}`;
+  $('#dsum').innerHTML = `<div class="hd" data-spec="27:2"><b>${r.title.length > 12 ? r.title.slice(0, 12) + '…' : r.title}</b><span><b>총 방송 시간 ${hms(r.dur)}</b> (${ts(r.start)} ~ ${ts(end)})</span></div>` +
+    [tile('최고 동시 시청자', fmt(r.peak), 27), tile('평균 동시 시청자', fmt(r.avg), 27), tile('누적 시청자', fmt(r.total), 27), tile('채팅 참여자', fmt(r.chat), 27), tile('방송 중 후원 횟수', fmt(r.dn), 27), tile('방송 중 후원액', fmt(r.da), 27, '캐시')].join('');
+  drawChart();
+}
+function drawChart() {
+  const r = S.daily; if (!r) return;
+  const data = series(r), mi = S.metric, box = $('#chart');
+  const W = 583.5, H = 197, L = 46, R = 16, T = 18, B = 26;
+  const max = Math.max(1, ...data.map((d) => d.v[mi])), nice = Math.pow(10, Math.floor(Math.log10(max))) * Math.ceil(max / Math.pow(10, Math.floor(Math.log10(max))));
+  const X = (t) => L + (W - L - R) * t / r.dur, Y = (v) => H - B - (H - T - B) * v / nice;
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map((k) => k * nice);
+  const xt = [0, 1, 2, 3].map((k) => Math.round(r.dur * k / 3));
+  const pts = data.map((d) => `${X(d.t).toFixed(1)},${Y(d.v[mi]).toFixed(1)}`).join(' ');
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    ${ticks.map((v) => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eee"/><text x="${L - 5}" y="${Y(v) + 3}" font-size="7" text-anchor="end" fill="#888">${fmt(v)}</text>`).join('')}
+    <line x1="${L}" x2="${L}" y1="${T}" y2="${H - B}" stroke="#ccc"/>
+    ${xt.map((t) => `<text x="${X(t)}" y="${H - B + 13}" font-size="6.5" text-anchor="middle" fill="#888">${hms(t)}</text>`).join('')}
+    <polyline points="${pts}" fill="none" stroke="#777" stroke-width="1"/>
+    ${data.map((d) => `<circle cx="${X(d.t)}" cy="${Y(d.v[mi])}" r="2" fill="#fff" stroke="#777" stroke-width=".8"/>`).join('')}
+    <line id="cx" y1="${T}" y2="${H - B}" stroke="#999" stroke-dasharray="2 2" visibility="hidden"/><circle id="cp" r="4.5" fill="#fff" stroke="#666" stroke-width="1.2" visibility="hidden"/>
+    <rect id="hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/>
+  </svg><div id="ctip"></div>`;
+  const svg = box.querySelector('svg'), tip = box.querySelector('#ctip');
+  const names = ['시청자수', '평균 시청자수', '누적 시청자', '채팅 참여자', '후원 횟수', '후원액'];
+  svg.addEventListener('mousemove', (e) => {   // 3번: 마우스 오버 시 해당 시간과 데이터
+    const rc = svg.getBoundingClientRect(), x = (e.clientX - rc.left) / rc.width * W;
+    const d = data.reduce((a, b) => (Math.abs(X(b.t) - x) < Math.abs(X(a.t) - x) ? b : a));
+    const cx = X(d.t), cy = Y(d.v[mi]);
+    svg.querySelector('#cx').setAttribute('x1', cx); svg.querySelector('#cx').setAttribute('x2', cx); svg.querySelector('#cx').setAttribute('visibility', 'visible');
+    svg.querySelector('#cp').setAttribute('cx', cx); svg.querySelector('#cp').setAttribute('cy', cy); svg.querySelector('#cp').setAttribute('visibility', 'visible');
+    const at = new Date(r.start.getTime() + d.t * 1000);
+    tip.innerHTML = `${at.toTimeString().slice(0, 5)}<br>• ${names[mi]}<b>${fmt(d.v[mi])}</b>`;
+    tip.style.display = 'block';
+    const px = cx / W * box.clientWidth, py = cy / H * box.clientHeight;
+    tip.style.left = Math.min(px + 8, box.clientWidth - tip.offsetWidth - 4) + 'px'; tip.style.top = Math.max(4, py + 8) + 'px';
+  });
+  svg.addEventListener('mouseleave', () => { tip.style.display = 'none'; svg.querySelector('#cx').setAttribute('visibility', 'hidden'); svg.querySelector('#cp').setAttribute('visibility', 'hidden'); });
+}
+$('#metric').addEventListener('change', () => { S.metric = $('#metric').selectedIndex; drawChart(); });
+$('#d-go').addEventListener('click', () => { const d = $('#dd').value; S.daily = ALL.find((r) => r.date === d) || null; renderDaily(); if (!S.daily) toast('선택한 날짜에 방송 기록이 없어요'); });   // 1번: 캘린더로 일자 조회
+$('#d-csv').addEventListener('click', () => {
+  const r = S.daily; if (!r) { toast('내려받을 데이터가 없어요'); return; }
+  download(`일별분석_${r.date}.csv`, [['시간', '최고 동시 시청자', '평균 동시 시청자', '누적 시청자', '채팅 참여자', '방송 중 후원 횟수', '방송 중 후원액'], ...series(r).map((d) => [new Date(r.start.getTime() + d.t * 1000).toTimeString().slice(0, 8), ...d.v])]);
+});
+
+/* ---------------- 이동 ---------------- */
+function go(v) { S.view = v; if (v === 'analysis' && !S.rows.length && !S._q) { S._q = 1; setPeriod(30); query(); } render(); if (v === 'daily') renderDaily(); }
+$$('#lnb .it').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
+$('#san-ok').addEventListener('click', () => { S.sanPopup = false; render(); });
+$('#cs').addEventListener('click', () => toast('고객센터로 이동 (프로토타입)'));
+
+/* ---------------- 미리보기 영상 + 5초 주기 갱신 ---------------- */
+const cv = $('#video'), cx = cv.getContext('2d');
+function frame(t) {
+  if (S.mode === 'live') {
+    const w = cv.width, h = cv.height, k = t / 1000;
+    const g = cx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#c9d2d8'); g.addColorStop(0.45, '#9aa59a'); g.addColorStop(1, '#5a6450'); cx.fillStyle = g; cx.fillRect(0, 0, w, h);
+    cx.fillStyle = '#7d8187'; cx.beginPath(); cx.moveTo(w * 0.05, h); cx.lineTo(w * 0.36, h * 0.28); cx.lineTo(w * 0.44, h * 0.28); cx.lineTo(w * 0.86, h); cx.fill();
+    cx.fillStyle = '#e8d24a'; for (let i = 0; i < 6; i++) { const y = ((k * 30 + i * 22) % 132) - 10; const s = y / h; cx.fillRect(w * 0.4 - s * 30, h * 0.28 + y, 3 + s * 10, 4 + s * 6); }
+    cx.fillStyle = '#3f6b32'; cx.fillRect(w * 0.72, h * 0.05, w * 0.28, h * 0.95); cx.fillStyle = '#6b4a35'; cx.fillRect(w * 0.88, 0, w * 0.05, h);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+// 3번 방송 정보: 동시 시청자·비트레이트는 5초 주기 갱신 (네트워크 불안정 중에는 마지막 값 유지), 방송 시간은 1초마다
+setInterval(() => { if (S.mode === 'live') { S.viewers = Math.max(0, Math.round(S.viewers * (1 + (Math.random() - 0.45) * 0.08))); S.bitrate = Math.round(5800 + Math.random() * 400); } }, 5000);
+setInterval(renderStats, 1000);
+
+/* ---------------- 기획서 연결 (부모 뷰어와 postMessage) ---------------- */
+const post = (m) => { try { parent.postMessage(Object.assign({ d2p: true }, m), '*'); } catch (_) {} };
+F.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-spec]'); if (!el) return;
+  post({ type: 'spec', refs: el.dataset.spec.split(/\s+/), label: (el.querySelector('label') ? el.querySelector('label').textContent : el.textContent || '').trim().slice(0, 30) });
+}, true);
+F.addEventListener('mouseover', (e) => {
+  if (!F.classList.contains('inspect')) return;
+  const el = e.target.closest('[data-spec]'), chip = $('#chip');
+  if (!el) { chip.style.display = 'none'; return; }
+  const r = el.getBoundingClientRect(), fr = F.getBoundingClientRect();
+  chip.textContent = el.dataset.spec.split(/\s+/).map((x) => x.replace(':', 'p ')).join(' · ');
+  chip.style.display = 'block'; chip.style.left = (r.left - fr.left) + 'px'; chip.style.top = Math.max(0, r.top - fr.top - 14) + 'px';
+});
+addEventListener('message', (e) => {
+  const m = e.data; if (!m || !m.d2p) return;
+  if (m.type === 'focus') {
+    const els = $$('[data-spec]').filter((x) => x.dataset.spec.split(/\s+/).includes(m.ref) && x.offsetParent !== null);
+    els.forEach((x) => { x.classList.remove('spec-flash'); void x.offsetWidth; x.classList.add('spec-flash'); setTimeout(() => x.classList.remove('spec-flash'), 3200); });
+    post({ type: 'focused', ref: m.ref, count: els.length });
+  } else if (m.type === 'inspect') F.classList.toggle('inspect', !!m.on);
+  else if (m.type === 'event') runEvent(m.name, m.value);
+  else if (m.type === 'state') applyState(m.state);
+  else if (m.type === 'changed') {
+    $$('[data-chg]').forEach((x) => x.removeAttribute('data-chg'));
+    const set = new Set(m.refs || []);
+    $$('[data-spec]').forEach((x) => { if (x.dataset.spec.split(/\s+/).some((r) => set.has(r))) x.setAttribute('data-chg', m.base ? m.base + ' 대비 변경' : '변경'); });
+  }
+});
+function startLive() { S.mode = 'live'; S.startAt = Date.now() - 71000; S.viewers = 812; S.quality = 'good'; S.fail = false; }
+function runEvent(name) {
+  switch (name) {
+    case 'live': if (S.mode !== 'live' && S.mode !== 'net') startLive(); S.mode = 'live'; S.quality = 'good'; S.view = 'manage'; toast('방송이 시작됐어요 — 상태는 서버 푸시로 즉시 갱신'); break;
+    case 'mid': if (S.mode === 'off' || S.mode === 'sanction') startLive(); S.mode = 'live'; S.quality = 'mid'; S.view = 'manage'; break;
+    case 'net': if (S.mode === 'off' || S.mode === 'sanction') startLive(); S.mode = 'net'; S.view = 'manage'; break;
+    case 'recover': if (S.mode === 'net') { S.mode = 'live'; S.quality = 'good'; toast('연결이 회복됐어요'); } break;
+    case 'end': S.mode = 'off'; S.view = 'manage'; toast('방송이 종료됐어요'); break;
+    case 'fail': S.fail = !S.fail; toast(S.fail ? '일부 항목 조회 실패 → "-" 표시' : '조회 정상'); break;
+    case 'sanction': S.mode = 'sanction'; S.sanPopup = true; S.view = 'manage'; break;
+    case 'nodata': S.view = 'analysis'; $('#d1').value = ymd(TODAY); $('#d2').value = ymd(TODAY); S.rows = []; S.page = 1; $$('.pb').forEach((b) => b.classList.remove('on')); renderAnalysis(); break;
+  }
+  render(); if (S.view === 'daily') renderDaily();
+}
+
+/* ---------------- 초기 상태 (?state=) ---------------- */
+function applyState(st) {
+  Object.assign(S, { view: 'manage', mode: 'off', quality: 'good', fail: false, sanPopup: true });
+  switch (st) {
+    case 'live': startLive(); break;
+    case 'net': startLive(); S.mode = 'net'; break;
+    case 'sanction': S.mode = 'sanction'; break;
+    case 'settings': S.view = 'settings'; break;
+    case 'analysis': S.view = 'analysis'; break;
+    case 'daily': S.view = 'daily'; break;
+  }
+  resetForm(S.mode === 'live' || S.mode === 'net');
+  setPeriod(30); S.rows = ALL.filter((r) => r.date >= $('#d1').value && r.date <= $('#d2').value); S.page = 1; S._q = 1; renderAnalysis();
+  if (st === 'daily') { S.daily = S.rows.find((r) => r.title === LAST_TITLE) || S.rows[0]; $('#dd').value = S.daily.date; }
+  render(); if (S.view === 'daily') renderDaily();
+}
+applyState(q.get('state') || 'off');
+if (q.has('inspect')) F.classList.add('inspect');
+post({ type: 'ready' });
+})();
+</script>
+</body>
+</html>

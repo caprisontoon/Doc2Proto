@@ -117,6 +117,7 @@
   .d2p .refs .it:last-child{border-bottom:0}
   .d2p .refs .it .k{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700}
   .d2p .refs .it .k i{font-style:normal;background:#d93025;color:#fff;border-radius:999px;padding:0 6px;font-size:11px}
+  .d2p .refs .it .k b.kn{white-space:nowrap;color:var(--ink)}
   .d2p .refs .it .k .here{color:var(--link);font-size:11px;font-weight:700}
   .d2p .refs .it .k button{margin-left:auto;padding:1px 8px;font-size:11.5px}
   .d2p .refs .it p{margin:4px 0 0;font-size:12.5px;color:var(--ink2);white-space:pre-wrap;line-height:1.5}
@@ -196,7 +197,10 @@
     root.className = 'd2p';
     const P = model.pages;
     const [WPT, HPT] = model.size || [960, 540];
-    const LIVE = model.live || null;
+    // 동작 화면: 한 문서에 여러 앱(예: 후원페이지·스튜디오·채팅)을 둘 수 있다.
+    // live.json = { apps:{이름:{src,events}}, frames:[{page,rect,state,app}] }  (예전 형식 { src, events, frames } 도 지원)
+    const LIVE = model.live ? (model.live.apps ? model.live : { ...model.live, apps: { main: { src: model.live.src, events: model.live.events || [] } } }) : null;
+    const appOf = (f) => (LIVE && LIVE.apps[f && f.app] ? f.app : LIVE ? Object.keys(LIVE.apps)[0] : null);
     const liveByPage = {};
     if (LIVE) for (const f of LIVE.frames || []) liveByPage[f.page - 1] = f;
     if (LIVE) root.classList.add('has-live', 'live-on', 'nums');
@@ -210,7 +214,9 @@
     function resolve(ref) {
       const m = /^(\d+):(.+)$/.exec(ref); if (!m) return null;
       const pi = +m[1] - 1, key = m[2].trim(), p = P[pi]; if (!p) return null;
-      const rows = (p.rows || []).filter((r) => r.role !== 'tooltip');
+      // Description 행 → 툴팁 표 행 → 그 밖의 표 행 순서로 찾는다 (목업 안 표와 툴팁 표의 항목 이름이 겹칠 수 있음)
+      const rank = { desc: 0, tooltip: 1 };
+      const rows = [...(p.rows || [])].sort((a, b) => (rank[a.role] ?? 2) - (rank[b.role] ?? 2));
       const main = key.includes('-') ? key.split('-')[0] : key;
       const row = rows.find((r) => r.key === key) || rows.find((r) => r.key === main);
       if (!row) return { pi, key, rect: null, title: key, text: '' };
@@ -219,6 +225,10 @@
       if (sub) {   // 하위 항목 텍스트만 추출
         const lines = text.split('\n'); const i = lines.findIndex((l) => l.trim().startsWith(key + '.') || l.trim().startsWith(key + ' '));
         if (i >= 0) { let j = i + 1; while (j < lines.length && !/^\s*\d{1,2}\s*-\s*\d{1,2}\s*[.)]?\s/.test(lines[j])) j++; text = lines.slice(i, j).join('\n').trim(); }
+      }
+      if (row.role !== 'desc' && !sub) {   // 표 행: 항목 이름 + 나머지 칸 내용 전체
+        const rest = text.split(/\s*\|\s*/).slice(1).join(' · ').trim();
+        return { pi, key, rect: row.rect, rowRect: row.rect, sub: false, title: '', text: '\n' + (rest || text) };
       }
       const title = (sub ? text.split('\n')[0] : (row.title || key)).replace(new RegExp('^' + key + '\\s*\\|\\s*'), '');
       return { pi, key, rect: sub || row.rect, rowRect: row.rect, sub: !!sub, title, text };
@@ -253,17 +263,20 @@
       const insp = el('button', 'sw sm on'); r3.append(insp);
       insp.onclick = () => { insp.classList.toggle('on'); const on = insp.classList.contains('on'); root.classList.toggle('nums', on); broadcast({ type: 'inspect', on }); };
       ctl.append(r3);
-      for (const g of LIVE.events || []) {
-        ctl.append(el('div', 'evlabel live-only', g.group));
-        const box = el('div', 'evs live-only');
-        for (const ev of g.items) {
-          const b = el('button', null, ev.label);
-          b.onclick = () => { const f = current(); if (f) send(f, { type: 'event', name: ev.name, value: ev.value }); else say('동작 화면이 있는 페이지에서 눌러 주세요'); };
-          box.append(b);
+      const anyEvents = Object.values(LIVE.apps).some((a) => (a.events || []).length);
+      for (const [name, a] of Object.entries(LIVE.apps)) {
+        for (const g of a.events || []) {
+          const lab = el('div', 'evlabel live-only', g.group); lab.dataset.app = name;
+          const box = el('div', 'evs live-only'); box.dataset.app = name;
+          for (const ev of g.items) {
+            const b = el('button', null, ev.label);
+            b.onclick = () => { const f = current(); if (f && appOf(f.frame) === name) send(f, { type: 'event', name: ev.name, value: ev.value }); else say('이 이벤트는 해당 동작 화면이 있는 페이지에서 눌러 주세요'); };
+            box.append(b);
+          }
+          ctl.append(lab, box);
         }
-        ctl.append(box);
       }
-      if ((LIVE.events || []).length) {
+      if (anyEvents) {
         const rs = el('button', 'reset live-only', '기본 상태로 초기화');
         rs.title = '이벤트·조작으로 바뀐 동작 화면을 이 페이지의 처음 상태로 되돌려요';
         rs.onclick = () => { const f = current(); if (!f) { say('동작 화면이 있는 페이지에서 눌러 주세요'); return; } unmountLive(f); mountLive(f); say('기본 상태로 되돌렸어요'); };
@@ -598,7 +611,8 @@
       const f = el('iframe', 'live');
       place(f, S.frame.rect);
       const qs = `embed=1&state=${encodeURIComponent(S.frame.state || 'live')}`;
-      f.src = LIVE.src.startsWith('blob:') ? `${LIVE.src}#${qs}` : `${LIVE.src}${LIVE.src.includes('?') ? '&' : '?'}${qs}`;
+      const src = LIVE.apps[appOf(S.frame)].src;
+      f.src = src.startsWith('blob:') ? `${src}#${qs}` : `${src}${src.includes('?') ? '&' : '?'}${qs}`;
       f.setAttribute('title', '동작 화면');
       f.setAttribute('allow', 'clipboard-write');
       S.stage.append(f); S.iframe = f;
@@ -686,7 +700,8 @@
       items.sort((a, b) => (a.pi === pi ? -1 : 0) - (b.pi === pi ? -1 : 0) || a.pi - b.pi);
       for (const r of items) {
         const it = el('div', 'it'); const k = el('div', 'k');
-        k.append(el('span', null, `${r.pi + 1}p ${P[r.pi].num ? '(' + P[r.pi].num + ')' : ''}`), el('i', null, r.key));
+        k.append(el('span', null, `${r.pi + 1}p ${P[r.pi].num ? '(' + P[r.pi].num + ')' : ''}`));
+        if (/^\d{1,2}(-\d{1,2})?$/.test(r.key)) k.append(el('i', null, r.key)); else { const kb = el('b', 'kn', r.key); k.append(kb); }
         k.append(el('span', null, r.title.replace(/^\d{1,2}-\d{1,2}\.\s*/, '')));
         if (r.pi === pi) k.append(el('span', 'here', '이 페이지'));
         else { const go = el('button', null, '보기 →'); go.onclick = () => { goto(r.pi); setTimeout(() => { lightRef(`${r.pi + 1}:${r.key}`); markHotspots(r.pi, r.key); }, 450); }; k.append(go); }
@@ -739,11 +754,22 @@
       S.stage.append(n);
     }
 
+    // 지금 보는 페이지의 동작 화면 앱에 맞는 이벤트 버튼만 보이게 (앱이 하나면 항상 보임)
+    let lastApp;
+    function syncEvents() {
+      if (!LIVE || Object.keys(LIVE.apps).length < 2) return;
+      let k = currentIdx; while (k >= 0 && !liveByPage[k]) k--;   // 동작 화면 없는 페이지는 직전 앱 유지
+      const app = k >= 0 ? appOf(liveByPage[k]) : Object.keys(LIVE.apps)[0];
+      if (app === lastApp) return; lastApp = app;
+      root.querySelectorAll('.ctl [data-app]').forEach((n) => { n.style.display = n.dataset.app === app ? '' : 'none'; });
+      const rs = root.querySelector('.ctl button.reset'); if (rs) rs.style.display = (LIVE.apps[app].events || []).length ? '' : 'none';
+    }
+
     /* ---------- 이동 / 해시 / 목차 ---------- */
     let navLock = 0;
     function goto(i, hsId) {
       const S = slides[i]; if (!S) return;
-      tocLinks.forEach((a, k) => a.classList.toggle('on', k === i)); currentIdx = i;
+      tocLinks.forEach((a, k) => a.classList.toggle('on', k === i)); currentIdx = i; syncEvents();
       navLock = Date.now() + 900;
       S.sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
       history.replaceState(null, '', '#s' + (i + 1));
@@ -760,7 +786,7 @@
       const vis = ents.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (!vis) return;
       const i = slides.findIndex((s) => s.sec === vis.target);
-      currentIdx = i;
+      currentIdx = i; syncEvents();
       tocLinks.forEach((a, k) => a.classList.toggle('on', k === i));
     }, { root: main, threshold: [0.25, 0.5, 0.75] });
     slides.forEach((s) => io.observe(s.sec));
@@ -782,6 +808,7 @@
     window.addEventListener('hashchange', applyHash);
 
     mountGhosts();
+    syncEvents();
     root.append(nav, main, refs, toast);
     setTimeout(applyHash, 50);
     return { goto, lightRef };

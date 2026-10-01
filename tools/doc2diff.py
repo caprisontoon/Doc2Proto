@@ -249,8 +249,10 @@ def main():
 def remap_live(od, nd, pagemap):
     """이전 버전 동작 화면을 복사하면서 페이지 번호 참조("7:3")를 새 번호로 바꾼다."""
     live = json.loads((od / 'live.json').read_text(encoding='utf-8'))
-    src_dir = (od / live['src']).parent
-    dst_dir = nd / Path(live['src']).parent
+    srcs = [a['src'] for a in live['apps'].values()] if live.get('apps') else [live['src']]
+    top = Path(srcs[0]).parts[0]            # 보통 'live' — 앱 여러 개도 이 폴더 아래에 있다
+    src_dir = od / top
+    dst_dir = nd / top
     if dst_dir.exists():
         print(f'  {dst_dir} 이(가) 이미 있어 동작 화면 복사는 건너뛰어요', file=sys.stderr)
         return

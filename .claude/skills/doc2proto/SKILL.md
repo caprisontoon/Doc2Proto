@@ -40,6 +40,15 @@ python tools/doc2proto.py "<기획서.pptx>" --pdf "<PowerPoint에서 내보낸.
     "events": [{"group": "방송 상태", "items": [{"label": "버퍼링", "name": "buffer"}, …]}]}
    ```
    `rect`는 슬라이드 대비 % (목업 틀 그대로), `state`는 그 슬라이드가 그리는 상태.
+   한 기획서에 화면 묶음이 여럿이면(예: 스튜디오·채팅·후원페이지) **앱을 나눈다** — 이벤트 버튼은 지금 보는 페이지의 앱 것만 보인다:
+   ```json
+   {"apps": {"studio": {"title": "크리에이터 스튜디오", "src": "live/studio/index.html", "size": [732.1, 453.5], "events": [...]},
+             "chat":   {"title": "채팅", "src": "live/chat/index.html", "size": [285.6, 456.4], "events": [...]}},
+    "frames": [{"page": 21, "rect": {...}, "state": "off", "app": "studio"}, ...]}
+   ```
+   이미 구현된 화면과 같은 페이지가 다른 기획서에 들어 있으면 `tools/doc2diff.py`의 `match_pages`·`remap_live`로 그대로 옮겨 쓴다 (예: 스트리밍 서비스 v1.00 43~59p = 후원페이지 v0.1).
+   번호 마커가 없는 표 형식 기획서는 `data-spec="29:채널 탭 표시"`처럼 표의 첫 칸(항목 이름)을 키로 쓴다 (공백 포함 가능 — 나눌 때는 `/\s+(?=\d+:)/`).
+   웹 업로드로 들어온 기획서는 스냅샷·연결만 자동이고 동작 화면은 없다 — 사용자가 요청하면 이 2단계를 진행한다. 참고 구현: `docs/투네이션-스트리밍-서비스-20260930/v1.00/live/`.
 
 ## 3. 검증
 
