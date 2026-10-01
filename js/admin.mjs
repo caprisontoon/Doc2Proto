@@ -11,14 +11,16 @@ export const token = {
 
 async function gh(path, opts = {}) {
   const res = await fetch(path.startsWith('http') ? path : API + path, {
+    cache: 'no-store',   // GitHub은 max-age=60을 주므로 캐시하면 오래된 브랜치 위치로 커밋하게 됨
     ...opts,
     headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token.get()}`, 'X-GitHub-Api-Version': '2022-11-28', ...(opts.body ? { 'Content-Type': 'application/json' } : {}), ...(opts.headers || {}) },
   });
   if (!res.ok) {
     let msg = res.status + '';
-    try { msg += ' ' + (await res.json()).message; } catch {}
+    let detail = '';
+    try { detail = (await res.json()).message || ''; msg += ' ' + detail; } catch {}
     const e = new Error(res.status === 401 ? '토큰이 맞지 않거나 만료됐어요' : res.status === 403 || res.status === 404 ? '이 토큰으로는 저장소에 쓸 수 없어요 (권한 확인)' : 'GitHub 오류: ' + msg);
-    e.status = res.status; throw e;
+    e.status = res.status; e.detail = detail; throw e;
   }
   return res.status === 204 ? null : res.json();
 }
@@ -52,7 +54,8 @@ async function readJson(path, ref) {
 }
 // 한 번의 커밋으로 파일 추가·삭제. add: [{path, base64|text}], remove: [경로 또는 '폴더/' 접두어]
 async function commit({ add = [], remove = [], message, onProgress }) {
-  for (let attempt = 0; attempt < 3; attempt++) {
+  let last = null;
+  for (let attempt = 0; attempt < 4; attempt++) {
     const h = await head();
     const tree = [];
     if (remove.length) {
@@ -70,9 +73,15 @@ async function commit({ add = [], remove = [], message, onProgress }) {
     const t = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: h.tree, tree }) });
     const c = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: t.sha, parents: [h.sha] }) });
     try { await gh(`/git/refs/heads/${REPO.branch}`, { method: 'PATCH', body: JSON.stringify({ sha: c.sha }) }); return c.sha; }
-    catch (e) { if (e.status !== 422) throw e; }   // 그 사이 다른 커밋이 들어옴 → 다시
+    catch (e) {
+      last = e;
+      if (e.status !== 422 || !/fast.?forward/i.test(e.detail || '')) break;   // 그 사이 다른 커밋이 들어온 경우만 다시
+      await new Promise((r) => setTimeout(r, 1200));
+    }
   }
-  throw new Error('저장소가 바쁘네요. 잠시 후 다시 시도해 주세요');
+  const d = last && last.detail ? last.detail : '';
+  if (/protect|rule|violat/i.test(d)) throw new Error(`main 브랜치 보호 규칙 때문에 막혔어요 (GitHub: ${d}). 저장소 Settings → Rules에서 확인해 주세요`);
+  throw new Error(d ? `GitHub가 거절했어요: ${d}` : (last ? last.message : '커밋하지 못했어요'));
 }
 
 /* ---------- 삭제 ---------- */

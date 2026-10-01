@@ -953,16 +953,21 @@ def main():
 
     prs = Presentation(str(pptx_path))
     SW, SH = prs.slide_width, prs.slide_height
+    # 숨긴 슬라이드는 PowerPoint PDF에 들어가지 않으므로 분석에서도 뺀다 (안 빼면 뒤 페이지 스냅샷이 한 장씩 밀림)
+    slides = [s for s in prs.slides if s._element.get('show') != '0']
+    hidden = len(prs.slides) - len(slides)
+    if hidden:
+        print(f'숨긴 슬라이드 {hidden}장은 제외해요', file=sys.stderr)
     if args.sign_only:
         data = json.loads((outdir / 'data.json').read_text(encoding='utf-8'))
-        for p, slide in zip(data['pages'], prs.slides):
+        for p, slide in zip(data['pages'], slides):
             p['sid'] = slide.slide_id
             p['shapes'] = signatures(slide, SW, SH)
         (outdir / 'data.json').write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
         print(f'✓ {outdir}/data.json 서명 추가 ({len(data["pages"])}장)')
         return
     pages = []
-    for i, slide in enumerate(prs.slides):
+    for i, slide in enumerate(slides):
         pages.append(analyze_slide(slide, i, SW, SH))
     resolve_nav(pages)
     cross_page_links(pages)
@@ -975,7 +980,7 @@ def main():
             n = render_pages(pdf, outdir)
             refine_rows(pdf, pages)
             pptx_lines = {}
-            for i, slide in enumerate(prs.slides):
+            for i, slide in enumerate(slides):
                 lines = []
                 for sh, r, d in walk(slide.shapes, SW, SH):
                     for ln in shape_text(sh).split('\n'):
@@ -1002,7 +1007,7 @@ def main():
                           **({'marker': h['marker'], 'marker_rect': h['marker_rect']} if h.get('marker') is not None else {}),
                           **({'sub': h['sub']} if h.get('sub') else {})} for h in p['hotspots']],
             'links': p['links'], 'behaviors': p['behaviors'], 'text': p.get('text', []),
-            'sid': p['slide_id'], 'shapes': signatures(prs.slides[p['index']], SW, SH),
+            'sid': p['slide_id'], 'shapes': signatures(slides[p['index']], SW, SH),
         } for p in pages],
     }
     (outdir / 'data.json').write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')

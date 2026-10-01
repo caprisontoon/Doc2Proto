@@ -80,6 +80,13 @@ function render() {
       vers.append(s);
     }
     card.append(vers);
+    if (latest) {   // 동작 화면(목업 자리의 실제 화면) 구현 여부
+      const lv = el('div', 'livest', '동작 화면 확인 중…'); card.append(lv);
+      fetch(`docs/${d.slug}/${latest.version}/live.json`, { method: 'HEAD', cache: 'no-cache' }).then((r) => r.ok).catch(() => false).then((ok) => {
+        lv.className = 'livest ' + (ok ? 'on' : 'off');
+        lv.textContent = ok ? '● 동작 화면 있음' : '○ 동작 화면 없음 — 스냅샷·Description 연결만 (Claude Code에서 구현)';
+      });
+    }
     const acts = el('div', 'doc-acts');
     const up = el('button', 'sm', '새 버전 올리기'); up.onclick = () => openUpload(d);
     const del = el('button', 'sm danger', '삭제'); del.onclick = () => openDelete(d); if (d._new) del.disabled = true;
