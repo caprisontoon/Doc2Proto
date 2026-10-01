@@ -38,6 +38,7 @@ async function openDoc(docPath) {
     getShareUrl: async () => location.href,
     versions,
     diffOn: q.get('diff') !== '0',
+    comments: import('./comments.mjs').then((m) => m.createComments({ doc: data.slug, version: data.version })).catch((e) => { console.error('코멘트 기능을 불러오지 못했어요', e); return null; }),
   });
 }
 

@@ -1,0 +1,12 @@
+/* 코멘트 기능 설정 — Google Cloud(Firebase) 프로젝트의 웹 앱 설정값을 넣는다.
+   비어 있으면 '데모 모드'(이 브라우저에만 저장)로 동작한다. 아래 값은 공개돼도 되는 식별자이며,
+   실제 접근 제어는 Firestore 보안 규칙(firestore.rules: @toonation.co.kr 계정만)이 한다. */
+window.D2P_COMMENTS = {
+  domain: 'toonation.co.kr',
+  firebase: {
+    apiKey: '',
+    authDomain: '',
+    projectId: '',
+    appId: '',
+  },
+};

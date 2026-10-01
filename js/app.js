@@ -193,6 +193,64 @@
     .d2p .slide-scroll{box-shadow:none;border-radius:0}
     .d2p .slide{min-width:0}
   }
+  /* ---- 코멘트 ---- */
+  .d2p .cctl .who{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);margin:2px 0 8px;flex-wrap:wrap}
+  .d2p .cctl .who img{width:18px;height:18px;border-radius:50%}
+  .d2p .cctl .who button{font-size:11.5px;padding:1px 7px}
+  .d2p .cctl select{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:6px;background:var(--side);color:var(--ink);padding:2px 4px}
+  .d2p .cctl .add{width:100%;font-size:12.5px;padding:6px;font-weight:700;color:#fff;background:var(--brand);border-color:var(--brand)}
+  .d2p.c-placing .cctl .add{background:var(--side);color:var(--brand)}
+  .d2p .cctl .mode{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .d2p .cplace{position:absolute;inset:0;z-index:27;display:none;cursor:crosshair;background:rgba(74,85,224,.04);outline:2px dashed rgba(74,85,224,.45);outline-offset:-2px}
+  .d2p.c-placing .cplace{display:block}
+  .d2p .cpin{position:absolute;z-index:26;transform:translate(-4px,-100%);min-width:22px;height:22px;padding:0 6px;border-radius:11px 11px 11px 2px;background:var(--brand);color:#fff;font-size:11.5px;font-weight:800;line-height:22px;text-align:center;cursor:pointer;box-shadow:0 0 0 2px #fff,0 2px 6px rgba(0,0,0,.25);border:0}
+  .d2p .cpin.resolved{background:#9aa0ab}
+  .d2p .cpin.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--brand)}
+  .d2p:not(.c-show) .cpin{display:none}
+  .d2p:not(.c-show) .cpin.on{display:block}
+  .d2p .cpin.resolved.hide{display:none}
+  .d2p .cpop{position:absolute;z-index:28;width:320px;max-width:calc(100% - 16px);background:var(--side);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 32px rgba(20,24,40,.22);font-size:13px;line-height:1.5;display:flex;flex-direction:column;max-height:440px}
+  .d2p .cpop .ch{display:flex;align-items:center;gap:6px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+  .d2p .cpop .ch b{color:var(--ink);font-size:12.5px} .d2p .cpop .ch .sp{flex:1}
+  .d2p .cpop .ch button{padding:2px 8px;font-size:11.5px}
+  .d2p .cpop .anc{display:inline-block;background:var(--brand-soft);color:var(--brand);border-radius:5px;padding:0 6px;font-size:11.5px;font-weight:700;cursor:pointer}
+  .d2p .cpop .msgs{overflow:auto;padding:4px 12px}
+  .d2p .cpop .m{padding:8px 0;border-bottom:1px solid var(--line)} .d2p .cpop .m:last-child{border-bottom:0}
+  .d2p .cpop .m .a{display:flex;align-items:center;gap:6px;font-size:12px} .d2p .cpop .m .a b{font-size:12.5px}
+  .d2p .cpop .m .a time{margin-left:auto;color:var(--muted);font-size:11px}
+  .d2p .cpop .m .a .x{border:0;background:none;padding:0 2px;color:var(--muted);font-size:11px}
+  .d2p .cpop .m p{margin:3px 0 0;white-space:pre-wrap;word-break:break-word}
+  .d2p .cpop .m p .mn{color:var(--brand);font-weight:700}
+  .d2p .rl{font-style:normal;font-size:10.5px;font-weight:800;border-radius:4px;padding:0 5px;color:#fff;background:#8a909c}
+  .d2p .rl.기획{background:#4a55e0} .d2p .rl.디자인{background:#d94f9b} .d2p .rl.개발{background:#1e9e5a} .d2p .rl.QA{background:#e08a00}
+  .d2p .cpop .rf{padding:8px 12px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+  .d2p .cpop textarea{width:100%;min-height:58px;resize:vertical;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--bg);color:var(--ink);outline:0}
+  .d2p .cpop textarea:focus{border-color:var(--brand)}
+  .d2p .cpop .bt{display:flex;gap:6px;align-items:center} .d2p .cpop .bt .sp{flex:1}
+  .d2p .cpop .bt button{font-size:12px;padding:4px 10px}
+  .d2p .cpop .bt .pri{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+  .d2p .cpop .st{font-size:11px;font-weight:800;border-radius:4px;padding:0 6px;color:#fff;background:var(--brand)} .d2p .cpop .st.resolved{background:#9aa0ab}
+  .d2p .cpop .login{padding:10px 12px;font-size:12.5px;color:var(--ink2)}
+  .d2p .clist{display:none;flex:none;max-height:34%;overflow:auto;border-top:1px solid var(--line);background:var(--bg);font-size:12px}
+  .d2p.c-on .clist{display:block}
+  .d2p .clist .rh{position:sticky;top:0;z-index:1;background:var(--bg);display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+  .d2p .clist .rh b{flex:1;font-size:12.5px}
+  .d2p .clist .rh .cnt{font-weight:400;color:var(--muted);font-size:11px;margin-left:4px}
+  .d2p .clist .flt{display:flex;gap:4px;padding:6px 10px;flex-wrap:wrap}
+  .d2p .clist .flt button{font-size:11px;padding:1px 8px;border-radius:999px}
+  .d2p .clist .flt button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .d2p .clist .ci{padding:6px 14px;border-top:1px solid var(--line);cursor:pointer;line-height:1.45}
+  .d2p .clist .ci:hover{background:var(--brand-soft)}
+  .d2p .clist .ci .t{display:flex;gap:5px;align-items:center;font-size:11.5px;color:var(--muted)}
+  .d2p .clist .ci .t b{color:var(--ink)} .d2p .clist .ci .t .r{margin-left:auto}
+  .d2p .clist .ci p{margin:2px 0 0;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .d2p .clist .ci.resolved p{text-decoration:line-through;opacity:.7}
+  .d2p .clist .empty{padding:10px 14px;color:var(--muted)}
+  .d2p.c-fold .clist .flt,.d2p.c-fold .clist .ci,.d2p.c-fold .clist .empty{display:none}
+  .d2p .toc a .cb{align-self:center;font-style:normal;font-size:10px;font-weight:800;color:var(--brand);background:var(--brand-soft);border-radius:4px;padding:0 5px;margin-left:4px}
+  .d2p .toc a .lv ~ .cb,.d2p .toc a .tag ~ .cb{margin-left:4px}
+  .d2p .toc a span + .cb{margin-left:auto}
+  @media print{ .d2p .cpin,.d2p .cpop,.d2p .cplace,.d2p .clist{display:none!important} }
   /* ---- 사이드 메뉴 접기 ---- */
   .d2p .toc .fold{position:absolute;top:16px;right:10px;width:28px;height:28px;padding:0;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px;line-height:1}
   .d2p .toc .fold:hover{color:var(--brand)}
@@ -869,9 +927,206 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { clearFloating(); closePanel(); const bd = root.querySelector('.backdrop'); if (bd) bd.remove(); } });
     window.addEventListener('hashchange', applyHash);
 
+    /* ---------- 코멘트 (문의·답변) ---------- */
+    const clist = el('section', 'clist');
+    async function mountComments(Cp) {
+      let C; try { C = await Cp; } catch (e) { console.error(e); return; }
+      if (!C) return;
+      root.classList.add('c-on', 'c-show');
+      const ROLES = ['기획', '디자인', '개발', 'QA'];
+      let role = (() => { try { return localStorage.getItem('d2p.role') || ''; } catch { return ''; } })();
+      let threads = [], me = null, authErr = '', pop = null, popUnsub = null, filter = 'open', mine = false, placing = false;
+      const fmtT = (t) => { const d = (Date.now() - t) / 1000; if (d < 60) return '방금'; if (d < 3600) return Math.floor(d / 60) + '분 전'; if (d < 86400) return Math.floor(d / 3600) + '시간 전'; const x = new Date(t); return `${x.getMonth() + 1}/${x.getDate()}`; };
+      const roleChip = (r) => (r ? el('i', 'rl ' + r, r) : null);
+      const bodyNode = (txt) => { const p = el('p'); String(txt).split(/(@[\w가-힣.]+)/).forEach((part) => p.append(part.startsWith('@') ? el('span', 'mn', part) : document.createTextNode(part))); return p; };
+      // 사이드바: 로그인·역할·코멘트 달기
+      const cc = el('div', 'ctl cctl');
+      const r1 = el('div', 'row'); r1.append(el('b', null, '코멘트'));
+      const cshow = el('button', 'sw sm on'); cshow.title = '코멘트 핀 표시'; r1.append(cshow); cc.append(r1);
+      const who = el('div', 'who'); cc.append(who);
+      const add = el('button', 'add', '+ 코멘트 달기'); cc.append(add);
+      const mode = el('div', 'mode', C.mode === 'demo' ? '데모 모드 — 이 브라우저에만 저장돼요 (Google Cloud 연결 전)' : '기획서의 원하는 곳을 눌러 문의를 남기세요. 답변·해결은 모두가 볼 수 있어요.'); cc.append(mode);
+      const firstToc = navTop.querySelector('a.sec'); navTop.insertBefore(cc, firstToc);
+      function renderWho() {
+        who.innerHTML = '';
+        if (!me) { const b = el('button', null, C.mode === 'demo' ? '이름 입력' : 'Google 로그인'); b.onclick = () => C.signIn().catch((e) => say('로그인하지 못했어요: ' + (e.code || e.message))); who.append(b); if (authErr) who.append(el('span', null, authErr)); return; }
+        if (me.photo) { const im = el('img'); im.src = me.photo; im.alt = ''; who.append(im); }
+        who.append(el('b', null, me.name));
+        const sel = el('select'); sel.title = '내 역할';
+        sel.append(...['역할 선택', ...ROLES].map((r, i) => { const o = el('option', null, r); o.value = i ? r : ''; o.selected = (i ? r : '') === role; return o; }));
+        sel.onchange = () => { role = sel.value; try { localStorage.setItem('d2p.role', role); } catch {} };
+        const out = el('button', null, '로그아웃'); out.onclick = () => C.signOut();
+        who.append(sel, out);
+      }
+      C.onAuth((u, err) => { me = u; authErr = err || ''; if (err) say(err); renderWho(); renderPins(); if (pop) refreshPop(); });
+      cshow.onclick = () => { cshow.classList.toggle('on'); root.classList.toggle('c-show', cshow.classList.contains('on')); };
+      const setPlacing = (on) => { placing = on; root.classList.toggle('c-placing', on); add.textContent = on ? '취소 (Esc) — 기획서를 눌러 위치 지정' : '+ 코멘트 달기'; };
+      add.onclick = async () => {
+        if (placing) return setPlacing(false);
+        if (!me) { try { await C.signIn(); } catch (e) { say('로그인하지 못했어요'); return; } if (!C.me()) return; }
+        closePop(); setPlacing(true); say('코멘트를 남길 곳을 누르세요');
+      };
+      // 위치 지정 레이어 (동작 화면 위에서도 위치를 고를 수 있게 맨 위에 덮음)
+      slides.forEach((S, pi) => {
+        const lay = el('div', 'cplace');
+        lay.onclick = (e) => {
+          e.stopPropagation();
+          const r = S.stage.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
+          setPlacing(false);
+          openComposer(pi, x, y);
+        };
+        S.stage.append(lay);
+        S.cpins = [];
+      });
+      // 위치가 Description 행·하위 항목 안이면 그 항목에 연결
+      function anchorAt(pi, x, y) {
+        const inR = (r) => r && x >= r.l && x <= r.l + r.w && y >= r.t && y <= r.t + r.h;
+        for (const row of P[pi].rows || []) {
+          if (row.subs) for (const [k, r] of Object.entries(row.subs)) if (inR(r)) return { ref: `${pi + 1}:${k}`, label: k };
+          if (inR(row.rect)) return { ref: `${pi + 1}:${row.key}`, label: row.key };
+        }
+        for (const h of P[pi].hotspots || []) if (h.marker != null && inR(h.rect)) return { ref: `${pi + 1}:${h.marker}`, label: String(h.marker) };
+        return null;
+      }
+      const ancLabel = (pi, a) => { if (!a) return null; const r = resolve(a.ref); return `${/^\d/.test(a.label) ? a.label + '번 ' : ''}${r && r.title ? r.title.replace(/^\d{1,2}-\d{1,2}\.\s*/, '').slice(0, 18) : a.label}`; };
+      function placePop(pi, x, y) {
+        closePop();
+        const S = slides[pi], box = el('div', 'cpop');
+        box.onclick = (e) => e.stopPropagation();
+        S.stage.append(box);
+        const W = S.stage.clientWidth, H = S.stage.clientHeight, px = x / 100 * W, py = y / 100 * H;
+        let left = px + 14, top = py - 10;
+        if (left + 330 > W) left = Math.max(8, px - 334);
+        box.style.left = left + 'px'; box.style.top = Math.max(8, Math.min(top, H - 300)) + 'px';
+        pop = { box, pi };
+        return box;
+      }
+      function openComposer(pi, x, y) {
+        const a = anchorAt(pi, x, y);
+        const box = placePop(pi, x, y);
+        const h = el('div', 'ch'); h.append(el('b', null, `${pi + 1}p 새 코멘트`));
+        if (a) { const an = el('span', 'anc', '📎 ' + ancLabel(pi, a)); an.title = '이 Description 항목에 연결돼요'; h.append(an); }
+        h.append(el('span', 'sp')); const x1 = el('button', null, '✕'); x1.onclick = closePop; h.append(x1);
+        const rf = el('div', 'rf'); const ta = el('textarea'); ta.placeholder = '문의 내용을 남겨 주세요. @이름 으로 사람을 부를 수 있어요.  (Ctrl+Enter 등록)'; ta.maxLength = 2000;
+        const bt = el('div', 'bt'); bt.append(roleChip(role) || el('span', 'mode', '역할 미선택')); bt.append(el('span', 'sp'));
+        const cancel = el('button', null, '취소'); cancel.onclick = closePop;
+        const ok = el('button', 'pri', '등록');
+        ok.onclick = async () => {
+          const body = ta.value.trim(); if (!body) { ta.focus(); return; }
+          ok.disabled = true;
+          try { const id = await C.create({ page: pi + 1, x: +x.toFixed(2), y: +y.toFixed(2), anchor: a, body, role, pageLabel: P[pi].label || P[pi].title || '' }); closePop(); say('코멘트를 남겼어요'); setTimeout(() => openThread(id), 300); }
+          catch (e) { ok.disabled = false; say('저장하지 못했어요: ' + (e.code || e.message)); }
+        };
+        ta.onkeydown = (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ok.click(); };
+        bt.append(cancel, ok); rf.append(ta, bt);
+        box.append(h, rf);
+        pinPreview(pi, x, y);
+        setTimeout(() => ta.focus(), 30);
+      }
+      function pinPreview(pi, x, y) { const pin = el('button', 'cpin on', '+'); pin.style.left = x + '%'; pin.style.top = y + '%'; slides[pi].stage.append(pin); pop.preview = pin; }
+      function closePop() {
+        if (popUnsub) { popUnsub(); popUnsub = null; }
+        if (pop) { pop.box.remove(); if (pop.preview) pop.preview.remove(); pop = null; }
+        root.querySelectorAll('.cpin.on').forEach((n) => n.classList.remove('on'));
+      }
+      function openThread(id) {
+        const t = threads.find((x) => x.id === id); if (!t) return;
+        const pi = t.page - 1; if (!slides[pi]) return;
+        if (!isVisible(slides[pi].sec)) goto(pi);
+        const box = placePop(pi, t.x, t.y); pop.id = id;
+        const pin = root.querySelector(`.cpin[data-id="${id}"]`); if (pin) pin.classList.add('on');
+        history.replaceState(null, '', '#c=' + id);
+        popUnsub = C.subscribeReplies(id, (replies) => { if (pop && pop.id === id) { pop.replies = replies; refreshPop(); } });
+        refreshPop();
+        return box;
+      }
+      function refreshPop() {
+        if (!pop || !pop.id) return;
+        const t = threads.find((x) => x.id === pop.id); if (!t) { closePop(); return; }
+        const box = pop.box, keep = box.querySelector('textarea') ? box.querySelector('textarea').value : '';
+        box.innerHTML = '';
+        const h = el('div', 'ch'); h.append(el('b', null, `${t.page}p`), el('span', 'st ' + t.status, t.status === 'resolved' ? '해결됨' : '열림'));
+        if (t.anchor) { const an = el('span', 'anc', '📎 ' + ancLabel(t.page - 1, t.anchor)); an.title = 'Description 항목 보기'; an.onclick = () => lightRef(t.anchor.ref); h.append(an); }
+        h.append(el('span', 'sp'));
+        const lk = el('button', null, '링크'); lk.title = '이 코멘트 링크 복사'; lk.onclick = () => { history.replaceState(null, '', '#c=' + t.id); navigator.clipboard.writeText(location.href).then(() => say('코멘트 링크를 복사했어요')); };
+        const x1 = el('button', null, '✕'); x1.onclick = closePop; h.append(lk, x1);
+        const msgs = el('div', 'msgs');
+        const msg = (m, first) => {
+          const d = el('div', 'm'); const a = el('div', 'a');
+          a.append(el('b', null, (m.author && m.author.name) || '?')); const rc = roleChip(m.role); if (rc) a.append(rc);
+          a.append(el('time', null, fmtT(m.createdAt) + (first && t.edited ? ' · 수정됨' : '')));
+          if (first && me && t.author && me.uid === t.author.uid) { const del = el('button', 'x', '삭제'); del.title = '내 코멘트 삭제'; del.onclick = async () => { if (confirm('이 코멘트와 답글을 모두 지울까요?')) { await C.remove(t.id); closePop(); say('삭제했어요'); } }; a.append(del); }
+          d.append(a, bodyNode(m.body)); return d;
+        };
+        msgs.append(msg(t, true));
+        (pop.replies || []).forEach((r) => msgs.append(msg(r)));
+        if (t.status === 'resolved' && t.resolvedBy) msgs.append(el('div', 'mode', `✔ ${t.resolvedBy.name} 님이 해결로 표시했어요`));
+        box.append(h, msgs);
+        if (!me) { const lg = el('div', 'login'); const b = el('button', null, C.mode === 'demo' ? '이름 입력하고 답변하기' : 'Google 로그인하고 답변하기'); b.onclick = () => C.signIn(); lg.append(b); box.append(lg); return; }
+        const rf = el('div', 'rf'); const ta = el('textarea'); ta.placeholder = '답변 남기기 (Ctrl+Enter)'; ta.value = keep; ta.maxLength = 2000;
+        const bt = el('div', 'bt');
+        const st = el('button', null, t.status === 'resolved' ? '다시 열기' : '✔ 해결');
+        st.onclick = async () => { await C.setStatus(t.id, t.status === 'resolved' ? 'open' : 'resolved'); say(t.status === 'resolved' ? '다시 열었어요' : '해결로 표시했어요'); };
+        const ok = el('button', 'pri', '답변');
+        ok.onclick = async () => { const b = ta.value.trim(); if (!b) return; ok.disabled = true; ta.value = ''; try { await C.reply(t.id, b, role); } catch (e) { const cur = pop && pop.box.querySelector('textarea'); if (cur) cur.value = b; say('저장하지 못했어요: ' + (e.code || e.message)); } ok.disabled = false; };
+        ta.onkeydown = (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ok.click(); };
+        bt.append(st, el('span', 'sp'), ok); rf.append(ta, bt); box.append(rf);
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+      // 핀 · 목차 배지 · 목록
+      function renderPins() {
+        slides.forEach((S) => { (S.cpins || []).forEach((n) => n.remove()); S.cpins = []; });
+        const byPage = {};
+        threads.slice().sort((a, b) => a.createdAt - b.createdAt).forEach((t) => {
+          const S = slides[t.page - 1]; if (!S) return;
+          byPage[t.page] = byPage[t.page] || { n: 0, open: 0 }; const k = ++byPage[t.page].n; if (t.status !== 'resolved') byPage[t.page].open++;
+          const pin = el('button', 'cpin' + (t.status === 'resolved' ? ' resolved' : '') + (filter === 'open' && t.status === 'resolved' ? ' hide' : ''), String(k));
+          pin.dataset.id = t.id; pin.title = `${(t.author && t.author.name) || ''}: ${t.body.slice(0, 60)}`;
+          pin.style.left = t.x + '%'; pin.style.top = t.y + '%';
+          pin.onclick = (e) => { e.stopPropagation(); if (pop && pop.id === t.id) closePop(); else openThread(t.id); };
+          if (pop && pop.id === t.id) pin.classList.add('on');
+          S.stage.append(pin); S.cpins.push(pin);
+        });
+        tocLinks.forEach((a, i) => { const old = a.querySelector('.cb'); if (old) old.remove(); const c = byPage[i + 1]; if (c && c.open) { const b = el('i', 'cb', '💬' + c.open); b.title = `열린 코멘트 ${c.open}개`; a.append(b); } });
+        renderList();
+      }
+      function renderList() {
+        clist.innerHTML = '';
+        const open = threads.filter((t) => t.status !== 'resolved').length;
+        const h = el('div', 'rh'); const t = el('b', null, '코멘트'); t.append(el('span', 'cnt', `열림 ${open} · 전체 ${threads.length}`)); h.append(t, el('span', null, root.classList.contains('c-fold') ? '▴' : '▾'));
+        h.onclick = () => { root.classList.toggle('c-fold'); renderList(); };
+        clist.append(h);
+        const f = el('div', 'flt');
+        [['open', '열림'], ['resolved', '해결'], ['all', '전체']].forEach(([k, v]) => { const b = el('button', filter === k ? 'on' : null, v); b.onclick = () => { filter = k; renderPins(); }; f.append(b); });
+        const mb = el('button', mine ? 'on' : null, '내 것'); mb.onclick = () => { mine = !mine; renderList(); }; f.append(mb);
+        clist.append(f);
+        let list = threads.filter((x) => filter === 'all' || (filter === 'open' ? x.status !== 'resolved' : x.status === 'resolved'));
+        if (mine && me) list = list.filter((x) => (x.author && x.author.uid === me.uid));
+        list.sort((a, b) => a.page - b.page || a.createdAt - b.createdAt);
+        if (!list.length) clist.append(el('div', 'empty', threads.length ? '해당하는 코멘트가 없어요' : '아직 코멘트가 없어요. "+ 코멘트 달기"로 첫 문의를 남겨 보세요.'));
+        for (const x of list) {
+          const it = el('div', 'ci' + (x.status === 'resolved' ? ' resolved' : ''));
+          const tt = el('div', 't'); tt.append(el('span', null, `${x.page}p`), el('b', null, (x.author && x.author.name) || '?')); const rc = roleChip(x.role); if (rc) tt.append(rc);
+          tt.append(el('span', 'r', (x.replies ? `답글 ${x.replies} · ` : '') + fmtT(x.lastAt || x.createdAt)));
+          it.append(tt, el('p', null, x.body));
+          it.onclick = () => openThread(x.id);
+          clist.append(it);
+        }
+      }
+      let first = true;
+      C.subscribe((list) => {
+        threads = list; renderPins(); if (pop && pop.id) refreshPop();
+        if (first) { first = false; const m = /#c=([\w-]+)/.exec(location.hash); if (m) setTimeout(() => openThread(m[1]), 500); }
+      }, (e) => { say('코멘트를 불러오지 못했어요: ' + (e.code || e.message)); if (e.code === 'permission-denied') mode.textContent = '사내 Google 계정으로 로그인해야 코멘트를 볼 수 있어요.'; });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (placing) setPlacing(false); closePop(); } });
+      main.addEventListener('click', (e) => { if (pop && !e.target.closest('.cpop,.cpin')) closePop(); });
+    }
+    if (opts.comments) mountComments(opts.comments);
+
     mountGhosts();
     syncEvents();
-    nav.append(navTop, refs);
+    nav.append(navTop, refs, clist);
     root.append(nav, main, toast, navOpen);
     document.addEventListener('keydown', (e) => {
       if (e.key !== '[' || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''))) return;

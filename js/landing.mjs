@@ -24,6 +24,11 @@ async function loadIndex() {
 }
 
 /* ---------- 연결 상태 ---------- */
+// 미리보기 배포(브랜치 주소)에서는 운영 저장소를 건드리지 않도록 올리기·삭제를 막는다
+const PROD = 'doc2proto.vercel.app';
+const PREVIEW = /\.vercel\.app$/.test(location.hostname) && location.hostname !== PROD;
+const blocked = () => { say('미리보기 주소에서는 올리기·삭제를 막아 두었어요 — 운영 사이트(doc2proto.vercel.app)에서 해 주세요', 4000); };
+
 function renderConn() {
   const c = $('#conn'); c.innerHTML = '';
   const on = !!A.token.get();
@@ -88,8 +93,9 @@ function render() {
       });
     }
     const acts = el('div', 'doc-acts');
-    const up = el('button', 'sm', '새 버전 올리기'); up.onclick = () => openUpload(d);
-    const del = el('button', 'sm danger', '삭제'); del.onclick = () => openDelete(d); if (d._new) del.disabled = true;
+    const up = el('button', 'sm', '새 버전 올리기'); up.onclick = () => (PREVIEW ? blocked() : openUpload(d));
+    const del = el('button', 'sm danger', '삭제'); del.onclick = () => (PREVIEW ? blocked() : openDelete(d)); if (d._new) del.disabled = true;
+    if (PREVIEW) { up.title = del.title = '미리보기 주소에서는 사용할 수 없어요'; up.style.opacity = del.style.opacity = '.5'; }
     acts.append(up, el('span', 'grow'), del);
     card.append(acts);
     box.append(card);
@@ -231,7 +237,8 @@ function watch() {
 
 export async function renderLanding() {
   renderConn();
-  $('#newdoc').onclick = () => openUpload(null);
+  $('#newdoc').onclick = () => (PREVIEW ? blocked() : openUpload(null));
+  if (PREVIEW) { $('#newdoc').style.opacity = '.5'; const t = document.querySelector('.top .t .sub'); if (t) t.insertAdjacentHTML('beforeend', ' <b style="color:#e08a00">· 미리보기(코멘트 기능 개발 중)</b>'); }
   await loadIndex();
   render();
   watch();
