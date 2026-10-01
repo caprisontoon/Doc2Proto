@@ -1,0 +1,32 @@
+# 웹에서 올린 기획서(inbox/<slug>/<version>/)를 docs/ 로 변환해 main에 커밋한다 → Vercel이 다시 배포
+name: 기획서 변환
+on:
+  push:
+    branches: [main]
+    paths: ['inbox/**']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: convert
+  cancel-in-progress: false
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install python-pptx pymupdf
+      - name: 변환
+        run: python tools/inbox.py
+      - name: 커밋
+        if: always()
+        run: |
+          git config user.name "doc2proto-bot"
+          git config user.email "doc2proto-bot@users.noreply.github.com"
+          git add -A docs inbox
+          git diff --cached --quiet && exit 0
+          git commit -m "기획서 변환: $(git diff --cached --name-only -- docs | grep -o 'docs/[^/]*/[^/]*/' | sort -u | tr '\n' ' ')"
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && break; sleep 3; done

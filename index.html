@@ -7,76 +7,164 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234a55e0'/%3E%3Cpath d='M9 10h9a5 5 0 0 1 0 12h-4v-4h4a1 1 0 0 0 0-4h-5v10H9z' fill='%23fff'/%3E%3C/svg%3E">
 <style>
 :root{
-  --bg:#e9ebef; --card:#ffffff; --ink:#1b1d22; --ink2:#4a4f5a; --muted:#8a909c; --line:#dde0e6;
-  --brand:#4a55e0; --brand-soft:#eceefe; --shadow:0 2px 14px rgba(20,24,40,.10);
+  --bg:#eef0f4; --card:#ffffff; --ink:#1b1d22; --ink2:#4a4f5a; --muted:#8a909c; --line:#dde0e6;
+  --brand:#4a55e0; --brand-soft:#eceefe; --danger:#d93025; --danger-soft:#fdecea; --ok:#1e9e5a; --warn:#e08a00;
+  --shadow:0 1px 3px rgba(20,24,40,.06),0 6px 20px rgba(20,24,40,.06);
 }
 @media (prefers-color-scheme: dark){
   :root{
     --bg:#121317; --card:#1b1d23; --ink:#eceef2; --ink2:#b8bdc8; --muted:#7d8391; --line:#2c2f38;
-    --brand:#7b84ff; --brand-soft:#262a4a; --shadow:0 2px 18px rgba(0,0,0,.5);
+    --brand:#7b84ff; --brand-soft:#262a4a; --danger:#ff6b70; --danger-soft:#3a1f22; --ok:#4cc38a; --warn:#f0a83a;
+    --shadow:0 2px 18px rgba(0,0,0,.5);
   }
 }
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);
-  font:15px/1.65 'Malgun Gothic','맑은 고딕','Noto Sans KR',sans-serif}
-#landing{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
-  padding:38px 34px;max-width:560px;width:100%}
-h1{margin:0 0 6px;font-size:26px}
-h1 b{color:var(--brand)}
-.sub{margin:0 0 22px;color:var(--ink2)}
-#drop{border:2px dashed var(--line);border-radius:12px;padding:34px 20px;text-align:center;cursor:pointer;
-  transition:border-color .15s, background .15s}
-#drop:hover,#drop.over{border-color:var(--brand);background:var(--brand-soft)}
-#drop .big{font-weight:700;font-size:16px}
-#drop .small{color:var(--muted);font-size:13px;margin-top:4px}
-.row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);
-  border-radius:9px;padding:10px 16px}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:15px/1.6 'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo','Noto Sans KR',sans-serif}
+#landing{max-width:980px;margin:0 auto;padding:40px 16px 60px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:8px 14px}
 button:hover{border-color:var(--brand)}
+button:disabled{opacity:.55;cursor:progress}
 .primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
-ul.feat{margin:22px 0 0;padding:0 0 0 2px;list-style:none;color:var(--ink2);font-size:13.5px}
-ul.feat li{margin:5px 0;padding-left:20px;position:relative}
-ul.feat li::before{content:'✓';position:absolute;left:0;color:var(--brand);font-weight:700}
-#status{margin-top:14px;color:var(--brand);font-weight:700}
-h2{font-size:15px;margin:18px 0 8px;color:var(--ink2)}
-.muted{color:var(--muted);font-size:13.5px;margin:0}
-code{background:var(--brand-soft);padding:1px 5px;border-radius:4px;font-size:12.5px}
-.doc{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px}
-.doc-title{font-weight:700;color:var(--brand);text-decoration:none;font-size:15px}
-.doc-title:hover{text-decoration:underline}
-.doc-meta{color:var(--muted);font-size:12.5px;margin-top:2px}
-.doc-vers{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
-.doc-vers a{font-size:12px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:1px 9px;text-decoration:none}
+.primary:hover{filter:brightness(1.08)}
+.danger{color:var(--danger)} .danger:hover{border-color:var(--danger)}
+.danger.fill{background:var(--danger);border-color:var(--danger);color:#fff;font-weight:700}
+.sm{font-size:13px;padding:5px 11px;border-radius:8px}
+/* 헤더 */
+.top{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.top .t{flex:1;min-width:260px}
+h1{margin:0;font-size:26px;letter-spacing:-.01em} h1 b{color:var(--brand)}
+.sub{margin:4px 0 0;color:var(--ink2);font-size:14px}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.conn{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.conn i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.conn.on i{background:var(--ok)} .conn.on{color:var(--ink2)}
+.conn button{font-size:12px;padding:2px 8px}
+/* 목록 */
+#doclist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.doc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;min-width:0}
+.doc-title{font-weight:800;color:var(--ink);text-decoration:none;font-size:16px;line-height:1.4}
+.doc-title:hover{color:var(--brand)}
+.doc-meta{color:var(--muted);font-size:12.5px}
+.doc-vers{display:flex;gap:6px;flex-wrap:wrap}
+.doc-vers a{font-size:12px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:1px 10px;text-decoration:none;display:inline-flex;gap:4px;align-items:center}
 .doc-vers a:hover{border-color:var(--brand);color:var(--brand)}
-details{margin-top:18px}
-summary{cursor:pointer;color:var(--ink2);font-size:13.5px}
-details #drop{margin-top:10px}
+.doc-vers a.latest{border-color:var(--brand);color:var(--brand);font-weight:700}
+.doc-vers .pend{font-size:12px;border:1px dashed var(--warn);color:var(--warn);border-radius:999px;padding:1px 10px;font-weight:700}
+.doc-vers .pend.err{border-color:var(--danger);color:var(--danger)}
+.doc-acts{display:flex;gap:6px;margin-top:auto;padding-top:6px;border-top:1px solid var(--line)}
+.doc-acts .grow{flex:1}
+.empty{grid-column:1/-1;background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:30px;text-align:center;color:var(--muted)}
+/* 하단 */
+.foot{margin-top:28px;color:var(--muted);font-size:13px}
+.foot summary{cursor:pointer;color:var(--ink2)}
+.foot ol{margin:8px 0 0;padding-left:20px;line-height:1.8}
+code{background:var(--brand-soft);padding:1px 5px;border-radius:4px;font-size:12.5px}
+#drop{margin-top:10px;border:2px dashed var(--line);border-radius:12px;padding:22px 16px;text-align:center;cursor:pointer;background:var(--card)}
+#drop:hover,#drop.over{border-color:var(--brand);background:var(--brand-soft)}
+#status{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:9px;font-size:13.5px;z-index:99;max-width:calc(100vw - 32px)}
+/* 대화상자 */
+dialog{border:1px solid var(--line);border-radius:14px;padding:0;background:var(--card);color:var(--ink);width:min(520px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(20,24,40,.45)}
+dialog form{padding:20px 22px}
+dialog h3{margin:0 0 4px;font-size:18px}
+dialog .desc{margin:0 0 14px;color:var(--ink2);font-size:13.5px}
+dialog label{display:block;font-size:12.5px;font-weight:700;margin:12px 0 5px}
+dialog input[type=text],dialog input[type=password]{width:100%;font:inherit;font-size:14px;padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--ink)}
+dialog input:focus{outline:2px solid var(--brand);outline-offset:1px}
+dialog .hint{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+dialog .btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+dialog .msg{min-height:1.4em;font-size:13px;margin-top:10px;color:var(--danger)} dialog .msg.wait{color:var(--brand)}
+.file{border:1.5px dashed var(--line);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px}
+.file:hover,.file.over{border-color:var(--brand);background:var(--brand-soft)}
+.file b{font-weight:700} .file .nm{color:var(--ink2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file.has{border-style:solid;border-color:var(--ok)} .file.has .nm{color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.note{background:var(--brand-soft);border-radius:9px;padding:9px 11px;font-size:12.5px;color:var(--ink2);margin-top:14px;line-height:1.55}
+.radio{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.radio label{display:flex;gap:8px;align-items:center;font-weight:400;font-size:14px;margin:0;cursor:pointer}
+@media (max-width:560px){ .two{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <div id="landing">
-  <main class="card">
-    <h1><b>Doc2Proto</b></h1>
-    <p class="sub">상세기획서를 원본 그대로 보여주면서, 화면은 실제로 동작하고 Description과 연결되는 문서로 전달해요.</p>
-    <h2>배포된 기획서</h2>
-    <div id="doclist"><p class="muted">불러오는 중…</p></div>
+  <header class="top">
+    <div class="t">
+      <h1><b>Doc2Proto</b></h1>
+      <p class="sub">상세기획서를 원본 그대로 보여주면서, 화면은 실제로 동작하고 Description과 연결되는 문서로 전달해요.</p>
+    </div>
+    <div class="acts">
+      <span class="conn" id="conn"><i></i><span>보기 전용</span></span>
+      <button class="primary" id="newdoc">+ 새 기획서 올리기</button>
+    </div>
+  </header>
+
+  <div id="doclist"><div class="empty">불러오는 중…</div></div>
+
+  <div class="foot">
     <details>
-      <summary>PDF 빠른 미리보기 (브라우저 안에서만 변환, 공유 안 됨)</summary>
-      <div id="drop">
-        <div class="big">PDF를 여기로 끌어오거나 클릭해서 선택</div>
-        <div class="small">배포는 로컬 Claude Code에서 <code>/doc2proto 기획서.pptx</code></div>
-        <input type="file" id="file" accept="application/pdf,.pdf" hidden>
-      </div>
+      <summary>올린 기획서는 어떻게 반영되나요?</summary>
+      <ol>
+        <li>PPTX와 PowerPoint에서 내보낸 PDF를 올리면 GitHub 저장소에 들어가요.</li>
+        <li>GitHub Actions가 자동으로 스냅샷·Description 연결을 만들고, 이전 버전이 있으면 <b>변경 사항 비교</b>와 동작 화면 복사까지 해요 (2~3분).</li>
+        <li>사이트가 다시 배포되면 목록에 새 버전이 나타나요.</li>
+        <li>기능이 바뀐 부분(새 버튼·새 상태 화면 등)의 <b>동작 화면 반영</b>은 로컬 Claude Code에서 <code>/doc2proto</code>로 이어서 해요.</li>
+      </ol>
     </details>
-    <ul class="feat">
-      <li>기획서는 PowerPoint 원본 스냅샷 그대로</li>
-      <li>목업 자리의 화면이 실제로 동작 — 누르면 해당 Description이 하이라이트</li>
-      <li>이벤트 발생(버퍼링·송출 끊김 등)으로 예외 상태 확인, 버전별 URL</li>
-    </ul>
-    <div id="status" hidden></div>
-  </main>
+    <details>
+      <summary>PDF 빠른 미리보기 (브라우저 안에서만, 공유 안 됨)</summary>
+      <div id="drop">PDF를 여기로 끌어오거나 클릭해서 선택<input type="file" id="file" accept="application/pdf,.pdf" hidden></div>
+    </details>
+  </div>
 </div>
+
+<!-- GitHub 연결 -->
+<dialog id="dlg-conn"><form method="dialog">
+  <h3>GitHub 연결</h3>
+  <p class="desc">올리기·삭제는 저장소에 바로 커밋해요. 저장소 쓰기 권한이 있는 토큰이 필요해요. 토큰은 이 브라우저에만 저장돼요.</p>
+  <label for="tok">GitHub 토큰</label>
+  <input type="password" id="tok" autocomplete="off" placeholder="github_pat_…">
+  <div class="hint">GitHub → Settings → Developer settings → Fine-grained tokens → <b>Generate new token</b><br>
+    Repository access: <b><span class="repo"></span></b> 만 선택 · Permissions: <b>Contents: Read and write</b>, <b>Actions: Read-only</b></div>
+  <div class="msg" id="conn-msg"></div>
+  <div class="btns"><button value="cancel" formnovalidate>취소</button><button class="primary" id="conn-ok" value="ok">연결</button></div>
+</form></dialog>
+
+<!-- 올리기 -->
+<dialog id="dlg-up"><form method="dialog">
+  <h3 id="up-h">새 버전 올리기</h3>
+  <p class="desc" id="up-d"></p>
+  <div id="up-new">
+    <label for="up-title">기획서 제목</label>
+    <input type="text" id="up-title" placeholder="예: 투네이션 스트리밍 플랫폼 후원페이지">
+    <label for="up-slug">주소 이름</label>
+    <input type="text" id="up-slug" placeholder="예: 후원페이지">
+    <div class="hint">URL에 쓰여요: <code>?doc=docs/<span id="up-slug-p">…</span>/버전</code> (한글·영문·숫자·-)</div>
+  </div>
+  <label for="up-ver">버전</label>
+  <input type="text" id="up-ver" placeholder="v0.1">
+  <div class="two">
+    <div><label>기획서 PPTX</label><div class="file" id="f-pptx"><span>📄</span><span class="nm">PPTX 선택</span><input type="file" accept=".pptx" hidden></div></div>
+    <div><label>PowerPoint PDF</label><div class="file" id="f-pdf"><span>🖼</span><span class="nm">PDF 선택</span><input type="file" accept=".pdf,application/pdf" hidden></div></div>
+  </div>
+  <div class="hint">PDF는 PowerPoint에서 <b>파일 → 내보내기 → PDF</b>로 만든 것이어야 원본과 똑같이 보여요.</div>
+  <div class="note" id="up-note"></div>
+  <div class="msg" id="up-msg"></div>
+  <div class="btns"><button value="cancel" formnovalidate>취소</button><button class="primary" id="up-ok" value="ok">올리기</button></div>
+</form></dialog>
+
+<!-- 삭제 -->
+<dialog id="dlg-del"><form method="dialog">
+  <h3>기획서 삭제</h3>
+  <p class="desc" id="del-d"></p>
+  <div class="radio" id="del-opts"></div>
+  <label for="del-confirm">확인을 위해 <b id="del-word"></b> 을(를) 입력하세요</label>
+  <input type="text" id="del-confirm" autocomplete="off">
+  <div class="hint">삭제하면 공유된 링크가 더 이상 열리지 않아요. (저장소 기록에는 남아 있어 되살릴 수 있어요)</div>
+  <div class="msg" id="del-msg"></div>
+  <div class="btns"><button value="cancel" formnovalidate>취소</button><button class="danger fill" id="del-ok" value="ok">삭제</button></div>
+</form></dialog>
+
+<div id="status" hidden></div>
 <div id="app"></div>
 <script src="js/app.js"></script>
 <script type="module" src="js/main.mjs"></script>

@@ -1017,7 +1017,7 @@ def main():
     entry['title'] = title
     entry['versions'] = [v for v in entry['versions'] if v['version'] != version]
     entry['versions'].append({'version': version, 'date': date.today().isoformat(), 'pages': len(pages)})
-    entry['versions'].sort(key=lambda v: v['date'] + v['version'])
+    entry['versions'].sort(key=lambda v: [int(x) if x.isdigit() else x for x in re.split(r'(\d+)', v['version'])])   # v0.2 < v0.10
     index_path.write_text(json.dumps(index, ensure_ascii=False, indent=1), encoding='utf-8')
 
     # 이전 버전이 있으면 자동 비교 → diff.json (동작 화면이 아직 없으면 이전 것을 새 페이지 번호로 옮겨 복사)

@@ -47,36 +47,8 @@ async function versionsOf(slug, current) {
   return doc.versions.map((v) => ({ version: v.version, label: v.version, href: `?doc=docs/${slug}/${v.version}`, current: v.version === current }));
 }
 
-/* ---------- 랜딩: 문서 목록 ---------- */
-async function renderList() {
-  const box = $('#doclist');
-  const idx = await fetch('docs/index.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  if (!idx || !idx.docs.length) { box.innerHTML = '<p class="muted">배포된 문서가 아직 없어요. 로컬 Claude Code에서 <code>/doc2proto 기획서.pptx</code>를 실행해 배포하세요.</p>'; return; }
-  box.innerHTML = '';
-  for (const d of [...idx.docs].reverse()) {
-    const row = document.createElement('div');
-    row.className = 'doc';
-    const latest = d.versions[d.versions.length - 1];
-    const href = (v) => `?doc=docs/${d.slug}/${v.version}`;
-    const a = document.createElement('a');
-    a.href = href(latest);
-    a.className = 'doc-title';
-    a.textContent = d.title;
-    const meta = document.createElement('div');
-    meta.className = 'doc-meta';
-    meta.textContent = `${latest.version} · ${latest.date} · ${latest.pages}p`;
-    const vers = document.createElement('div');
-    vers.className = 'doc-vers';
-    for (const v of [...d.versions].reverse()) {
-      const l = document.createElement('a');
-      l.href = href(v);
-      l.textContent = v.version;
-      vers.append(l);
-    }
-    row.append(a, meta, vers);
-    box.append(row);
-  }
-}
+/* ---------- 랜딩: 문서 목록 + 관리 (js/landing.mjs) ---------- */
+const renderList = () => import('./landing.mjs').then((m) => m.renderLanding());
 
 /* ---------- PDF 빠른 미리보기 (브라우저 안 변환, 공유 불가) ---------- */
 async function openPdf(file) {
