@@ -123,7 +123,7 @@ dialog .msg{min-height:1.4em;font-size:13px;margin-top:10px;color:var(--danger)}
   <p class="desc">올리기·삭제는 저장소에 바로 커밋해요. 저장소 쓰기 권한이 있는 토큰이 필요해요. 토큰은 이 브라우저에만 저장돼요.</p>
   <label for="tok">GitHub 토큰</label>
   <input type="password" id="tok" autocomplete="off" placeholder="github_pat_…">
-  <div class="hint">GitHub → Settings → Developer settings → Fine-grained tokens → <b>Generate new token</b><br>
+  <div class="hint"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener"><b>토큰 만들기 페이지 열기 ↗</b></a> (내 프로필 사진 → Settings → 맨 아래 Developer settings → Fine-grained tokens)<br>
     Repository access: <b><span class="repo"></span></b> 만 선택 · Permissions: <b>Contents: Read and write</b>, <b>Actions: Read-only</b></div>
   <div class="msg" id="conn-msg"></div>
   <div class="btns"><button value="cancel" formnovalidate>취소</button><button class="primary" id="conn-ok" value="ok">연결</button></div>
