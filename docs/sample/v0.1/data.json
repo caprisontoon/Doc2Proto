@@ -37,6 +37,7 @@
         {
          "text": "Page Name",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -47,6 +48,7 @@
         {
          "text": "화면 영역",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -57,6 +59,7 @@
         {
          "text": "Project",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -67,6 +70,7 @@
         {
          "text": "투네이션 채팅",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -99,6 +103,7 @@
         {
          "text": "채널 탭 표시",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -109,6 +114,7 @@
         {
          "text": "투네이션·유튜브·트위치 탭이 나열. 각 탭에는 현재 채팅 숫자 노출",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -121,6 +127,7 @@
         {
          "text": "채널 전환",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -131,6 +138,7 @@
         {
          "text": "탭을 클릭하면 그 채널로 즉시 전환된다.",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -143,6 +151,7 @@
         {
          "text": "대화 이력 보존",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -153,6 +162,7 @@
         {
          "text": "다른 채널로 이동했다가 돌아오면, 이전 대화 이력이 그대로 유지",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -165,6 +175,7 @@
         {
          "text": "관리 메뉴",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -175,6 +186,7 @@
         {
          "text": "클린봇 설정, 채팅입력제한, 채팅 얼리기, 매니저 모드, 입장표시, 글자크기, 차단목록",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -210,6 +222,7 @@
         {
          "text": "공지 (고정)",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -220,6 +233,7 @@
         {
          "text": "공지사항(매니저 모드) 등록/수정, 상단 고정",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -232,6 +246,7 @@
         {
          "text": "채팅",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -242,6 +257,7 @@
         {
          "text": "투네이션 VIP 등급 표시, 도네이터 명 클릭 시 프로필 및 차단/신고, 이모티콘",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -254,6 +270,7 @@
         {
          "text": "스크롤 시 최근 후원",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -264,6 +281,7 @@
         {
          "text": "스크롤 이동 시 최근 후원 노출",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -287,7 +305,7 @@
       "w": 40.0,
       "h": 10.0
      },
-     "role": "tooltip",
+     "role": "table",
      "cells": {
       "cols": [
        30.0,
@@ -298,6 +316,7 @@
         {
          "text": "이모티콘",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -308,6 +327,7 @@
         {
          "text": "채팅용 이모티콘 기본 제공. 😊 아이콘에 마우스를 올리면 \"이모티콘 선택\" 툴팁 노출",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -320,6 +340,7 @@
         {
          "text": "채팅",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -330,6 +351,7 @@
         {
          "text": "최대 120자 이내 채팅 입력. 보내기 클릭 시 전송",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -1032,6 +1054,7 @@
         {
          "text": "Page Name",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -1042,6 +1065,7 @@
         {
          "text": "채널 영역",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -1052,6 +1076,7 @@
         {
          "text": "Project",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -1062,6 +1087,7 @@
         {
          "text": "투네이션 채팅",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -1981,6 +2007,7 @@
         {
          "text": "Page Name",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -1991,6 +2018,7 @@
         {
          "text": "채팅 입력 영역",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2001,6 +2029,7 @@
         {
          "text": "Project",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2011,6 +2040,7 @@
         {
          "text": "투네이션 채팅",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2043,6 +2073,7 @@
         {
          "text": "텍스트 전송",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2053,6 +2084,7 @@
         {
          "text": "입력 후 Enter 또는 \"보내기\"로 전송한다. 전송하면 입력창이 비워진다. 최대 120자.",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2065,6 +2097,7 @@
         {
          "text": "이모티콘",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2075,6 +2108,7 @@
         {
          "text": ": 뒤에 글자를 입력하면 스티커 후보 팝업이 뜬다. 😊 아이콘 위에 올리면 \"이모티콘 선택\" 툴팁",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2087,6 +2121,7 @@
         {
          "text": "멘션 자동완성",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2097,6 +2132,7 @@
         {
          "text": "@ 뒤에 글자를 입력하면 참여자 닉 후보가 뜨고, 선택 시 @닉 이 삽입된다.",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2109,6 +2145,7 @@
         {
          "text": "전송 차단 안내",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,
@@ -2119,6 +2156,7 @@
         {
          "text": "얼리기·저속모드·제재 등으로 전송이 막히면 입력창 하단에 사유가 안내되고 입력이 잠긴다.",
          "bold": false,
+         "lines": null,
          "color": null,
          "bg": null,
          "align": null,

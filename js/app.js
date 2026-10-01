@@ -58,10 +58,14 @@
   .d2p table.pt{position:absolute;border-collapse:collapse;table-layout:fixed;background:#fff;color:#000;line-height:1.55;font-family:var(--fm)}
   .d2p table.pt td{border:calc(.75*var(--pt)) solid #d9d9d9;padding:calc(1.6*var(--pt)) calc(5*var(--pt));vertical-align:middle;overflow-wrap:anywhere;word-break:keep-all;white-space:pre-wrap}
   .d2p table.pt tr.lit td{background:var(--lit)!important;box-shadow:inset 0 0 0 1px var(--lit-line)}
+  .d2p table.pt tr.lit-soft td{background:#fffbe3!important}
+  .d2p table.pt span.seg{display:block;border-radius:calc(2*var(--pt));cursor:pointer;margin:0 calc(-2*var(--pt));padding:0 calc(2*var(--pt))}
+  .d2p table.pt span.seg:hover{background:rgba(74,85,224,.06)}
+  .d2p table.pt span.seg.lit{background:var(--lit);box-shadow:inset 0 0 0 calc(.75*var(--pt)) var(--lit-line)}
   .d2p table.pt tr.rowlink{cursor:pointer}
   .d2p table.pt tr.rowlink:hover td{filter:brightness(.97)}
-  .d2p table.desc td.n{text-align:center;font-weight:800;color:#fff;background:transparent!important;vertical-align:top;padding-top:calc(3*var(--pt))}
-  .d2p table.desc td.n i{display:inline-block;font-style:normal;background:#d93025;border-radius:50%;width:calc(11*var(--pt));height:calc(11*var(--pt));line-height:calc(11*var(--pt));font-size:calc(7*var(--pt))}
+  .d2p table.desc td.n{text-align:center;font-weight:800;vertical-align:top;padding:calc(3*var(--pt)) 0 0!important}
+  .d2p table.desc td.n i{display:inline-block;font-style:normal;color:#fff;background:#d93025;border-radius:999px;min-width:calc(11*var(--pt));padding:0 calc(2*var(--pt));height:calc(11*var(--pt));line-height:calc(11*var(--pt));font-size:calc(7*var(--pt))!important;white-space:nowrap}
   .d2p .chips{display:flex;flex-wrap:wrap;gap:calc(2*var(--pt));margin-top:calc(2*var(--pt))}
   .d2p .chip{font-size:calc(6.4*var(--pt));line-height:1.5;padding:0 calc(4*var(--pt));border-radius:999px;background:#e8ecff;color:#3b46c4;cursor:pointer;white-space:nowrap;font-weight:700}
   .d2p .chip:hover{background:#4a55e0;color:#fff}
@@ -69,7 +73,7 @@
     background:#fff;border:calc(.75*var(--pt)) solid #cfd3db;color:#444;opacity:0;transition:opacity .15s;cursor:pointer}
   .d2p .slide:hover .copybtn{opacity:.95}
   /* 번호 dot / 핫스팟 */
-  .d2p .dot{position:absolute;z-index:5;transform:translate(-50%,-50%);width:calc(12*var(--pt));height:calc(12*var(--pt));border-radius:50%;
+  .d2p .dot{position:absolute;z-index:5;transform:translate(-50%,-50%);min-width:calc(12*var(--pt));padding:0 calc(2.5*var(--pt));height:calc(12*var(--pt));border-radius:999px;white-space:nowrap;
     background:#d93025;color:#fff;font-weight:800;font-size:calc(7*var(--pt));line-height:calc(12*var(--pt));text-align:center;cursor:pointer;
     box-shadow:0 0 0 calc(1.5*var(--pt)) #fff}
   .d2p .dot:hover,.d2p .dot.active{background:var(--brand);box-shadow:0 0 0 calc(1.5*var(--pt)) #fff,0 0 0 calc(4*var(--pt)) rgba(74,85,224,.25)}
@@ -213,8 +217,32 @@
           if (isNum) { td.className = 'n'; td.append(el('i', null, c.text.trim())); }
           else {
             const lines = c.text.split('\n');
-            if (t.role === 'desc' && ci === 1 && lines.length > 1) {
-              td.append(el('b', null, lines[0]), document.createTextNode('\n' + lines.slice(1).join('\n')));
+            if (c.lines) {
+              // 문단별 굵기(원본 그대로) + 하위 번호 단락 span
+              let seg = null, box = td;
+              c.lines.forEach(([ln, bold], k) => {
+                const m = /^\s*(\d{1,2})\s*[-.]\s*(\d{1,2})\s*[.)]?\s/.exec(ln);
+                if (k) box.append(document.createTextNode('\n'));
+                if (m && t.role === 'desc') { seg = `${+m[1]}-${+m[2]}`; box = el('span', 'seg'); box.dataset.sub = seg; td.append(box); }
+                box.append(bold ? el('b', null, ln) : document.createTextNode(ln));
+              });
+            } else if (t.role === 'desc' && ci >= 1 && lines.length > 1 && !c.bold) {
+              td.append(el('b', null, lines[0]));
+              // '1-1.' '1-2)' 같은 하위 번호로 시작하는 줄에서 끊어 span으로 감싼다 (하위 마커 하이라이트용)
+              let seg = null, buf = [];
+              const flush = () => {
+                if (!buf.length) return;
+                const node = seg ? el('span', 'seg') : document.createTextNode('');
+                const txt = '\n' + buf.join('\n');
+                if (seg) { node.dataset.sub = seg; node.textContent = txt; } else node.textContent = txt;
+                td.append(node); buf = [];
+              };
+              for (const ln of lines.slice(1)) {
+                const m = /^\s*(\d{1,2})\s*[-.]\s*(\d{1,2})\s*[.)]?\s/.exec(ln);
+                if (m) { flush(); seg = `${+m[1]}-${+m[2]}`; }
+                buf.push(ln);
+              }
+              flush();
             } else td.textContent = c.text;
           }
           tr.append(td);
@@ -312,7 +340,7 @@
 
     /* ---------- 하이라이트 ---------- */
     let litTimer;
-    function clearLit() { root.querySelectorAll('.lit').forEach((x) => x.classList.remove('lit')); }
+    function clearLit() { root.querySelectorAll('.lit,.lit-soft').forEach((x) => x.classList.remove('lit', 'lit-soft')); }
     function clearActive() { root.querySelectorAll('.hs.active,.dot.active').forEach((x) => x.classList.remove('active')); }
     function lightRows(pi, ids, keep) {
       const S = slides[pi];
@@ -328,7 +356,17 @@
       const S = slides[pi];
       clearActive();
       const n = S.hsEls[h.id]; if (n) { n.classList.add('active'); if (n._dot) n._dot.classList.add('active'); }
-      lightRows(pi, h.targets);
+      if (h.sub) {
+        clearLit();
+        for (const id of h.targets) {
+          const tr = S.rowEls[id];
+          const sp = tr && tr.querySelector(`span.seg[data-sub="${h.sub}"]`);
+          if (sp) { tr.classList.add('lit-soft'); sp.classList.add('lit'); sp.scrollIntoView({ block: 'nearest' }); }
+          else if (tr) tr.classList.add('lit');
+          else if (S.blkEls[id]) S.blkEls[id].classList.add('lit');
+        }
+        clearTimeout(litTimer); litTimer = setTimeout(clearLit, 4000);
+      } else lightRows(pi, h.targets);
       const p = P[pi];
       const t = h.targets.map((id) => p.blocks[id]).filter(Boolean);
       const nonRow = t.filter((b) => b.kind !== 'row');
@@ -341,7 +379,12 @@
       const tr = e.target.closest('tr[data-blk]'); if (!tr || e.target.closest('.chip')) return;
       const sec = tr.closest('.slide-wrap'); const pi = slides.findIndex((s) => s.sec === sec); if (pi < 0) return;
       const id = +tr.dataset.blk; const p = P[pi];
-      const hs = (p.hotspots || []).filter((h) => h.targets.includes(id));
+      const seg = e.target.closest('span.seg');
+      if (seg) {
+        const hsub = (p.hotspots || []).find((h) => h.sub === seg.dataset.sub && h.targets.includes(id));
+        if (hsub) { activate(pi, hsub); e.stopPropagation(); return; }
+      }
+      const hs = (p.hotspots || []).filter((h) => h.targets.includes(id) && !h.sub);
       clearActive(); lightRows(pi, [id]);
       for (const h of hs) { const n = slides[pi].hsEls[h.id]; if (n) { n.classList.add('active'); if (n._dot) n._dot.classList.add('active'); } }
       e.stopPropagation();

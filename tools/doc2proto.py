@@ -61,6 +61,12 @@ def dist_pt_rect(x, y, r):
     return (dx * dx + dy * dy) ** 0.5
 
 
+def gap_rect(a, b):
+    dx = max(0, max(a['l'], b['l']) - min(a['l'] + a['w'], b['l'] + b['w']))
+    dy = max(0, max(a['t'], b['t']) - min(a['t'] + a['h'], b['t'] + b['h']))
+    return (dx * dx + dy * dy) ** 0.5
+
+
 def same_rect(a, b, tol=0.6):
     return all(abs(a[k] - b[k]) < tol for k in 'ltwh')
 
@@ -123,11 +129,31 @@ def table_cells(shape, SW, SH):
             if c.is_spanned:
                 row.append(None)
                 continue
-            paras = []
+            paras = []; lines = []
             bold = None; color = None; size = None; align = None
             for pg in c.text_frame.paragraphs:
                 runs = pg.runs
-                txt = ''.join(run.text for run in runs) if runs else pg.text
+                # 문단 안의 run/br을 순서대로 읽어 줄 단위 굵기 계산 (줄의 글자 절반 이상이 굵으면 굵은 줄)
+                cur = []  # [(text, bold)]
+                def end_line():
+                    t = ''.join(x for x, _ in cur)
+                    tot = sum(len(x.strip()) for x, _ in cur) or 1
+                    lines.append([t, sum(len(x.strip()) for x, b in cur if b) / tot > 0.5])
+                    cur.clear()
+                for child in pg._p:
+                    tag = child.tag.split('}')[1]
+                    if tag == 'r':
+                        rpr = child.find('a:rPr', NS)
+                        b = rpr is not None and rpr.get('b') in ('1', 'true')
+                        tnode = child.find('a:t', NS)
+                        cur.append((tnode.text or '' if tnode is not None else '', b))
+                    elif tag == 'br':
+                        end_line()
+                    elif tag == 'fld':
+                        tnode = child.find('a:t', NS)
+                        cur.append((tnode.text or '' if tnode is not None else '', False))
+                end_line()
+                txt = pg.text  # <a:br/>(줄바꿈)이 \x0b로 보존된다
                 if runs:
                     if bold is None and runs[0].font.bold is not None:
                         bold = runs[0].font.bold
@@ -146,7 +172,11 @@ def table_cells(shape, SW, SH):
                     bg = rgb_of(c.fill.fore_color)
             except Exception:
                 pass
-            row.append({'text': '\n'.join(paras).strip(), 'bold': bool(bold), 'color': color, 'bg': bg, 'align': align,
+            while lines and not lines[-1][0].strip():
+                lines.pop()
+            all_bold = bool(lines) and all(b for t, b in lines if t.strip())
+            row.append({'text': '\n'.join(paras).strip(), 'bold': all_bold,
+                        'lines': None if all_bold or not any(b for t, b in lines) else lines, 'color': color, 'bg': bg, 'align': align,
                         'size': size, 'colspan': c.span_width if c.is_merge_origin else 1, 'rowspan': c.span_height if c.is_merge_origin else 1})
         rows.append(row)
     default = min(sizes) if sizes else 9
@@ -159,11 +189,11 @@ def table_cells(shape, SW, SH):
 
 def shape_text(shape):
     if shape.has_text_frame:
-        return '\n'.join(p.text for p in shape.text_frame.paragraphs if p.text.strip()).strip()
+        return '\n'.join(p.text.replace('\x0b', '\n') for p in shape.text_frame.paragraphs if p.text.strip()).strip()
     if getattr(shape, 'has_table', False) and shape.has_table:
         rows = []
         for row in shape.table.rows:
-            cells = [c.text.strip().replace('\n', ' ') for c in row.cells]
+            cells = [c.text.strip().replace('\x0b', ' ').replace('\n', ' ') for c in row.cells]
             if any(cells):
                 rows.append(' | '.join(cells))
         return '\n'.join(rows)
@@ -199,8 +229,10 @@ def walk(shapes, SW, SH, xf=None, depth=0):
     return out
 
 
-def connector_ends(shape, rect):
-    """연결선의 시작/끝 좌표(%) + 연결된 도형 id + 화살표 방향."""
+def connector_ends(shape, rect, SW=16, SH=9):
+    """연결선의 시작/끝 좌표(%) + 연결된 도형 id + 화살표 방향.
+    화살촉(triangle/arrow/stealth)이 있는 쪽이 도착, 점(oval)·없음 쪽이 출발. 회전·뒤집기 반영."""
+    import math
     el = shape._element
     cxn = el.find('p:nvCxnSpPr/p:cNvCxnSpPr', NS)
     st = cxn.find('a:stCxn', NS) if cxn is not None else None
@@ -208,20 +240,32 @@ def connector_ends(shape, rect):
     xfrm = el.find('p:spPr/a:xfrm', NS)
     flipH = xfrm is not None and xfrm.get('flipH') == '1'
     flipV = xfrm is not None and xfrm.get('flipV') == '1'
+    rot = int(xfrm.get('rot', '0')) / 60000 if xfrm is not None else 0
     x0, y0 = rect['l'], rect['t']
     x1, y1 = rect['l'] + rect['w'], rect['t'] + rect['h']
     if flipH:
         x0, x1 = x1, x0
     if flipV:
         y0, y1 = y1, y0
+    if rot:
+        cx, cy = rect['l'] + rect['w'] / 2, rect['t'] + rect['h'] / 2
+        a = math.radians(rot)
+        def rp(x, y):
+            dx, dy = (x - cx) * SW, (y - cy) * SH
+            return cx + (dx * math.cos(a) - dy * math.sin(a)) / SW, cy + (dx * math.sin(a) + dy * math.cos(a)) / SH
+        (x0, y0), (x1, y1) = rp(x0, y0), rp(x1, y1)
     ln = el.find('p:spPr/a:ln', NS)
-    head = ln is not None and ln.find('a:headEnd', NS) is not None and ln.find('a:headEnd', NS).get('type') not in (None, 'none')
-    tail = ln is not None and ln.find('a:tailEnd', NS) is not None and ln.find('a:tailEnd', NS).get('type') not in (None, 'none')
+    def end_type(tag):
+        e = ln.find(tag, NS) if ln is not None else None
+        return (e.get('type') or 'none') if e is not None else 'none'
+    arrows = ('triangle', 'arrow', 'stealth')
+    head, tail = end_type('a:headEnd'), end_type('a:tailEnd')
+    arrow_at_end = tail in arrows or head not in arrows
     return {
         'start': (x0, y0), 'end': (x1, y1),
         'start_id': int(st.get('id')) if st is not None else None,
         'end_id': int(en.get('id')) if en is not None else None,
-        'arrow_at_end': tail or not head,  # 기본은 끝쪽 화살표
+        'arrow_at_end': arrow_at_end,
     }
 
 
@@ -244,9 +288,31 @@ def page_title(items):
     return ''
 
 
+def heading_text(items):
+    """슬라이드 상단(13% 이내)에서 글자가 가장 큰 텍스트 (표·작은 글씨 제외)."""
+    best = None
+    for sh, r, d in items:
+        if r['t'] > 13 or not sh.has_text_frame or (getattr(sh, 'has_table', False) and sh.has_table):
+            continue
+        t = shape_text(sh).replace('\x0b', ' ').split('\n')[0].strip()
+        if len(t) < 2 or t.lower() in ('page name', 'project', 'description'):
+            continue
+        size = 0
+        for pg in sh.text_frame.paragraphs:
+            for run in pg.runs:
+                if run.font.size is not None:
+                    size = max(size, run.font.size.pt)
+        score = size or r['h'] * 4  # 크기가 상속값이면 상자 높이로 추정
+        if best is None or score > best[0]:
+            best = (score, t)
+    return best[1] if best and best[0] >= 14 else ''
+
+
 def analyze_slide(slide, idx, SW, SH):
     items = walk(slide.shapes, SW, SH)
-    title = page_title(items)
+    section = page_title(items)
+    head = heading_text(items)
+    title = head if head and head != section else section
     if not title:
         try:
             if slide.shapes.title is not None and slide.shapes.title.has_text_frame:
@@ -278,7 +344,7 @@ def analyze_slide(slide, idx, SW, SH):
             continue
         is_conn = sh._element.tag.endswith('}cxnSp')
         if is_conn:
-            c = connector_ends(sh, r)
+            c = connector_ends(sh, r, SW, SH)
             dashed, rgb = line_info(sh)
             c['red'] = is_red(rgb)
             connectors.append(c)
@@ -327,7 +393,7 @@ def analyze_slide(slide, idx, SW, SH):
         rows = list(sh.table.rows)
         if not rows:
             continue
-        texts = [[c.text.strip() for c in row.cells] for row in rows]
+        texts = [[c.text.replace('\x0b', '\n').strip() for c in row.cells] for row in rows]
         col0_w = (sh.table.columns[0].width / SW * 100) if len(sh.table.columns) else r['w'] * 0.3
         tmeta = {'rect': r, 'col0_w': col0_w, 'rows': [], 'cells': table_cells(sh, SW, SH), 'role': 'table'}
         tables.append(tmeta)
@@ -337,10 +403,10 @@ def analyze_slide(slide, idx, SW, SH):
             weights.append(max(row.height / SH * 100, lines * 2.1))
         scale = r['h'] / sum(weights) if sum(weights) else 1
         y = r['t']
-        is_tip_table = any('툴팁' in c for c in texts[0])
+        is_tip_table = any(c.strip().startswith('툴팁') for c in texts[0]) and len(rows) > 1
         if is_tip_table:
             tmeta['role'] = 'tooltip'
-        elif any(re.fullmatch(r'0*\d{1,2}|[①-⑳]', t[0]) for t in texts if t and t[0]) and r['l'] > 65:
+        elif r['l'] > 65 or any(re.fullmatch(r'0*\d{1,2}|[①-⑳]', t[0]) for t in texts if t and t[0]):
             tmeta['role'] = 'desc'
         for i, (row, cells) in enumerate(zip(rows, texts)):
             h = weights[i] * scale
@@ -380,13 +446,14 @@ def analyze_slide(slide, idx, SW, SH):
     marker_ids = set()
     for sh, r, depth in items:
         text = shape_text(sh).strip()
-        m = re.fullmatch(r'0*(\d{1,2})|([①-⑳])', text)
+        m = re.fullmatch(r'0*(\d{1,2})(?:\s*[-.]\s*(\d{1,2}))?|([①-⑳])', text)
         if not m or r['w'] > 3.5 or r['h'] > 5:
             continue
         dashed, rgb = line_info(sh)
         if not (is_red(rgb) or is_red(fill_rgb(sh))):
             continue
-        n = int(m.group(1)) if m.group(1) else '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳'.index(m.group(2)) + 1
+        n = int(m.group(1)) if m.group(1) else '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳'.index(m.group(3)) + 1
+        sub = f'{n}-{int(m.group(2))}' if m.group(2) else None
         marker_ids.add(sh.shape_id)
         cx, cy = r['l'] + r['w'] / 2, r['t'] + r['h'] / 2
         cands = [b for b in blocks if b['shape_id'] != sh.shape_id and b['kind'] != 'row' and area(b['rect']) > area(r) * 3
@@ -398,7 +465,10 @@ def analyze_slide(slide, idx, SW, SH):
             hr = {'l': l, 't': t, 'w': max(r['l'] + r['w'], e['l'] + e['w']) - l, 'h': max(r['t'] + r['h'], e['t'] + e['h']) - t}
         else:
             hr = {'l': r['l'] - 0.6, 't': r['t'] - 0.6, 'w': max(r['w'] + 1.2, 2.5), 'h': max(r['h'] + 1.2, 3.5)}
-        h = {'id': len(hotspots), 'rect': hr, 'label': f'{n}번', 'targets': [], 'shape_id': sh.shape_id, 'marker': n, 'marker_rect': r}
+        h = {'id': len(hotspots), 'rect': hr, 'label': f'{sub or n}번', 'targets': [], 'shape_id': sh.shape_id,
+             'marker': sub or n, 'marker_rect': r}
+        if sub:
+            h['sub'] = sub
         row = numbered_rows.get(n)
         if row is not None:
             h['targets'].append(row['id'])
@@ -497,7 +567,16 @@ def analyze_slide(slide, idx, SW, SH):
             continue
         src_pt, dst_pt = (c['start'], c['end']) if c['arrow_at_end'] else (c['end'], c['start'])
         src_id, dst_id = (c['start_id'], c['end_id']) if c['arrow_at_end'] else (c['end_id'], c['start_id'])
-        h = id_to_hotspot.get(src_id) or nearest_hotspot(src_pt)
+        h = id_to_hotspot.get(src_id)
+        if h is None and src_id in id_to_block:
+            sb0 = id_to_block[src_id]['rect']
+            scx, scy = sb0['l'] + sb0['w'] / 2, sb0['t'] + sb0['h'] / 2
+            near_m = [(dist_pt_rect(scx, scy, x['rect']), x) for x in hotspots]
+            near_m = [x for x in near_m if x[0] < 1.5]
+            if near_m:
+                h = min(near_m, key=lambda x: x[0])[1]
+        if h is None:
+            h = nearest_hotspot(src_pt)
         if h is None:
             # 출발점에 핫스팟이 없으면 출발 도형 자체를 가상 핫스팟으로
             sb = id_to_block.get(src_id) or nearest_block(src_pt, [])
@@ -510,7 +589,18 @@ def analyze_slide(slide, idx, SW, SH):
         if tb is None or tb in mock:
             tb = nearest_block(dst_pt, mock)
         if tb is not None and tb['id'] not in h['targets']:
-            h['targets'].append(tb['id'])
+            if h.get('marker') is not None and tb['kind'] != 'row' and area(tb['rect']) > 4 * 100:
+                # 번호 마커에서 화면 목업(모달 등)으로 이어진 선 → 클릭 시 그 목업을 띄우는 팝업
+                desc = next((blocks[t]['text'] for t in h['targets'] if blocks[t]['kind'] == 'row'), '')
+                heads = sorted([b for b in blocks if b is not tb and b['text'] and contains(tb['rect'], b['rect']) and len(b['text'].split('\n')[0]) < 30],
+                               key=lambda b: (b['rect']['t'], b['rect']['l']))
+                label = tb['text'].split('\n')[0] if tb['text'] else (heads[0]['text'].split('\n')[0] if heads else h['label'])
+                tooltip_behaviors.append({'kind': 'popup', 'trigger': 'click', 'rect': h['rect'],
+                                          'label': label.strip()[:30],
+                                          'content': desc.split('\n', 1)[-1].strip()[:200] if desc else '',
+                                          'show_rect': tb['rect'], 'target_page': None, 'source': 'connector'})
+            else:
+                h['targets'].append(tb['id'])
 
     # 목업(핫스팟을 품은 가장 큰 블록) 표시
     for h in hotspots:
@@ -518,7 +608,7 @@ def analyze_slide(slide, idx, SW, SH):
         h['mockup'] = max(mock, key=lambda b: area(b['rect']))['id'] if mock else None
 
     return {
-        'index': idx, 'title': title, 'full_title': full_title or title, 'slide_id': slide.slide_id,
+        'index': idx, 'title': title, 'full_title': full_title or title, 'section': section, 'slide_id': slide.slide_id,
         'blocks': [{k: v for k, v in b.items() if k not in ('depth',)} for b in blocks],
         'hotspots': [{k: v for k, v in h.items() if k not in ('shape_id',)} for h in hotspots],
         'nav': nav, 'links': [], 'behaviors': tooltip_behaviors, 'tables': tables,
@@ -540,6 +630,8 @@ def cross_page_links(pages):
                 if h.get('mockup') is None or h.get('marker') is not None:
                     continue
                 qm = q['blocks'][h['mockup']]['rect']
+                if area(qm) > 45 * 100:
+                    continue  # 슬라이드 전체 틀이 같을 뿐 화면이 같다는 뜻은 아님
                 if not any(same_rect(m, qm) for m in mocks):
                     continue
                 if any(same_rect(own['rect'], h['rect']) for own in p['hotspots']):
@@ -587,12 +679,14 @@ def number_sections(pages, items_by_page=None):
             text = ' '.join(b['text'] for b in p['blocks'])
             t = '개정 이력' if ('Version' in text or '변경' in text) else f"페이지 {p['index'] + 1}"
         r = rel(t) or [t]
-        group = r[0]
-        is_sub = (len(r) >= 2 and group == prev_group) or (t == prev_title)
+        group = re.sub(r'\s*\(\s*\d+\s*/\s*\d+\s*\)\s*$', '', r[0]).strip()
+        is_sub = group == prev_group or t == prev_title
         if is_sub and n:
             sub += 1
             p['num'] = f'{n}.{sub}'
-            if t == prev_title:
+            if len(r) == 1 and t != prev_title:
+                p['label'] = r[0]
+            elif t == prev_title:
                 cands = [b['text'].split('\n')[0].strip() for b in p['blocks'] if not b['inner'] and b['text'] and b['kind'] == 'shape'
                          and b['rect']['t'] < 35 and b['rect']['l'] > 30 and 1 < len(b['text'].split('\n')[0].strip()) < 24 and b['text'].split('\n')[0].strip() != p['title']]
                 p['label'] = cands[0] if cands else f"{r[-1]} ({sub})"
@@ -603,6 +697,13 @@ def number_sections(pages, items_by_page=None):
             p['num'] = str(n)
             p['label'] = ' > '.join(r[-2:]) if len(r) >= 2 else r[-1]
         prev_group = group; prev_title = t
+    chapter = ''
+    for p in pages:
+        if p.get('kind') == 'chapter':
+            chapter = p['label'].strip()
+            continue
+        if chapter and p.get('label', '').startswith(chapter + '_'):
+            p['label'] = p['label'][len(chapter) + 1:].strip()
 
 
 def resolve_nav(pages):
@@ -672,7 +773,8 @@ def refine_rows(pdf, pages):
             ys, used = [], set()
             for row in t['rows']:
                 key = row['key'].split()[0] if row['key'] else ''
-                hit = next((w for w in inside if id(w) not in used and w[1] > (ys[-1] if ys else -1) and key and w[4].startswith(key[:4])), None)
+                last_y = next((y for y in reversed(ys) if y is not None), -1)
+                hit = next((w for w in inside if id(w) not in used and w[1] > last_y and key and w[4].startswith(key[:4])), None)
                 if hit is None:
                     ys.append(None)
                     continue
@@ -764,7 +866,8 @@ def main():
             'tables': [{'rect': t['rect'], 'role': t['role'], 'cells': t['cells'], 'rows': [r['block'] for r in t['rows']]} for t in p['tables']],
             'blocks': [{'id': b['id'], 'rect': b['rect'], 'text': b['text'], 'caption': b['caption'], 'kind': b['kind'], 'inner': b['inner']} for b in p['blocks']],
             'hotspots': [{'id': h['id'], 'rect': h['rect'], 'label': h['label'], 'targets': h['targets'],
-                          **({'marker': h['marker'], 'marker_rect': h['marker_rect']} if h.get('marker') is not None else {})} for h in p['hotspots']],
+                          **({'marker': h['marker'], 'marker_rect': h['marker_rect']} if h.get('marker') is not None else {}),
+                          **({'sub': h['sub']} if h.get('sub') else {})} for h in p['hotspots']],
             'links': p['links'], 'behaviors': p['behaviors'],
         } for p in pages],
     }

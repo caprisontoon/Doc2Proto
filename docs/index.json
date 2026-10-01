@@ -7,7 +7,8 @@
     {
      "version": "v0.1",
      "date": "2026-10-01",
-     "pages": 3
+     "pages": 3,
+     "protected": false
     }
    ]
   },
@@ -18,7 +19,20 @@
     {
      "version": "v0.01",
      "date": "2026-10-01",
-     "pages": 11
+     "pages": 11,
+     "protected": false
+    }
+   ]
+  },
+  {
+   "slug": "후원페이지",
+   "title": "투네이션 스트리밍 플랫폼 후원페이지",
+   "versions": [
+    {
+     "version": "v0.1",
+     "date": "2026-10-01",
+     "pages": 27,
+     "protected": false
     }
    ]
   }
