@@ -765,7 +765,7 @@ def refine_rows(pdf, pages):
             break
         page = doc[p['index']]
         PW, PH = page.rect.width, page.rect.height
-        words = [(w[0] / PW * 100, w[1] / PH * 100, w[2] / PW * 100, w[3] / PH * 100, w[4]) for w in page.get_text('words')]
+        words = [(w[0] / PW * 100, w[1] / PH * 100, w[2] / PW * 100, w[3] / PH * 100, w[4], w[5], w[6], w[7]) for w in page.get_text('words')]
         for t in p['tables']:
             r = t['rect']
             inside = [w for w in words if r['l'] - 0.5 <= w[0] <= r['l'] + t['col0_w'] + 0.5 and r['t'] - 0.5 <= w[1] <= r['t'] + r['h'] + 0.5]
@@ -801,6 +801,25 @@ def refine_rows(pdf, pages):
             for i, row in enumerate(t['rows']):
                 blk = p['blocks'][row['block']]
                 blk['rect'] = {'l': r['l'], 't': round(bounds[i], 3), 'w': r['w'], 'h': round(max(bounds[i + 1] - bounds[i], 1.0), 3)}
+            # 하위 항목('1-4.' 로 시작하는 줄)의 세로 범위
+            for i, row in enumerate(t['rows']):
+                blk = p['blocks'][row['block']]
+                br = blk['rect']
+                x_text = r['l'] + t['col0_w'] - 0.5
+                starts = []
+                for w in words:
+                    if not (x_text <= w[0] <= r['l'] + r['w'] and br['t'] - 0.3 <= w[1] <= br['t'] + br['h']):
+                        continue
+                    m = re.match(r'^(\d{1,2})\s*-\s*(\d{1,2})\.?', w[4])
+                    if m and w[7] == 0:
+                        starts.append((w[1], f'{int(m.group(1))}-{int(m.group(2))}'))
+                starts.sort()
+                subs = {}
+                for k, (y, key) in enumerate(starts):
+                    y1 = starts[k + 1][0] - 0.4 if k + 1 < len(starts) else br['t'] + br['h']
+                    subs[key] = {'l': round(x_text, 3), 't': round(y - 0.4, 3), 'w': round(r['l'] + r['w'] - x_text, 3), 'h': round(max(y1 - y + 0.4, 1.0), 3)}
+                if subs:
+                    blk['subs'] = subs
 
 
 def render_pages(pdf, outdir, width=1920):
@@ -864,6 +883,11 @@ def main():
         'pages': [{
             'title': p['title'], 'num': p.get('num', ''), 'label': p.get('label', p['title']), 'kind': p.get('kind', 'page'), 'img': f'p{p["index"] + 1}.jpg',
             'tables': [{'rect': t['rect'], 'role': t['role'], 'cells': t['cells'], 'rows': [r['block'] for r in t['rows']]} for t in p['tables']],
+            'rows': [{'key': r['key'], 'role': t['role'], 'rect': p['blocks'][r['block']]['rect'],
+                      'title': (p['blocks'][r['block']]['text'].split('\n')[0] if t['role'] == 'desc' else p['blocks'][r['block']]['caption']),
+                      'text': p['blocks'][r['block']]['text'],
+                      **({'subs': p['blocks'][r['block']]['subs']} if p['blocks'][r['block']].get('subs') else {})}
+                     for t in p['tables'] for r in t['rows']],
             'blocks': [{'id': b['id'], 'rect': b['rect'], 'text': b['text'], 'caption': b['caption'], 'kind': b['kind'], 'inner': b['inner']} for b in p['blocks']],
             'hotspots': [{'id': h['id'], 'rect': h['rect'], 'label': h['label'], 'targets': h['targets'],
                           **({'marker': h['marker'], 'marker_rect': h['marker_rect']} if h.get('marker') is not None else {}),

@@ -16,6 +16,12 @@ const model = {
   title: data.title, version: data.version, generated: data.generated, size: data.size,
   pages: data.pages.map((p) => ({ ...p, img: 'data:image/jpeg;base64,' + fs.readFileSync(path.join(dir, p.img)).toString('base64') })),
 };
+// 동작 화면(live)이 있으면 한 파일 안에 넣고, 열 때 blob URL로 띄운다
+let liveHtml = null;
+if (fs.existsSync(path.join(dir, 'live.json'))) {
+  model.live = JSON.parse(fs.readFileSync(path.join(dir, 'live.json'), 'utf8'));
+  liveHtml = fs.readFileSync(path.join(dir, model.live.src), 'utf8');
+}
 const esc = (s) => s.replace(/<\/script/gi, '<\\/script');
 const inner = `<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -23,7 +29,7 @@ const inner = `<!doctype html>
 <style>html,body{margin:0;height:100%;background:#e9ebef}</style></head>
 <body><div id="app"></div>
 <script>${esc(appJs)}</script>
-<script>window.D2P.init(${esc(JSON.stringify(model))}, { homeHref: '../../../' });</script>
+<script>(function(){var m=${esc(JSON.stringify(model))};${liveHtml ? `var L=${esc(JSON.stringify(liveHtml))};m.live.src=URL.createObjectURL(new Blob([L],{type:'text/html'}));` : ''}window.D2P.init(m,{homeHref:'../../../'});})();</script>
 </body></html>`;
 
 const enc = new TextEncoder();

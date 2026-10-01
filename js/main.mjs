@@ -22,9 +22,11 @@ async function openDoc(docPath) {
   const res = await fetch(base + 'data.json', { cache: 'no-cache' }).catch(() => null);
   if (!res || !res.ok) { status('문서를 찾을 수 없어요: ' + docPath); return; }
   const data = await res.json();
+  const live = await fetch(base + 'live.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (live) live.src = base + live.src;
   const model = {
     title: data.title, version: data.version, generated: data.generated, size: data.size,
-    pages: data.pages.map((p) => ({ ...p, img: base + p.img })),
+    pages: data.pages.map((p) => ({ ...p, img: base + p.img })), live,
   };
   status('');
   start(model, {
