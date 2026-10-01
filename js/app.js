@@ -108,8 +108,36 @@
   .d2p .modal .mb{padding:14px} .d2p .modal .mb p{margin:0 0 10px;color:var(--ink2);font-size:13px;white-space:pre-wrap}
   .d2p .fakein{position:absolute;z-index:23;font:inherit;font-size:13px;padding:4px 8px;border:2px solid var(--brand);border-radius:6px;background:#fff;color:#1b1d22;outline:0}
   /* 관련 기획 카드 */
-  .d2p .refs{position:fixed;right:18px;bottom:18px;width:min(380px,calc(100vw - 36px));max-height:52vh;overflow:auto;background:var(--side);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);z-index:30;display:none}
-  .d2p .refs.open{display:block}
+  /* 관련 기획 패널: 넓은 화면 = 오른쪽 칸(기획서를 밀어냄), 좁은 화면 = 하단 접이식 시트 */
+  .d2p .refs{display:none;background:var(--side);overflow:auto;min-width:0}
+  .d2p.rp-open .refs{display:block}
+  .d2p .refs .rh .cnt{font-weight:400;color:var(--muted);font-size:12px;margin-left:4px}
+  .d2p .refs .it.here{padding:7px 14px;cursor:pointer}
+  .d2p .refs .it.here .k{font-weight:600}
+  .d2p .refs .it.here .k .tg{margin-left:auto;color:var(--muted);font-size:11px;font-weight:400}
+  .d2p .refs .it.here:hover{background:var(--brand-soft)}
+  .d2p .refs .sect{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);padding:12px 14px 4px}
+  .d2p .refs .hist{padding:0 8px 14px}
+  .d2p .refs .hist button{display:flex;width:100%;text-align:left;gap:6px;border:0;background:none;border-radius:7px;padding:5px 8px;font-size:12.5px;color:var(--ink2)}
+  .d2p .refs .hist button:hover{background:var(--brand-soft);color:var(--brand)}
+  .d2p .refs .hist button em{font-style:normal;color:var(--muted);min-width:34px}
+  .d2p .rtab{display:none;position:fixed;z-index:31;border:1px solid var(--line);background:var(--side);color:var(--ink);box-shadow:var(--shadow);font-weight:700;font-size:12.5px;cursor:pointer}
+  .d2p.rp-has:not(.rp-open):not(.off) .rtab{display:flex}
+  .d2p .rtab b{background:var(--brand);color:#fff;border-radius:999px;font-size:11px;padding:0 6px;line-height:17px}
+  @media (min-width:1101px){
+    .d2p.rp-open{grid-template-columns:260px minmax(0,1fr) 340px}
+    .d2p.rp-open.nav-off{grid-template-columns:minmax(0,1fr) 340px}
+    .d2p .refs{height:100%;border-left:1px solid var(--line)}
+    .d2p .rtab{right:0;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;padding:14px 7px;border-radius:10px 0 0 10px;border-right:0;gap:8px;align-items:center}
+    .d2p .rtab b{writing-mode:horizontal-tb}
+    .d2p.rp-has:not(.rp-open):not(.off) main{padding-right:46px}
+  }
+  @media (max-width:1100px){
+    .d2p .refs{position:fixed;left:0;right:0;bottom:0;max-height:46vh;z-index:30;border-top:1px solid var(--line);box-shadow:0 -6px 24px rgba(20,24,40,.14);border-radius:14px 14px 0 0}
+    .d2p .rtab{left:50%;bottom:12px;transform:translateX(-50%);padding:8px 14px;border-radius:999px;gap:8px;align-items:center;max-width:calc(100vw - 32px);white-space:nowrap}
+    .d2p .rtab span{overflow:hidden;text-overflow:ellipsis}
+    .d2p.rp-open main{padding-bottom:48vh}
+  }
   .d2p .refs .rh{position:sticky;top:0;background:var(--side);display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
   .d2p .refs .rh b{flex:1;font-size:13.5px}
   .d2p .refs .rh button{padding:2px 8px;font-size:12px}
@@ -178,7 +206,7 @@
   }
   @media print{
     .d2p{position:static;display:block}
-    .d2p nav.toc,.d2p .refs,.d2p .toast,.d2p .dot,.d2p .hs,.d2p .lnk,.d2p .bh,.d2p .hl,.d2p .rowhit,.d2p iframe.live,.d2p .livebadge,.d2p .copybtn,.d2p .cap{display:none!important}
+    .d2p nav.toc,.d2p .refs,.d2p .rtab,.d2p .toast,.d2p .dot,.d2p .hs,.d2p .lnk,.d2p .bh,.d2p .hl,.d2p .rowhit,.d2p iframe.live,.d2p .livebadge,.d2p .copybtn,.d2p .cap{display:none!important}
     .d2p main{overflow:visible;padding:0}
     .d2p .slide-wrap{max-width:none;margin:0;page-break-after:always}
     .d2p .slide-scroll{box-shadow:none;border-radius:0}
@@ -222,7 +250,10 @@
     /* ---------- 공통 UI ---------- */
     const toast = el('div', 'toast'); let toastT;
     const say = (m) => { toast.textContent = m; toast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('show'), 1800); };
-    const refs = el('div', 'refs');
+    const refs = el('aside', 'refs');
+    const rtab = el('button', 'rtab'); rtab.setAttribute('aria-label', '관련 기획 펼치기');
+    const refHist = [];   // 최근 본 기획 (동작 화면 요소 단위)
+    let refLabel = '';
 
     /* ---------- 참조 해석: "21:7", "8:1-4", "20:공통" ---------- */
     function resolve(ref) {
@@ -258,9 +289,7 @@
     const mobile = () => matchMedia('(max-width:760px)').matches;
     const setNav = (show) => {
       if (mobile()) { root.classList.toggle('nav-show', show); return; }
-      const keep = slides[currentIdx];   // 폭이 바뀌어도 보던 페이지에 머문다
-      root.classList.toggle('nav-off', !show);
-      if (keep) requestAnimationFrame(() => { main.style.scrollBehavior = 'auto'; keep.sec.scrollIntoView({ block: 'start' }); main.style.scrollBehavior = ''; navLock = Date.now() + 300; });
+      relayout(() => root.classList.toggle('nav-off', !show));   // 폭이 바뀌어도 보던 위치에 머문다
       try { localStorage.setItem('d2p.nav', show ? '1' : '0'); } catch {}
     };
     fold.onclick = () => setNav(false);
@@ -338,7 +367,7 @@
       const go = el('button', null, '변경 요약 보기'); go.style.width = '100%'; go.style.fontSize = '12.5px';
       go.onclick = () => { if (!root.classList.contains('diff-on')) dsw.click(); main.scrollTo({ top: 0, behavior: 'smooth' }); };
       dc.append(go);
-      dsw.onclick = () => { dsw.classList.toggle('on'); root.classList.toggle('diff-on', dsw.classList.contains('on')); refs.classList.remove('open'); slides.forEach(sendChanged); };
+      dsw.onclick = () => { dsw.classList.toggle('on'); root.classList.toggle('diff-on', dsw.classList.contains('on')); closePanel(); slides.forEach(sendChanged); };
       nav.append(dc);
     }
     const baseImg = (n) => (D && D.baseDir ? `${D.baseDir}p${n}.jpg` : null);
@@ -519,10 +548,7 @@
       chg.append(ul);
     }
     function showChange(pi, it) {
-      refs.innerHTML = '';
-      const head = el('div', 'rh'); head.append(el('b', null, `변경 내용 · ${pi + 1}p ${it.label}`));
-      const x = el('button', null, '✕'); x.onclick = () => refs.classList.remove('open'); head.append(x);
-      refs.append(head);
+      panelStart(`변경 내용 · ${pi + 1}p ${it.label}`, '', '변경 내용');
       const box = el('div', 'it'); const d = it.d;
       const k = el('div', 'k'); k.append(el('i', 'tag ' + it.st, TAG[it.st]), el('span', null, it.title || it.label)); box.append(k);
       if (d.segs) { box.append(el('div', 'lbl', `${D.base} → ${model.version || '현재'}`), segHtml(d.segs)); }
@@ -530,8 +556,8 @@
       else if (it.st === 'removed' && (d.old || d.text)) box.append(el('div', 'lbl', `${D.base}에 있던 내용`), segHtml([['-', d.old || d.text]]));
       if (it.st === 'moved') box.append(el('p', null, '위치가 바뀌었어요. 보라색 점선이 이전 위치예요.'));
       if (it.kind === 'row' && d.old_key && d.key && d.old_key !== d.key) box.append(el('p', null, `번호 변경: ${d.old_key} → ${d.key}`));
-      refs.append(box);
-      refs.classList.add('open');
+      refs.append(box); panelHistory();
+      openPanel();
       clearLit();
       if (it.rect) light(pi, it.rect); if (it.old) light(pi, it.old, true);
       if (!isVisible(slides[pi].sec)) goto(pi);
@@ -717,17 +743,60 @@
       send(S, { type: 'focus', ref });
     }
     // 동작 화면 요소 클릭 → 관련 기획 표시
+    function panelStart(title, count, tabText) {
+      refs.innerHTML = '';
+      const head = el('div', 'rh'); const t = el('b', null, title); if (count) t.append(el('span', 'cnt', count)); head.append(t);
+      const x = el('button', null, matchMedia('(max-width:1100px)').matches ? '▼' : '»'); x.title = '접기 (Esc)'; x.onclick = closePanel; head.append(x);
+      refs.append(head);
+      refLabel = tabText || title;
+      rtab.innerHTML = ''; rtab.append(el('span', null, '관련 기획'), el('b', null, count ? count.replace(/\D/g, '') || '1' : '1'));
+      if (tabText) rtab.append(el('span', null, tabText));
+      rtab.title = `${refLabel} — 펼치기`;
+      root.classList.add('rp-has');
+    }
+    function panelHistory() {
+      if (refHist.length < 2) return;
+      refs.append(el('div', 'sect', '최근 본 기획'));
+      const h = el('div', 'hist');
+      for (const e of refHist.slice(1, 6)) {
+        const b = el('button'); b.append(el('em', null, `${e.pi + 1}p`), el('span', null, e.label || '선택한 요소'));
+        b.onclick = () => { if (!isVisible(slides[e.pi].sec)) goto(e.pi); showRefs(e.pi, e.list, e.label); };
+        h.append(b);
+      }
+      refs.append(h);
+    }
+    // 패널을 열고 닫아도 보던 위치 유지 (폭이 바뀌면 슬라이드 높이도 바뀜)
+    function relayout(fn) {
+      const top = main.scrollTop, S = slides.find((x) => x.sec.offsetTop + x.sec.offsetHeight > top) || slides[currentIdx];
+      const frac = S ? (top - S.sec.offsetTop) / Math.max(1, S.sec.offsetHeight) : 0;
+      fn();
+      if (S) { main.style.scrollBehavior = 'auto'; main.scrollTop = S.sec.offsetTop + frac * S.sec.offsetHeight; main.style.scrollBehavior = ''; navLock = Date.now() + 300; }
+    }
+    function openPanel() { if (!root.classList.contains('rp-open')) relayout(() => root.classList.add('rp-open')); }
+    function closePanel() { if (root.classList.contains('rp-open')) relayout(() => root.classList.remove('rp-open')); }
+    rtab.onclick = openPanel;
     function showRefs(pi, list, label) {
       const items = list.map(resolve).filter(Boolean);
       if (!items.length) return;
       clearLit(); clearActive();
       items.filter((r) => r.pi === pi).forEach((r) => { lightRef(`${r.pi + 1}:${r.key}`, true); markHotspots(pi, r.key); });
-      refs.innerHTML = '';
-      const head = el('div', 'rh'); head.append(el('b', null, `관련 기획 · ${label || '선택한 요소'}`));
-      const x = el('button', null, '✕'); x.onclick = () => refs.classList.remove('open'); head.append(x);
-      refs.append(head);
+      const key = pi + '|' + list.join(' ');
+      const hi = refHist.findIndex((e) => e.key === key); if (hi >= 0) refHist.splice(hi, 1);
+      refHist.unshift({ key, pi, list, label }); refHist.length = Math.min(refHist.length, 8);
+      panelStart(`관련 기획 · ${label || '선택한 요소'}`, `${items.length}건`, label || '');
       items.sort((a, b) => (a.pi === pi ? -1 : 0) - (b.pi === pi ? -1 : 0) || a.pi - b.pi);
       for (const r of items) {
+        if (r.pi === pi) {   // 이 페이지 항목: 이미 노랗게 표시되므로 한 줄로 (누르면 내용 펼침)
+          const it = el('div', 'it here'); const k = el('div', 'k');
+          if (/^\d{1,2}(-\d{1,2})?$/.test(r.key)) k.append(el('i', null, r.key)); else k.append(el('b', 'kn', r.key));
+          k.append(el('span', null, r.title.replace(/^\d{1,2}-\d{1,2}\.\s*/, '')), el('span', 'tg', '이 페이지 ▾'));
+          it.append(k);
+          const body = r.text.split('\n').slice(1).join('\n').trim();
+          let p = null;
+          it.onclick = () => { if (p) { p.remove(); p = null; k.lastChild.textContent = '이 페이지 ▾'; return; } if (!body) return; p = el('p', null, body); it.append(p); k.lastChild.textContent = '이 페이지 ▴'; lightRef(`${r.pi + 1}:${r.key}`); };
+          refs.append(it);
+          continue;
+        }
         const it = el('div', 'it'); const k = el('div', 'k');
         k.append(el('span', null, `${r.pi + 1}p ${P[r.pi].num ? '(' + P[r.pi].num + ')' : ''}`));
         if (/^\d{1,2}(-\d{1,2})?$/.test(r.key)) k.append(el('i', null, r.key)); else { const kb = el('b', 'kn', r.key); k.append(kb); }
@@ -739,7 +808,8 @@
         if (body) it.append(el('p', null, body.length > 320 ? body.slice(0, 320) + '…' : body));
         refs.append(it);
       }
-      refs.classList.add('open');
+      panelHistory();
+      openPanel();
     }
 
     /* ---------- 표 복사 ---------- */
@@ -827,18 +897,18 @@
       root.classList.toggle('off', !on);
       hint.style.display = on ? '' : 'none'; offHint.style.display = on ? 'none' : '';
       if (LIVE) root.classList.toggle('live-on', on);
-      if (!on) { refs.classList.remove('open'); clearLit(); clearActive(); }
+      if (!on) { closePanel(); clearLit(); clearActive(); }
     };
     bShare.onclick = async () => {
       try { const url = await (opts.getShareUrl ? opts.getShareUrl() : Promise.resolve(location.href)); await navigator.clipboard.writeText(url); say('링크를 복사했어요'); }
       catch (e) { say(e && e.message ? e.message : '링크를 만들지 못했어요'); }
     };
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { clearFloating(); refs.classList.remove('open'); const bd = root.querySelector('.backdrop'); if (bd) bd.remove(); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { clearFloating(); closePanel(); const bd = root.querySelector('.backdrop'); if (bd) bd.remove(); } });
     window.addEventListener('hashchange', applyHash);
 
     mountGhosts();
     syncEvents();
-    root.append(nav, main, refs, toast, navOpen);
+    root.append(nav, main, refs, toast, navOpen, rtab);
     document.addEventListener('keydown', (e) => {
       if (e.key !== '[' || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''))) return;
       setNav(mobile() ? !root.classList.contains('nav-show') : root.classList.contains('nav-off'));
