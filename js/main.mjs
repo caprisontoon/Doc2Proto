@@ -23,7 +23,7 @@ async function openDoc(docPath) {
   if (!res || !res.ok) { status('문서를 찾을 수 없어요: ' + docPath); return; }
   const data = await res.json();
   const model = {
-    title: data.title + (data.version ? ` · ${data.version}` : ''),
+    title: data.title, version: data.version, generated: data.generated, size: data.size,
     pages: data.pages.map((p) => ({ ...p, img: base + p.img })),
   };
   status('');
@@ -37,7 +37,7 @@ async function versionsOf(slug, current) {
   const idx = await fetch('docs/index.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const doc = idx && idx.docs.find((d) => d.slug === slug);
   if (!doc) return null;
-  return doc.versions.map((v) => ({ label: v.version, href: `?doc=docs/${slug}/${v.version}`, current: v.version === current }));
+  return doc.versions.map((v) => ({ label: v.version + (v.protected ? ' 🔒' : ''), href: v.protected ? `docs/${slug}/${v.version}/index.html` : `?doc=docs/${slug}/${v.version}`, current: v.version === current }));
 }
 
 /* ---------- 랜딩: 문서 목록 ---------- */
@@ -50,19 +50,20 @@ async function renderList() {
     const row = document.createElement('div');
     row.className = 'doc';
     const latest = d.versions[d.versions.length - 1];
+    const href = (v) => v.protected ? `docs/${d.slug}/${v.version}/index.html` : `?doc=docs/${d.slug}/${v.version}`;
     const a = document.createElement('a');
-    a.href = `?doc=docs/${d.slug}/${latest.version}`;
+    a.href = href(latest);
     a.className = 'doc-title';
     a.textContent = d.title;
     const meta = document.createElement('div');
     meta.className = 'doc-meta';
-    meta.textContent = `${latest.version} · ${latest.date} · ${latest.pages}p`;
+    meta.textContent = `${latest.version} · ${latest.date} · ${latest.pages}p${latest.protected ? ' · 🔒 비밀번호' : ''}`;
     const vers = document.createElement('div');
     vers.className = 'doc-vers';
     for (const v of [...d.versions].reverse()) {
       const l = document.createElement('a');
-      l.href = `?doc=docs/${d.slug}/${v.version}`;
-      l.textContent = v.version;
+      l.href = href(v);
+      l.textContent = v.version + (v.protected ? ' 🔒' : '');
       vers.append(l);
     }
     row.append(a, meta, vers);
@@ -88,7 +89,7 @@ async function openPdf(file) {
       const [vx0, vy0] = p.origin, W = p.width, H = p.height;
       return { l: ((bbox[0] - vx0) / W) * 100, t: ((H - (bbox[3] - vy0)) / H) * 100, w: ((bbox[2] - bbox[0]) / W) * 100, h: ((bbox[3] - bbox[1]) / H) * 100 };
     };
-    const model = { title: file.name.replace(/\.pdf$/i, '') + ' (미리보기)', pages: [] };
+    const model = { title: file.name.replace(/\.pdf$/i, '') + ' (미리보기)', size: [pages[0] ? pages[0].width : 960, pages[0] ? pages[0].height : 540], pages: [] };
     for (let i = 0; i < pages.length; i++) {
       status(`페이지 렌더링 중… ${i + 1}/${pages.length}`);
       const p = pages[i];
@@ -104,7 +105,7 @@ async function openPdf(file) {
         blocks: p.blocks.map((b) => ({ id: b.id, rect: toRect(b.bbox, p), text: b.text, caption: b.caption, inner: !!b.sub })),
         hotspots: p.hotspots.map((h) => ({ id: h.id, rect: toRect(h.bbox, p), label: h.label, targets: h.targets })),
         links: p.links.map((l) => ({ page: l.page, hotspot: l.hotspot, rect: toRect(l.bbox, p) })),
-        behaviors: [],
+        behaviors: [], tables: [], num: String(i + 1), label: p.title || `페이지 ${i + 1}`,
       });
     }
     status('');

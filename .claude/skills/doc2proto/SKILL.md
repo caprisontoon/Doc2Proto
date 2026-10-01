@@ -5,7 +5,7 @@ description: PPTX 상세기획서를 인터랙티브 기획서(docs/<slug>/<vers
 
 # /doc2proto — PPTX 기획서 → 인터랙티브 기획서 배포
 
-인자: `<기획서.pptx> [--slug 이름] [--version v0.2] [--pdf 내보낸.pdf]`
+인자: `<기획서.pptx> [--slug 이름] [--version v0.2] [--pdf 내보낸.pdf] [--protect 비밀번호]`
 
 ## 흐름
 
@@ -19,6 +19,9 @@ python tools/doc2proto.py "<기획서.pptx>" --slug <slug> --version <version> -
 - version: 기획서의 버전 표기를 그대로(v0.1, v0.2 …). 인자가 없으면 사용자에게 묻는다.
 - 스크립트가 하는 일: 빨간 점선 도형 → 핫스팟, 연결선의 시작/끝 도형 → 핫스팟↔설명 블록 매핑, 슬라이드 점프 하이퍼링크 → `navigate` 동작, LibreOffice/PowerPoint로 페이지 이미지(`p1.jpg`…) 생성, `data.json` 작성, `docs/index.json` 갱신.
 - `python-pptx`, `pymupdf`가 필요하다. LibreOffice도 PowerPoint도 없으면 사용자에게 PowerPoint에서 PDF로 내보내 달라고 하고 `--pdf`로 넘긴다.
+- 표는 셀 단위(텍스트·굵기·색·병합·열 너비)로 추출되어 뷰어에서 HTML 표로 다시 그려진다. 목차 번호(3, 4.1 …)는 슬라이드 제목에서 자동으로 매긴다 — 어색하면 `data.json`의 `num`/`label`을 직접 고친다.
+- 비밀번호가 필요한 문서는 `--protect <비밀번호>`: 암호화된 단일 `index.html`만 `docs/`에 남고 원본은 `work/<slug>/<version>/`(git 제외)에 둔다. 동작을 고친 뒤에는 `node tools/protect.mjs work/<slug>/<version> <비밀번호>`로 다시 잠그고 생성된 index.html을 docs 쪽으로 복사한다. 비밀번호는 커밋 메시지·문서 어디에도 적지 않는다.
+- 다시 돌릴 때 손으로 쓴 동작을 지키려면: 돌리기 전 `data.json`을 복사해 두고 `python tools/merge_behaviors.py <이전> <새>`로 되살린다.
 - 출력 요약(핫스팟 n개, 설명 연결 n개)을 확인한다. 설명 연결이 0개면 기획서가 빨간 점선/연결선 관행을 쓰지 않는 것이니, 사용자에게 어떤 표기 규칙을 쓰는지 묻고 `tools/doc2proto.py`의 `is_red`/`line_info` 판정을 조정한다.
 
 ### 2. 프로토타입 동작 작성 (Claude)
@@ -64,7 +67,7 @@ git commit -m "docs: <문서 제목> <version>"
 git push
 ```
 
-Vercel이 `main`을 자동 배포한다. 공유 링크: `https://doc2proto.vercel.app/?doc=docs/<slug>/<version>` — 특정 페이지·핫스팟은 `#p=6&h=0`을 붙인다.
+Vercel이 `main`을 자동 배포한다. 공유 링크: `https://doc2proto.vercel.app/?doc=docs/<slug>/<version>` (보호 문서는 `https://doc2proto.vercel.app/docs/<slug>/<version>/index.html`) — 특정 페이지는 `#s4`, 특정 마커는 `#p=4&h=1`을 붙인다.
 
 ## 수정·재배포
 

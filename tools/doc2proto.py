@@ -100,6 +100,63 @@ def fill_rgb(shape):
     return tuple(int(v[i:i + 2], 16) for i in (0, 2, 4))
 
 
+def rgb_of(color):
+    try:
+        if color is not None and color.type is not None and color.rgb is not None:
+            return '#%02x%02x%02x' % tuple(color.rgb)
+    except Exception:
+        pass
+    return None
+
+
+def table_cells(shape, SW, SH):
+    """표를 셀 단위 데이터로. {cols:[%...], rows:[[{text,bold,color,bg,align,size,colspan,rowspan}|None,...],...]}"""
+    from pptx.enum.text import PP_ALIGN
+    tbl = shape.table
+    total = sum(c.width for c in tbl.columns) or 1
+    cols = [round(c.width / total * 100, 2) for c in tbl.columns]
+    rows = []
+    sizes = []
+    for r in tbl.rows:
+        row = []
+        for c in r.cells:
+            if c.is_spanned:
+                row.append(None)
+                continue
+            paras = []
+            bold = None; color = None; size = None; align = None
+            for pg in c.text_frame.paragraphs:
+                runs = pg.runs
+                txt = ''.join(run.text for run in runs) if runs else pg.text
+                if runs:
+                    if bold is None and runs[0].font.bold is not None:
+                        bold = runs[0].font.bold
+                    if color is None:
+                        color = rgb_of(runs[0].font.color)
+                    if size is None and runs[0].font.size is not None:
+                        size = runs[0].font.size.pt
+                if align is None and pg.alignment is not None:
+                    align = {PP_ALIGN.CENTER: 'center', PP_ALIGN.RIGHT: 'right'}.get(pg.alignment, 'left')
+                paras.append(txt.replace('\x0b', '\n'))
+            if size:
+                sizes.append(size)
+            bg = None
+            try:
+                if c.fill.type == 1:  # solid
+                    bg = rgb_of(c.fill.fore_color)
+            except Exception:
+                pass
+            row.append({'text': '\n'.join(paras).strip(), 'bold': bool(bold), 'color': color, 'bg': bg, 'align': align,
+                        'size': size, 'colspan': c.span_width if c.is_merge_origin else 1, 'rowspan': c.span_height if c.is_merge_origin else 1})
+        rows.append(row)
+    default = min(sizes) if sizes else 9
+    for row in rows:
+        for c in row:
+            if c and not c['size']:
+                c['size'] = default
+    return {'cols': cols, 'rows': rows}
+
+
 def shape_text(shape):
     if shape.has_text_frame:
         return '\n'.join(p.text for p in shape.text_frame.paragraphs if p.text.strip()).strip()
@@ -200,8 +257,11 @@ def analyze_slide(slide, idx, SW, SH):
         shorter = [shape_text(sh).split('\n')[0].strip() for sh, r, d in items
                    if r['t'] < 15 and shape_text(sh) and len(shape_text(sh).split('\n')[0].strip()) < len(title)
                    and title.endswith(shape_text(sh).split('\n')[0].strip())]
+        full_title = title
         if shorter:
             title = min(shorter, key=len)
+    else:
+        full_title = ''
 
     hotspots, blocks, connectors, nav = [], [], [], []
     id_to_block, id_to_hotspot = {}, {}
@@ -269,7 +329,7 @@ def analyze_slide(slide, idx, SW, SH):
             continue
         texts = [[c.text.strip() for c in row.cells] for row in rows]
         col0_w = (sh.table.columns[0].width / SW * 100) if len(sh.table.columns) else r['w'] * 0.3
-        tmeta = {'rect': r, 'col0_w': col0_w, 'rows': []}
+        tmeta = {'rect': r, 'col0_w': col0_w, 'rows': [], 'cells': table_cells(sh, SW, SH), 'role': 'table'}
         tables.append(tmeta)
         weights = []
         for row, cells in zip(rows, texts):
@@ -278,6 +338,10 @@ def analyze_slide(slide, idx, SW, SH):
         scale = r['h'] / sum(weights) if sum(weights) else 1
         y = r['t']
         is_tip_table = any('툴팁' in c for c in texts[0])
+        if is_tip_table:
+            tmeta['role'] = 'tooltip'
+        elif any(re.fullmatch(r'0*\d{1,2}|[①-⑳]', t[0]) for t in texts if t and t[0]) and r['l'] > 65:
+            tmeta['role'] = 'desc'
         for i, (row, cells) in enumerate(zip(rows, texts)):
             h = weights[i] * scale
             rr = {'l': r['l'], 't': round(y, 3), 'w': r['w'], 'h': round(h, 3)}
@@ -334,7 +398,7 @@ def analyze_slide(slide, idx, SW, SH):
             hr = {'l': l, 't': t, 'w': max(r['l'] + r['w'], e['l'] + e['w']) - l, 'h': max(r['t'] + r['h'], e['t'] + e['h']) - t}
         else:
             hr = {'l': r['l'] - 0.6, 't': r['t'] - 0.6, 'w': max(r['w'] + 1.2, 2.5), 'h': max(r['h'] + 1.2, 3.5)}
-        h = {'id': len(hotspots), 'rect': hr, 'label': f'{n}번', 'targets': [], 'shape_id': sh.shape_id, 'marker': n}
+        h = {'id': len(hotspots), 'rect': hr, 'label': f'{n}번', 'targets': [], 'shape_id': sh.shape_id, 'marker': n, 'marker_rect': r}
         row = numbered_rows.get(n)
         if row is not None:
             h['targets'].append(row['id'])
@@ -454,7 +518,7 @@ def analyze_slide(slide, idx, SW, SH):
         h['mockup'] = max(mock, key=lambda b: area(b['rect']))['id'] if mock else None
 
     return {
-        'index': idx, 'title': title, 'slide_id': slide.slide_id,
+        'index': idx, 'title': title, 'full_title': full_title or title, 'slide_id': slide.slide_id,
         'blocks': [{k: v for k, v in b.items() if k not in ('depth',)} for b in blocks],
         'hotspots': [{k: v for k, v in h.items() if k not in ('shape_id',)} for h in hotspots],
         'nav': nav, 'links': [], 'behaviors': tooltip_behaviors, 'tables': tables,
@@ -483,6 +547,62 @@ def cross_page_links(pages):
                 if area(h['rect']) > area(qm) * 0.5:
                     continue
                 p['links'].append({'page': q['index'], 'hotspot': h['id'], 'rect': h['rect']})
+
+
+def number_sections(pages, items_by_page=None):
+    """슬라이드 제목으로 목차 번호를 만든다.
+    경로형 제목(A > B > C)은 공통 접두 경로를 뗀 뒤, 같은 그룹이 이어지면 N, N.1, N.2 …
+    같은 제목이 연속되면(화면 하나를 여러 장에 나눠 설명) 역시 N.1, N.2 …"""
+    def segs(t):
+        return [x.strip() for x in t.replace('\x0b', ' ').split('>') if x.strip()]
+    titled = [segs(p.get('full_title') or p['title']) for p in pages if (p.get('full_title') or p['title']).strip()]
+    crumbs = [t for t in titled if len(t) > 1]
+    prefix = []
+    if crumbs:
+        for i in range(min(len(t) for t in crumbs)):
+            if all(t[i] == crumbs[0][i] for t in crumbs):
+                prefix.append(crumbs[0][i])
+            else:
+                break
+        if any(len(t) - len(prefix) < 1 for t in crumbs):
+            prefix = prefix[:-1]
+    def rel(t):
+        sg = segs(t)
+        return sg[len(prefix):] if len(sg) > len(prefix) and sg[:len(prefix)] == prefix else sg
+    n = 0; sub = 0
+    prev_group = None; prev_title = None
+    last = len(pages) - 1
+    for p in pages:
+        t = (p.get('full_title') or p['title']).replace('\x0b', ' ').strip()
+        has_table = any(b['kind'] == 'table' for b in p['blocks'])
+        content = bool(p['hotspots']) or has_table or len(p['blocks']) > 8
+        if p['index'] == 0 and not has_table:
+            p['num'] = ''; p['label'] = '표지'; prev_group = None; prev_title = None; continue
+        if not t and not content:
+            big = sorted([b for b in p['blocks'] if b['text']], key=lambda b: -area(b['rect']))
+            p['num'] = ''; p['label'] = (big[0]['text'].split('\n')[0][:24] if big else f"페이지 {p['index'] + 1}")
+            p['kind'] = 'chapter' if (big and p['index'] != last) else 'plain'
+            prev_group = None; prev_title = None; continue
+        if not t:
+            text = ' '.join(b['text'] for b in p['blocks'])
+            t = '개정 이력' if ('Version' in text or '변경' in text) else f"페이지 {p['index'] + 1}"
+        r = rel(t) or [t]
+        group = r[0]
+        is_sub = (len(r) >= 2 and group == prev_group) or (t == prev_title)
+        if is_sub and n:
+            sub += 1
+            p['num'] = f'{n}.{sub}'
+            if t == prev_title:
+                cands = [b['text'].split('\n')[0].strip() for b in p['blocks'] if not b['inner'] and b['text'] and b['kind'] == 'shape'
+                         and b['rect']['t'] < 35 and b['rect']['l'] > 30 and 1 < len(b['text'].split('\n')[0].strip()) < 24 and b['text'].split('\n')[0].strip() != p['title']]
+                p['label'] = cands[0] if cands else f"{r[-1]} ({sub})"
+            else:
+                p['label'] = r[-1]
+        else:
+            n += 1; sub = 0
+            p['num'] = str(n)
+            p['label'] = ' > '.join(r[-2:]) if len(r) >= 2 else r[-1]
+        prev_group = group; prev_title = t
 
 
 def resolve_nav(pages):
@@ -606,6 +726,7 @@ def main():
     ap.add_argument('--pdf', help='이미 내보낸 PDF (LibreOffice/PowerPoint 없을 때)')
     ap.add_argument('--docs', default=str(Path(__file__).resolve().parent.parent / 'docs'), help='docs 폴더 경로')
     ap.add_argument('--no-render', action='store_true', help='페이지 이미지 생성 생략')
+    ap.add_argument('--protect', metavar='비밀번호', help='비밀번호로 잠근 단일 index.html로 배포 (원본 data.json·이미지는 work/ 로 이동)')
     args = ap.parse_args()
 
     pptx_path = Path(args.pptx)
@@ -625,6 +746,7 @@ def main():
         pages.append(analyze_slide(slide, i, SW, SH))
     resolve_nav(pages)
     cross_page_links(pages)
+    number_sections(pages, None)
 
     if not args.no_render:
         with tempfile.TemporaryDirectory() as td:
@@ -636,11 +758,13 @@ def main():
 
     data = {
         'title': title, 'slug': slug, 'version': version, 'source': pptx_path.name,
-        'generated': date.today().isoformat(), 'aspect': round(SW / SH, 4),
+        'generated': date.today().isoformat(), 'aspect': round(SW / SH, 4), 'size': [round(SW / 12700, 2), round(SH / 12700, 2)],
         'pages': [{
-            'title': p['title'], 'img': f'p{p["index"] + 1}.jpg',
+            'title': p['title'], 'num': p.get('num', ''), 'label': p.get('label', p['title']), 'kind': p.get('kind', 'page'), 'img': f'p{p["index"] + 1}.jpg',
+            'tables': [{'rect': t['rect'], 'role': t['role'], 'cells': t['cells'], 'rows': [r['block'] for r in t['rows']]} for t in p['tables']],
             'blocks': [{'id': b['id'], 'rect': b['rect'], 'text': b['text'], 'caption': b['caption'], 'kind': b['kind'], 'inner': b['inner']} for b in p['blocks']],
-            'hotspots': [{'id': h['id'], 'rect': h['rect'], 'label': h['label'], 'targets': h['targets']} for h in p['hotspots']],
+            'hotspots': [{'id': h['id'], 'rect': h['rect'], 'label': h['label'], 'targets': h['targets'],
+                          **({'marker': h['marker'], 'marker_rect': h['marker_rect']} if h.get('marker') is not None else {})} for h in p['hotspots']],
             'links': p['links'], 'behaviors': p['behaviors'],
         } for p in pages],
     }
@@ -655,15 +779,27 @@ def main():
         index['docs'].append(entry)
     entry['title'] = title
     entry['versions'] = [v for v in entry['versions'] if v['version'] != version]
-    entry['versions'].append({'version': version, 'date': date.today().isoformat(), 'pages': len(pages)})
+    entry['versions'].append({'version': version, 'date': date.today().isoformat(), 'pages': len(pages), 'protected': bool(args.protect)})
     entry['versions'].sort(key=lambda v: v['date'] + v['version'])
     index_path.write_text(json.dumps(index, ensure_ascii=False, indent=1), encoding='utf-8')
+
+    if args.protect:
+        node = shutil.which('node')
+        if not node:
+            sys.exit('--protect 에는 Node.js가 필요해요 (node 명령을 찾지 못함)')
+        subprocess.run([node, str(Path(__file__).resolve().parent / 'protect.mjs'), str(outdir), args.protect], check=True)
+        work = Path(args.docs).parent / 'work' / slug / version
+        work.mkdir(parents=True, exist_ok=True)
+        for f in list(outdir.glob('p*.jpg')) + [outdir / 'data.json']:
+            shutil.move(str(f), str(work / f.name))
+        print(f'  원본(data.json·이미지)은 {work} 에 두었어요 (git에 올라가지 않음). 동작을 고친 뒤 다시 잠그려면:')
+        print(f'  node tools/protect.mjs {work} <비밀번호>  →  생성된 index.html을 {outdir} 로 복사')
 
     hs = sum(len(p['hotspots']) for p in pages)
     tg = sum(1 for p in pages for h in p['hotspots'] if h['targets'])
     nv = sum(len(p['behaviors']) for p in pages)
     print(f'✓ {outdir}  페이지 {len(pages)}장, 핫스팟 {hs}개(설명 연결 {tg}개), 하이퍼링크 이동 {nv}개')
-    print(f'  미리보기: index.html?doc=docs/{slug}/{version}')
+    print(f'  미리보기: ' + (f'docs/{slug}/{version}/index.html (비밀번호)' if args.protect else f'index.html?doc=docs/{slug}/{version}'))
 
 
 if __name__ == '__main__':

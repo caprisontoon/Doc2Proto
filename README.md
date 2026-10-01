@@ -13,8 +13,13 @@
 3. Claude가 페이지를 보고 디스크립션을 읽어 툴팁·팝업·드롭다운·이동·토글·입력 동작을 `data.json`에 적는다 (모호하면 묻는다)
 4. 로컬 미리보기 → commit/push → `https://doc2proto.vercel.app/?doc=docs/투네이션채팅/v0.2`
 
-뷰어 기능: 핫스팟 클릭 → 디스크립션 하이라이트(반대도 됨), 요소 클릭 → 툴팁/팝업/드롭다운/화면 이동/토글/입력,
-인터랙션 모드 / 인쇄 모드, 버전 전환, 딥링크(`#p=6&h=0`), 설명 텍스트 복사.
+뷰어: 슬라이드가 한 페이지로 이어지고 왼쪽에 번호 목차(3, 4.1 …). 슬라이드 위에 **진짜 HTML 표**가 얹혀
+텍스트 선택·검색·"표 복사"(서식 유지, 엑셀·노션에 붙여넣기)가 되고, 번호 dot을 누르면 Description 행이 노랗게,
+Description 행을 누르면 dot이 표시된다. 설명에 다른 표의 항목명이 나오면 칩 링크. 요소 클릭 → 툴팁/팝업/드롭다운/
+화면 이동/토글/입력/토스트. 인터랙션 ON/OFF, 원본 보기, 인쇄, 버전 전환, 딥링크(`#s4`, `#p=4&h=1`).
+
+비밀번호 보호: `--protect <비밀번호>`를 주면 문서가 AES-GCM으로 잠긴 **단일 index.html**로 배포되고,
+원본(data.json·이미지)은 git에 올라가지 않는 `work/`에 남는다. 링크를 받은 사람은 비밀번호를 입력해 브라우저 안에서 연다.
 
 ## 준비물 (기획자 PC)
 
@@ -45,7 +50,9 @@ pip install python-pptx pymupdf
 
 | 경로 | 역할 |
 |---|---|
-| `tools/doc2proto.py` | PPTX 분석 + 렌더링 + `docs/` 출력 (python-pptx, PyMuPDF, LibreOffice) |
+| `tools/doc2proto.py` | PPTX 분석(표 셀·마커·연결선·하이퍼링크·섹션 번호) + 렌더링 + `docs/` 출력 |
+| `tools/protect.mjs` | 문서 폴더 → 비밀번호 잠금 단일 index.html (Node 내장 WebCrypto) |
+| `tools/merge_behaviors.py` | 재생성한 data.json에 이전에 손으로 쓴 동작을 되살림 |
 | `.claude/skills/doc2proto/SKILL.md` | Claude Code 스킬: 변환 → 동작 작성 → 미리보기 → 배포 |
 | `docs/<slug>/<version>/data.json` | 페이지·블록·핫스팟·링크·동작 데이터 (좌표는 %) |
 | `docs/index.json` | 문서·버전 목록 (랜딩 페이지가 읽음) |

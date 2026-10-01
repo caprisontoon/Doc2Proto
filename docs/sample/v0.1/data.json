@@ -5,10 +5,347 @@
  "source": "투네이션채팅_상세기획서_샘플.pptx",
  "generated": "2026-10-01",
  "aspect": 1.7778,
+ "size": [
+  960.0,
+  540.0
+ ],
  "pages": [
   {
    "title": "화면 영역",
+   "num": "1",
+   "label": "화면 영역",
+   "kind": "page",
    "img": "p1.jpg",
+   "tables": [
+    {
+     "rect": {
+      "l": 1.2,
+      "t": 2.0,
+      "w": 97.5,
+      "h": 4.5
+     },
+     "role": "table",
+     "cells": {
+      "cols": [
+       12.31,
+       59.49,
+       9.23,
+       18.97
+      ],
+      "rows": [
+       [
+        {
+         "text": "Page Name",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "화면 영역",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "Project",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "투네이션 채팅",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ]
+      ]
+     },
+     "rows": [
+      32
+     ]
+    },
+    {
+     "rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 40.0,
+      "h": 16.0
+     },
+     "role": "table",
+     "cells": {
+      "cols": [
+       30.0,
+       70.0
+      ],
+      "rows": [
+       [
+        {
+         "text": "채널 탭 표시",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "투네이션·유튜브·트위치 탭이 나열. 각 탭에는 현재 채팅 숫자 노출",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ],
+       [
+        {
+         "text": "채널 전환",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "탭을 클릭하면 그 채널로 즉시 전환된다.",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ],
+       [
+        {
+         "text": "대화 이력 보존",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "다른 채널로 이동했다가 돌아오면, 이전 대화 이력이 그대로 유지",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ],
+       [
+        {
+         "text": "관리 메뉴",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "클린봇 설정, 채팅입력제한, 채팅 얼리기, 매니저 모드, 입장표시, 글자크기, 차단목록",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ]
+      ]
+     },
+     "rows": [
+      33,
+      34,
+      35,
+      36
+     ]
+    },
+    {
+     "rect": {
+      "l": 36.0,
+      "t": 44.0,
+      "w": 40.0,
+      "h": 13.0
+     },
+     "role": "table",
+     "cells": {
+      "cols": [
+       30.0,
+       70.0
+      ],
+      "rows": [
+       [
+        {
+         "text": "공지 (고정)",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "공지사항(매니저 모드) 등록/수정, 상단 고정",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ],
+       [
+        {
+         "text": "채팅",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "투네이션 VIP 등급 표시, 도네이터 명 클릭 시 프로필 및 차단/신고, 이모티콘",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ],
+       [
+        {
+         "text": "스크롤 시 최근 후원",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "스크롤 이동 시 최근 후원 노출",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ]
+      ]
+     },
+     "rows": [
+      37,
+      38,
+      39
+     ]
+    },
+    {
+     "rect": {
+      "l": 36.0,
+      "t": 70.0,
+      "w": 40.0,
+      "h": 10.0
+     },
+     "role": "tooltip",
+     "cells": {
+      "cols": [
+       30.0,
+       70.0
+      ],
+      "rows": [
+       [
+        {
+         "text": "이모티콘",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "채팅용 이모티콘 기본 제공. 😊 아이콘에 마우스를 올리면 \"이모티콘 선택\" 툴팁 노출",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ],
+       [
+        {
+         "text": "채팅",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "최대 120자 이내 채팅 입력. 보내기 클릭 시 전송",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ]
+      ]
+     },
+     "rows": [
+      40,
+      41
+     ]
+    }
+   ],
    "blocks": [
     {
      "id": 0,
@@ -47,7 +384,7 @@
      "text": "● 투네이션 999\n● 유튜브 999\n● 트위치 999\n⋮\n📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\nSVIP\n열혈팬1호 오늘도 화이팅\nSVIP 열혈팬1호                           1,000 캐시\n텍스트후원 오늘 방송 미쳤다 후원 받아라~\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\n😊  채팅 입력\n보내기",
      "caption": "화면 영역",
      "kind": "group",
-     "inner": false
+     "inner": true
     },
     {
      "id": 3,
@@ -425,6 +762,136 @@
      "caption": "채팅 입력 영역",
      "kind": "table",
      "inner": false
+    },
+    {
+     "id": 32,
+     "rect": {
+      "l": 1.2,
+      "t": 2.0,
+      "w": 97.5,
+      "h": 4.5
+     },
+     "text": "Page Name | 화면 영역 | Project | 투네이션 채팅",
+     "caption": "화면 영역",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 33,
+     "rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 40.0,
+      "h": 5.479
+     },
+     "text": "채널 탭 표시 | 투네이션·유튜브·트위치 탭이 나열. 각 탭에는 현재 채팅 숫자 노출",
+     "caption": "투네이션·유튜브·트위치 탭이 나열. 각 탭에는 현재 채",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 34,
+     "rect": {
+      "l": 36.0,
+      "t": 23.479,
+      "w": 40.0,
+      "h": 4.0
+     },
+     "text": "채널 전환 | 탭을 클릭하면 그 채널로 즉시 전환된다.",
+     "caption": "탭을 클릭하면 그 채널로 즉시 전환된다.",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 35,
+     "rect": {
+      "l": 36.0,
+      "t": 27.479,
+      "w": 40.0,
+      "h": 5.517
+     },
+     "text": "대화 이력 보존 | 다른 채널로 이동했다가 돌아오면, 이전 대화 이력이 그대로 유지",
+     "caption": "다른 채널로 이동했다가 돌아오면, 이전 대화 이력이 그",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 36,
+     "rect": {
+      "l": 36.0,
+      "t": 32.996,
+      "w": 40.0,
+      "h": 1.004
+     },
+     "text": "관리 메뉴 | 클린봇 설정, 채팅입력제한, 채팅 얼리기, 매니저 모드, 입장표시, 글자크기, 차단목록",
+     "caption": "클린봇 설정, 채팅입력제한, 채팅 얼리기, 매니저 모드",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 37,
+     "rect": {
+      "l": 36.0,
+      "t": 44.0,
+      "w": 40.0,
+      "h": 4.293
+     },
+     "text": "공지 (고정) | 공지사항(매니저 모드) 등록/수정, 상단 고정",
+     "caption": "공지사항(매니저 모드) 등록/수정, 상단 고정",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 38,
+     "rect": {
+      "l": 36.0,
+      "t": 48.293,
+      "w": 40.0,
+      "h": 5.517
+     },
+     "text": "채팅 | 투네이션 VIP 등급 표시, 도네이터 명 클릭 시 프로필 및 차단/신고, 이모티콘",
+     "caption": "투네이션 VIP 등급 표시, 도네이터 명 클릭 시 프로",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 39,
+     "rect": {
+      "l": 36.0,
+      "t": 53.81,
+      "w": 40.0,
+      "h": 3.19
+     },
+     "text": "스크롤 시 최근 후원 | 스크롤 이동 시 최근 후원 노출",
+     "caption": "스크롤 이동 시 최근 후원 노출",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 40,
+     "rect": {
+      "l": 36.0,
+      "t": 70.0,
+      "w": 40.0,
+      "h": 5.479
+     },
+     "text": "이모티콘 | 채팅용 이모티콘 기본 제공. 😊 아이콘에 마우스를 올리면 \"이모티콘 선택\" 툴팁 노출",
+     "caption": "채팅용 이모티콘 기본 제공. 😊 아이콘에 마우스를 올리",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 41,
+     "rect": {
+      "l": 36.0,
+      "t": 75.479,
+      "w": 40.0,
+      "h": 4.521
+     },
+     "text": "채팅 | 최대 120자 이내 채팅 입력. 보내기 클릭 시 전송",
+     "caption": "최대 120자 이내 채팅 입력. 보내기 클릭 시 전송",
+     "kind": "row",
+     "inner": true
     }
    ],
    "hotspots": [
@@ -501,7 +968,7 @@
       "h": 5.5
      },
      "label": "보내기",
-     "content": "채팅 입력 영역(으)로 이동",
+     "content": "입력 영역(으)로 이동",
      "show_rect": null,
      "target_page": 3,
      "source": "hyperlink"
@@ -540,7 +1007,76 @@
   },
   {
    "title": "채널 영역",
+   "num": "2",
+   "label": "채널 영역",
+   "kind": "page",
    "img": "p2.jpg",
+   "tables": [
+    {
+     "rect": {
+      "l": 1.2,
+      "t": 2.0,
+      "w": 97.5,
+      "h": 4.5
+     },
+     "role": "table",
+     "cells": {
+      "cols": [
+       12.31,
+       59.49,
+       9.23,
+       18.97
+      ],
+      "rows": [
+       [
+        {
+         "text": "Page Name",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "채널 영역",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "Project",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "투네이션 채팅",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ]
+      ]
+     },
+     "rows": [
+      53
+     ]
+    }
+   ],
    "blocks": [
     {
      "id": 0,
@@ -1230,6 +1766,19 @@
      "caption": "",
      "kind": "shape",
      "inner": false
+    },
+    {
+     "id": 53,
+     "rect": {
+      "l": 1.2,
+      "t": 2.0,
+      "w": 97.5,
+      "h": 4.5
+     },
+     "text": "Page Name | 채널 영역 | Project | 투네이션 채팅",
+     "caption": "채널 영역",
+     "kind": "row",
+     "inner": true
     }
    ],
    "hotspots": [
@@ -1283,7 +1832,7 @@
       "h": 5.5
      },
      "label": "보내기",
-     "content": "채팅 입력 영역(으)로 이동",
+     "content": "입력 영역(으)로 이동",
      "show_rect": null,
      "target_page": 3,
      "source": "hyperlink"
@@ -1406,8 +1955,188 @@
    ]
   },
   {
-   "title": "채팅 입력 영역",
+   "title": "입력 영역",
+   "num": "3",
+   "label": "채팅 입력 영역",
+   "kind": "page",
    "img": "p3.jpg",
+   "tables": [
+    {
+     "rect": {
+      "l": 1.2,
+      "t": 2.0,
+      "w": 97.5,
+      "h": 4.5
+     },
+     "role": "table",
+     "cells": {
+      "cols": [
+       12.31,
+       59.49,
+       9.23,
+       18.97
+      ],
+      "rows": [
+       [
+        {
+         "text": "Page Name",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "채팅 입력 영역",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "Project",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "투네이션 채팅",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 10.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ]
+      ]
+     },
+     "rows": [
+      28
+     ]
+    },
+    {
+     "rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 42.0,
+      "h": 20.0
+     },
+     "role": "table",
+     "cells": {
+      "cols": [
+       30.0,
+       70.0
+      ],
+      "rows": [
+       [
+        {
+         "text": "텍스트 전송",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "입력 후 Enter 또는 \"보내기\"로 전송한다. 전송하면 입력창이 비워진다. 최대 120자.",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ],
+       [
+        {
+         "text": "이모티콘",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": ": 뒤에 글자를 입력하면 스티커 후보 팝업이 뜬다. 😊 아이콘 위에 올리면 \"이모티콘 선택\" 툴팁",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ],
+       [
+        {
+         "text": "멘션 자동완성",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "@ 뒤에 글자를 입력하면 참여자 닉 후보가 뜨고, 선택 시 @닉 이 삽입된다.",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ],
+       [
+        {
+         "text": "전송 차단 안내",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        },
+        {
+         "text": "얼리기·저속모드·제재 등으로 전송이 막히면 입력창 하단에 사유가 안내되고 입력이 잠긴다.",
+         "bold": false,
+         "color": null,
+         "bg": null,
+         "align": null,
+         "size": 9.0,
+         "colspan": 1,
+         "rowspan": 1
+        }
+       ]
+      ]
+     },
+     "rows": [
+      29,
+      30,
+      31,
+      32
+     ]
+    }
+   ],
    "blocks": [
     {
      "id": 0,
@@ -1772,6 +2501,71 @@
      "caption": "입력 영역",
      "kind": "table",
      "inner": false
+    },
+    {
+     "id": 28,
+     "rect": {
+      "l": 1.2,
+      "t": 2.0,
+      "w": 97.5,
+      "h": 4.5
+     },
+     "text": "Page Name | 채팅 입력 영역 | Project | 투네이션 채팅",
+     "caption": "채팅 입력 영역",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 29,
+     "rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 42.0,
+      "h": 5.479
+     },
+     "text": "텍스트 전송 | 입력 후 Enter 또는 \"보내기\"로 전송한다. 전송하면 입력창이 비워진다. 최대 120자.",
+     "caption": "입력 후 Enter 또는 \"보내기\"로 전송한다. 전송하",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 30,
+     "rect": {
+      "l": 36.0,
+      "t": 23.479,
+      "w": 42.0,
+      "h": 5.517
+     },
+     "text": "이모티콘 | : 뒤에 글자를 입력하면 스티커 후보 팝업이 뜬다. 😊 아이콘 위에 올리면 \"이모티콘 선택\" 툴팁",
+     "caption": ": 뒤에 글자를 입력하면 스티커 후보 팝업이 뜬다. 😊",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 31,
+     "rect": {
+      "l": 36.0,
+      "t": 28.996,
+      "w": 42.0,
+      "h": 5.517
+     },
+     "text": "멘션 자동완성 | @ 뒤에 글자를 입력하면 참여자 닉 후보가 뜨고, 선택 시 @닉 이 삽입된다.",
+     "caption": "@ 뒤에 글자를 입력하면 참여자 닉 후보가 뜨고, 선택",
+     "kind": "row",
+     "inner": true
+    },
+    {
+     "id": 32,
+     "rect": {
+      "l": 36.0,
+      "t": 34.513,
+      "w": 42.0,
+      "h": 3.487
+     },
+     "text": "전송 차단 안내 | 얼리기·저속모드·제재 등으로 전송이 막히면 입력창 하단에 사유가 안내되고 입력이 잠긴다.",
+     "caption": "얼리기·저속모드·제재 등으로 전송이 막히면 입력창 하단",
+     "kind": "row",
+     "inner": true
     }
    ],
    "hotspots": [
