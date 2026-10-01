@@ -7,8 +7,7 @@
     {
      "version": "v0.1",
      "date": "2026-10-01",
-     "pages": 3,
-     "protected": false
+     "pages": 3
     }
    ]
   },
@@ -19,8 +18,7 @@
     {
      "version": "v0.01",
      "date": "2026-10-01",
-     "pages": 11,
-     "protected": false
+     "pages": 11
     }
    ]
   },
@@ -31,14 +29,12 @@
     {
      "version": "v0.1",
      "date": "2026-10-01",
-     "pages": 27,
-     "protected": false
+     "pages": 27
     },
     {
      "version": "v0.2",
      "date": "2026-10-01",
-     "pages": 27,
-     "protected": false
+     "pages": 27
     }
    ]
   }

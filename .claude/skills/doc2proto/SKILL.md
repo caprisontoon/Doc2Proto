@@ -5,7 +5,7 @@ description: PPTX 상세기획서를 "스냅샷 + 실제 동작 화면 + Descrip
 
 # /doc2proto — 기획서 스냅샷 + 동작 화면 + 연결
 
-인자: `<기획서.pptx> --pdf <PowerPoint에서 내보낸.pdf> [--slug 이름] [--version v0.2] [--protect 비밀번호]`
+인자: `<기획서.pptx> --pdf <PowerPoint에서 내보낸.pdf> [--slug 이름] [--version v0.2]`
 
 원칙: **기획서 원본은 절대 다시 그리지 않는다.** PowerPoint가 내보낸 PDF를 그대로 스냅샷으로 쓰고,
 기능은 별도의 동작 화면으로 구현해서 목업 자리에 끼우며, 둘을 Description 번호로 연결한다.
@@ -60,7 +60,6 @@ git push
 ```
 
 공유 링크: `https://doc2proto.vercel.app/?doc=docs/<slug>/<version>` · 특정 페이지 `#s8` · 특정 마커 `#p=8&h=3`.
-비밀번호 보호: `--protect <비밀번호>` (원본은 `work/`로, 동작 화면까지 한 파일에 들어간다). 동작 화면을 고친 뒤에는 `node tools/protect.mjs work/<slug>/<version> <비밀번호>`로 다시 잠그고 생성된 `index.html`을 docs로 복사한다. 비밀번호는 어디에도 적지 않는다.
 
 ## 새 버전이 왔을 때 (변경 사항 표시)
 
@@ -69,9 +68,9 @@ git push
 1. 같은 slug에 새 version으로 1단계를 돌린다. data.json에 슬라이드 고유 id(`sid`)와 도형 서명(`shapes`)이 함께 저장된다.
    이전 버전 data.json에 `sid`가 없으면 먼저 이전 PPTX로 서명만 추가한다:
    `python tools/doc2proto.py <이전.pptx> --slug <slug> --version <이전 버전> --sign-only`
-2. `python tools/doc2diff.py docs/<slug>/<새 버전> --remap-live`
+2. 1단계가 이전 버전과 **자동으로 비교**한다 (`tools/doc2diff.py` 실행, `--no-diff`로 끔). 따로 돌리려면 `python tools/doc2diff.py docs/<slug>/<새 버전> --remap-live`
    - `diff.json`: 페이지 짝짓기(sid → 제목·내용 유사도), Description/표 행 추가·수정·삭제(글자 비교 포함), 도형 추가·이동·삭제·글자 변경, 삭제된 페이지, 페이지 번호 대응표(`pagemap`)
-   - `--remap-live`: 이전 버전 `live/`·`live.json`을 복사하면서 `data-spec="7:3"` 참조와 프레임 페이지 번호를 새 번호로 바꾼다. 삭제된 페이지를 가리키던 참조는 경고로 알려준다
+   - 새 버전에 동작 화면이 아직 없으면 자동으로 `--remap-live`: 이전 버전 `live/`·`live.json`을 복사하면서 `data-spec="7:3"` 참조와 프레임 페이지 번호를 새 번호로 바꾼다. 삭제된 페이지를 가리키던 참조는 경고로 알려준다
 3. 출력된 변경 목록을 보고 **바뀐 기획만** 동작 화면에 반영한다 (예: 시간·옵션 값, 새 버튼/모달, 새 상태 화면 → `live.json` 프레임·이벤트 추가). 삭제된 행을 가리키는 `data-spec`은 지운다.
    동작 화면은 부모가 보내는 `{type:'changed', refs:[...]}` 메시지를 받아 해당 `data-spec` 요소에 `data-chg`를 달고 주황 점선으로 표시해야 한다 (후원페이지 v0.2 live 참고).
 4. 손으로 쓴 단순 동작은 `python tools/merge_behaviors.py <이전 data.json> <새 data.json>`로 되살린다.

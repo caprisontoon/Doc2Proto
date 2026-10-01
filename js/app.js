@@ -44,6 +44,8 @@
   .d2p .ctl .btns button{flex:1;font-size:12.5px;padding:5px 6px}
   .d2p .evs{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
   .d2p .evs button{font-size:12px;padding:3px 8px;border-radius:7px}
+  .d2p .ctl button.reset{display:none;width:100%;margin-top:10px;font-size:12.5px;padding:5px 6px;color:var(--brand);border-color:var(--brand);background:var(--brand-soft)}
+  .d2p.has-live .ctl button.reset{display:block}
   .d2p .evlabel{font-size:11.5px;color:var(--muted);margin:8px 0 2px;font-weight:700}
   .d2p .ctl .live-only{display:none} .d2p.has-live .ctl .live-only{display:block}
   .d2p .toc a.sec{display:flex;gap:6px;text-decoration:none;color:var(--ink2);font-size:13.5px;padding:6px 10px;border-radius:7px;line-height:1.4}
@@ -261,10 +263,16 @@
         }
         ctl.append(box);
       }
+      if ((LIVE.events || []).length) {
+        const rs = el('button', 'reset live-only', '기본 상태로 초기화');
+        rs.title = '이벤트·조작으로 바뀐 동작 화면을 이 페이지의 처음 상태로 되돌려요';
+        rs.onclick = () => { const f = current(); if (!f) { say('동작 화면이 있는 페이지에서 눌러 주세요'); return; } unmountLive(f); mountLive(f); say('기본 상태로 되돌렸어요'); };
+        ctl.append(rs);
+      }
     }
     const r2 = el('div', 'row btns'); r2.style.marginTop = '10px';
-    const bPrint = el('button', null, '인쇄'); const bShare = el('button', null, '링크 복사');
-    r2.append(bPrint, bShare);
+    const bShare = el('button', null, '링크 복사');
+    r2.append(bShare);
     ctl.append(r2);
     nav.append(ctl);
 
@@ -766,7 +774,6 @@
       if (LIVE) root.classList.toggle('live-on', on);
       if (!on) { refs.classList.remove('open'); clearLit(); clearActive(); }
     };
-    bPrint.onclick = () => setTimeout(() => window.print(), 50);
     bShare.onclick = async () => {
       try { const url = await (opts.getShareUrl ? opts.getShareUrl() : Promise.resolve(location.href)); await navigator.clipboard.writeText(url); say('링크를 복사했어요'); }
       catch (e) { say(e && e.message ? e.message : '링크를 만들지 못했어요'); }

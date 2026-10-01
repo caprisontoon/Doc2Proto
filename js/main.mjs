@@ -27,10 +27,7 @@ async function openDoc(docPath) {
   // 버전 비교: 새 버전 폴더의 diff.json (이전 버전 대비)
   const diff = await fetch(base + 'diff.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const versions = await versionsOf(data.slug, data.version);
-  if (diff) {
-    const b = versions && versions.find((v) => v.version === diff.base);
-    if (!b || !b.protected) diff.baseDir = base.replace(/[^/]+\/$/, '') + diff.base + '/';
-  }
+  if (diff) diff.baseDir = base.replace(/[^/]+\/$/, '') + diff.base + '/';
   const model = {
     title: data.title, version: data.version, generated: data.generated, size: data.size,
     pages: data.pages.map((p) => ({ ...p, img: base + p.img })), live, diff,
@@ -47,7 +44,7 @@ async function versionsOf(slug, current) {
   const idx = await fetch('docs/index.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const doc = idx && idx.docs.find((d) => d.slug === slug);
   if (!doc) return null;
-  return doc.versions.map((v) => ({ version: v.version, protected: !!v.protected, label: v.version + (v.protected ? ' 🔒' : ''), href: v.protected ? `docs/${slug}/${v.version}/index.html` : `?doc=docs/${slug}/${v.version}`, current: v.version === current }));
+  return doc.versions.map((v) => ({ version: v.version, label: v.version, href: `?doc=docs/${slug}/${v.version}`, current: v.version === current }));
 }
 
 /* ---------- 랜딩: 문서 목록 ---------- */
@@ -60,20 +57,20 @@ async function renderList() {
     const row = document.createElement('div');
     row.className = 'doc';
     const latest = d.versions[d.versions.length - 1];
-    const href = (v) => v.protected ? `docs/${d.slug}/${v.version}/index.html` : `?doc=docs/${d.slug}/${v.version}`;
+    const href = (v) => `?doc=docs/${d.slug}/${v.version}`;
     const a = document.createElement('a');
     a.href = href(latest);
     a.className = 'doc-title';
     a.textContent = d.title;
     const meta = document.createElement('div');
     meta.className = 'doc-meta';
-    meta.textContent = `${latest.version} · ${latest.date} · ${latest.pages}p${latest.protected ? ' · 🔒 비밀번호' : ''}`;
+    meta.textContent = `${latest.version} · ${latest.date} · ${latest.pages}p`;
     const vers = document.createElement('div');
     vers.className = 'doc-vers';
     for (const v of [...d.versions].reverse()) {
       const l = document.createElement('a');
       l.href = href(v);
-      l.textContent = v.version + (v.protected ? ' 🔒' : '');
+      l.textContent = v.version;
       vers.append(l);
     }
     row.append(a, meta, vers);

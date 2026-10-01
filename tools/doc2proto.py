@@ -913,7 +913,7 @@ def main():
     ap.add_argument('--docs', default=str(Path(__file__).resolve().parent.parent / 'docs'), help='docs 폴더 경로')
     ap.add_argument('--no-render', action='store_true', help='페이지 이미지 생성 생략')
     ap.add_argument('--sign-only', action='store_true', help='기존 data.json에 버전 비교용 서명(sid·shapes)만 추가')
-    ap.add_argument('--protect', metavar='비밀번호', help='비밀번호로 잠근 단일 index.html로 배포 (원본 data.json·이미지는 work/ 로 이동)')
+    ap.add_argument('--no-diff', action='store_true', help='이전 버전과 자동 비교(diff.json) 생략')
     args = ap.parse_args()
 
     pptx_path = Path(args.pptx)
@@ -990,27 +990,25 @@ def main():
         index['docs'].append(entry)
     entry['title'] = title
     entry['versions'] = [v for v in entry['versions'] if v['version'] != version]
-    entry['versions'].append({'version': version, 'date': date.today().isoformat(), 'pages': len(pages), 'protected': bool(args.protect)})
+    entry['versions'].append({'version': version, 'date': date.today().isoformat(), 'pages': len(pages)})
     entry['versions'].sort(key=lambda v: v['date'] + v['version'])
     index_path.write_text(json.dumps(index, ensure_ascii=False, indent=1), encoding='utf-8')
 
-    if args.protect:
-        node = shutil.which('node')
-        if not node:
-            sys.exit('--protect 에는 Node.js가 필요해요 (node 명령을 찾지 못함)')
-        subprocess.run([node, str(Path(__file__).resolve().parent / 'protect.mjs'), str(outdir), args.protect], check=True)
-        work = Path(args.docs).parent / 'work' / slug / version
-        work.mkdir(parents=True, exist_ok=True)
-        for f in list(outdir.glob('p*.jpg')) + [outdir / 'data.json']:
-            shutil.move(str(f), str(work / f.name))
-        print(f'  원본(data.json·이미지)은 {work} 에 두었어요 (git에 올라가지 않음). 동작을 고친 뒤 다시 잠그려면:')
-        print(f'  node tools/protect.mjs {work} <비밀번호>  →  생성된 index.html을 {outdir} 로 복사')
+    # 이전 버전이 있으면 자동 비교 → diff.json (동작 화면이 아직 없으면 이전 것을 새 페이지 번호로 옮겨 복사)
+    vers = [v['version'] for v in entry['versions']]
+    if not args.no_diff and vers.index(version) > 0:
+        prev = vers[vers.index(version) - 1]
+        if (Path(args.docs) / slug / prev / 'data.json').exists():
+            cmd = [sys.executable, str(Path(__file__).resolve().parent / 'doc2diff.py'), str(outdir), '--base', prev]
+            if not (outdir / 'live.json').exists():
+                cmd.append('--remap-live')
+            subprocess.run(cmd, check=False)
 
     hs = sum(len(p['hotspots']) for p in pages)
     tg = sum(1 for p in pages for h in p['hotspots'] if h['targets'])
     nv = sum(len(p['behaviors']) for p in pages)
     print(f'✓ {outdir}  페이지 {len(pages)}장, 핫스팟 {hs}개(설명 연결 {tg}개), 하이퍼링크 이동 {nv}개')
-    print(f'  미리보기: ' + (f'docs/{slug}/{version}/index.html (비밀번호)' if args.protect else f'index.html?doc=docs/{slug}/{version}'))
+    print(f'  미리보기: index.html?doc=docs/{slug}/{version}')
 
 
 if __name__ == '__main__':
