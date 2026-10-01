@@ -25,6 +25,14 @@
 같은 slug에 새 버전을 변환하면 이전 버전과 자동으로 비교해 `diff.json`을 만든다.
 예시: `docs/후원페이지/v0.2` (`samples/make_v02_test.py`로 만든 테스트 버전).
 
+## 웹에서 올리기·삭제 (메인 페이지)
+
+메인 페이지의 **새 기획서 올리기 / 새 버전 올리기 / 삭제**는 브라우저가 GitHub 저장소에 바로 커밋한다 (서버 없음).
+1. 처음 한 번 **GitHub 연결**: Fine-grained token — Repository access `caprisontoon/Doc2Proto`만, Permissions `Contents: Read and write`, `Actions: Read-only`. 토큰은 그 브라우저(localStorage)에만 저장.
+2. PPTX + PowerPoint PDF를 올리면 `inbox/<slug>/<version>/`에 들어가고, `.github/workflows/convert.yml`(GitHub Actions)이 `tools/inbox.py`로 변환 → 이전 버전 자동 비교·동작 화면 복사 → `main`에 커밋 → Vercel 재배포 (2~3분). 카드에 "변환 중…" 표시.
+3. 삭제는 버전 하나 또는 기획서 전체. 지운 버전을 기준으로 하던 다음 버전의 `diff.json`도 함께 지운다. 저장소 기록에는 남아 되살릴 수 있다.
+4. 기능이 바뀐 동작 화면 반영은 로컬 Claude Code(`/doc2proto`)에서.
+
 ## 준비물 (기획자 PC)
 
 ```bash
@@ -59,6 +67,8 @@ pip install python-pptx pymupdf
 | 경로 | 역할 |
 |---|---|
 | `tools/doc2proto.py` | PPTX 분석(마커·Description 행·하위 항목·연결선·하이퍼링크·목차) + 스냅샷 렌더링 + `docs/` 출력 |
+| `js/landing.mjs`, `js/admin.mjs` | 메인 페이지 목록 + 올리기·삭제 (GitHub Git Data API로 커밋) |
+| `tools/inbox.py`, `.github/workflows/convert.yml` | 웹에서 올린 기획서를 GitHub Actions에서 변환 |
 | `tools/doc2diff.py` | 새 버전 ↔ 이전 버전 비교 → `diff.json` (페이지 짝짓기·행/도형 변경·글자 비교), `--remap-live`로 동작 화면을 새 페이지 번호로 복사 |
 | `tools/merge_behaviors.py` | 재생성한 data.json에 이전에 손으로 쓴 동작을 되살림 |
 | `.claude/skills/doc2proto/SKILL.md` | Claude Code 스킬: 변환 → 동작 작성 → 미리보기 → 배포 |

@@ -61,6 +61,11 @@ git push
 
 공유 링크: `https://doc2proto.vercel.app/?doc=docs/<slug>/<version>` · 특정 페이지 `#s8` · 특정 마커 `#p=8&h=3`.
 
+## 웹에서 올라온 버전
+
+메인 페이지에서 올린 버전은 GitHub Actions가 이미 변환·비교·동작 화면 복사까지 해 둔다 (`git pull`로 받기).
+Claude는 `diff.json` 변경 목록을 보고 동작 화면의 기능 변경만 반영하면 된다 (아래 '새 버전이 왔을 때' 3단계부터).
+
 ## 스냅샷은 반드시 PowerPoint PDF로
 
 LibreOffice로 그리면 맑은 고딕이 없어 다른 글꼴로 바뀌고 글자 위치가 원본과 달라진다. 변환기가 "⚠ 스냅샷 PDF를 만든 프로그램"

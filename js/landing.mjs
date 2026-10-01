@@ -94,7 +94,7 @@ function filePicker(id, accept) {
   const box = $(id), input = box.querySelector('input'), nm = box.querySelector('.nm');
   const label = nm.textContent;
   let file = null;
-  const set = (f) => { file = f; box.classList.toggle('has', !!f); nm.textContent = f ? `${f.name} (${(f.size / 1024 / 1024).toFixed(1)}MB)` : label; box.dispatchEvent(new Event('pick')); };
+  const set = (f) => { file = f; if (f) { const m = document.querySelector('#up-msg'); if (m) m.textContent = ''; } box.classList.toggle('has', !!f); nm.textContent = f ? `${f.name} (${(f.size / 1024 / 1024).toFixed(1)}MB)` : label; box.dispatchEvent(new Event('pick')); };
   box.onclick = () => input.click();
   input.onchange = () => { const f = input.files[0]; if (f && accept.test(f.name)) set(f); input.value = ''; };
   box.ondragover = (e) => { e.preventDefault(); box.classList.add('over'); };
