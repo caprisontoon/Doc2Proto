@@ -62,9 +62,22 @@ git push
 공유 링크: `https://doc2proto.vercel.app/?doc=docs/<slug>/<version>` · 특정 페이지 `#s8` · 특정 마커 `#p=8&h=3`.
 비밀번호 보호: `--protect <비밀번호>` (원본은 `work/`로, 동작 화면까지 한 파일에 들어간다). 동작 화면을 고친 뒤에는 `node tools/protect.mjs work/<slug>/<version> <비밀번호>`로 다시 잠그고 생성된 `index.html`을 docs로 복사한다. 비밀번호는 어디에도 적지 않는다.
 
-## 새 버전이 왔을 때
+## 새 버전이 왔을 때 (변경 사항 표시)
 
-같은 slug에 새 version으로 1단계를 돌리고, `live/`와 `live.json`을 이전 버전에서 복사한 뒤 **바뀐 슬라이드의 Description만** 비교해서 동작 화면을 고친다. 손으로 쓴 단순 동작은 `python tools/merge_behaviors.py <이전 data.json> <새 data.json>`로 되살린다.
+작업자가 "어디가 바뀌었는지" 바로 보게 하는 것이 목적이다.
+
+1. 같은 slug에 새 version으로 1단계를 돌린다. data.json에 슬라이드 고유 id(`sid`)와 도형 서명(`shapes`)이 함께 저장된다.
+   이전 버전 data.json에 `sid`가 없으면 먼저 이전 PPTX로 서명만 추가한다:
+   `python tools/doc2proto.py <이전.pptx> --slug <slug> --version <이전 버전> --sign-only`
+2. `python tools/doc2diff.py docs/<slug>/<새 버전> --remap-live`
+   - `diff.json`: 페이지 짝짓기(sid → 제목·내용 유사도), Description/표 행 추가·수정·삭제(글자 비교 포함), 도형 추가·이동·삭제·글자 변경, 삭제된 페이지, 페이지 번호 대응표(`pagemap`)
+   - `--remap-live`: 이전 버전 `live/`·`live.json`을 복사하면서 `data-spec="7:3"` 참조와 프레임 페이지 번호를 새 번호로 바꾼다. 삭제된 페이지를 가리키던 참조는 경고로 알려준다
+3. 출력된 변경 목록을 보고 **바뀐 기획만** 동작 화면에 반영한다 (예: 시간·옵션 값, 새 버튼/모달, 새 상태 화면 → `live.json` 프레임·이벤트 추가). 삭제된 행을 가리키는 `data-spec`은 지운다.
+   동작 화면은 부모가 보내는 `{type:'changed', refs:[...]}` 메시지를 받아 해당 `data-spec` 요소에 `data-chg`를 달고 주황 점선으로 표시해야 한다 (후원페이지 v0.2 live 참고).
+4. 손으로 쓴 단순 동작은 `python tools/merge_behaviors.py <이전 data.json> <새 data.json>`로 되살린다.
+5. 검증: `?doc=docs/<slug>/<새 버전>` — 변경 요약표, 목차 배지, 각 변경 표시 클릭 시 이전→현재 비교, 겹쳐 보기, 삭제 페이지, 동작 화면 표시. `&diff=0`이면 변경 표시 없이 연다.
+
+주의: 겹쳐 보기는 두 버전 스냅샷을 픽셀로 겹치므로 **같은 프로그램(PowerPoint)으로 PDF를 내보내야** 글꼴 차이가 변경처럼 보이지 않는다. 행·도형 변경 판정은 PPTX 구조로 하므로 렌더러와 무관하다.
 
 ## 분석기가 읽는 기획서 관행
 

@@ -125,6 +125,54 @@
   .d2p .slide-wrap .cap a{color:var(--muted);text-decoration:none;margin-left:auto} .d2p .slide-wrap .cap a:hover{color:var(--brand)}
   .d2p .copybtn{position:absolute;z-index:6;font-size:11px;padding:1px 7px;border-radius:5px;background:#fff;border:1px solid #cfd3db;color:#444;opacity:0;transition:opacity .15s}
   .d2p .slide:hover .copybtn{opacity:.95}
+  /* ---- 버전 비교 ---- */
+  .d2p{--add:#1e9e5a;--mod:#e08a00;--del:#d93025}
+  .d2p .dctl .cnt{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 4px}
+  .d2p .tag{display:inline-block;font-size:10.5px;font-weight:800;color:#fff;border-radius:4px;padding:0 5px;line-height:17px;font-style:normal;white-space:nowrap}
+  .d2p .tag.added{background:var(--add)} .d2p .tag.modified{background:var(--mod)} .d2p .tag.removed{background:var(--del)} .d2p .tag.moved{background:#6b6fd6}
+  .d2p .toc a .tag{align-self:center;margin-left:auto} .d2p .toc a .lv + .tag,.d2p .toc a .tag + .lv{margin-left:4px}
+  .d2p:not(.diff-on) .toc a .tag,.d2p:not(.diff-on) .toc a.ghost,.d2p:not(.diff-on) .ghost,.d2p:not(.diff-on) .dm,.d2p:not(.diff-on) .chg,.d2p:not(.diff-on) .dsum{display:none!important}
+  .d2p .toc a.ghost{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--del)}
+  .d2p .dm{position:absolute;z-index:14;border-radius:3px;pointer-events:none}
+  .d2p .dm.added{box-shadow:inset 0 0 0 2px var(--add);background:rgba(30,158,90,.10)}
+  .d2p .dm.modified{box-shadow:inset 0 0 0 2px var(--mod);background:rgba(224,138,0,.10)}
+  .d2p .dm.removed{border:2px dashed var(--del);background:repeating-linear-gradient(135deg,rgba(217,48,37,.10) 0 6px,transparent 6px 12px)}
+  .d2p .dm.was{border:2px dashed #6b6fd6;background:rgba(107,111,214,.06)}
+  .d2p .dm .tag{position:absolute;left:-2px;top:0;transform:translateY(-100%);pointer-events:auto;cursor:pointer;border-radius:4px 4px 0 0}
+  .d2p .dm.removed .tag,.d2p .dm.was .tag{top:auto;bottom:0;transform:translateY(100%);border-radius:0 0 4px 4px}
+  .d2p.live-on .slide.has-live .dm.inlive{display:none}
+  .d2p .chg{margin:0 0 6px;padding:8px 12px;border:1px solid var(--line);border-left:4px solid var(--mod);border-radius:8px;background:var(--side);font-size:12.5px}
+  .d2p .chg.added{border-left-color:var(--add)}
+  .d2p .chg .ch{display:flex;align-items:center;gap:8px;flex-wrap:wrap} .d2p .chg .ch b{font-size:13px}
+  .d2p .chg .ch button{margin-left:auto;font-size:12px;padding:3px 9px}
+  .d2p .chg ul{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:3px}
+  .d2p .chg li{display:flex;gap:7px;align-items:baseline;cursor:pointer;padding:2px 4px;border-radius:5px;line-height:1.5}
+  .d2p .chg li:hover{background:var(--brand-soft)}
+  .d2p .chg li .tx{color:var(--ink2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .d2p del{background:rgba(217,48,37,.16);color:var(--del);text-decoration:line-through}
+  .d2p ins{background:rgba(30,158,90,.18);color:var(--add);text-decoration:none;font-weight:700}
+  .d2p .refs .it .seg{margin:6px 0 0;font-size:12.5px;white-space:pre-wrap;line-height:1.6;color:var(--ink2)}
+  .d2p .refs .it .lbl{font-size:11px;font-weight:700;color:var(--muted);margin-top:8px}
+  .d2p .ghost .slide{filter:grayscale(1);opacity:.55}
+  .d2p .ghost .slide-scroll{position:relative;outline:3px dashed var(--del);outline-offset:-3px}
+  .d2p .ghost .gban{position:absolute;inset:auto 0 0 0;z-index:5;background:rgba(217,48,37,.92);color:#fff;font-weight:800;font-size:14px;padding:8px 14px;text-align:center}
+  .d2p .dsum{max-width:1400px;margin:0 auto 26px;background:var(--side);border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow)}
+  .d2p .dsum h2{margin:0 0 4px;font-size:17px} .d2p .dsum .sub{color:var(--muted);font-size:12.5px;margin-bottom:10px}
+  .d2p .dsum table{width:100%;border-collapse:collapse;font-size:13px}
+  .d2p .dsum td,.d2p .dsum th{border-top:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  .d2p .dsum th{font-size:11.5px;color:var(--muted);font-weight:700}
+  .d2p .dsum tr.go{cursor:pointer} .d2p .dsum tr.go:hover td{background:var(--brand-soft)}
+  .d2p .dsum td.pg{white-space:nowrap;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .d2p .cmpbox{position:relative;width:min(1200px,92vw);aspect-ratio:var(--ar);background:#fff;user-select:none}
+  .d2p .cmpbox img{position:absolute;inset:0;width:100%;height:100%}
+  .d2p .cmpbox .old{clip-path:inset(0 calc(100% - var(--x)) 0 0)}
+  .d2p .cmpbox .bar{position:absolute;top:0;bottom:0;left:var(--x);width:2px;background:var(--brand);box-shadow:0 0 0 1px #fff}
+  .d2p .cmpbox .lab{position:absolute;top:8px;font-size:12px;font-weight:800;color:#fff;background:rgba(20,24,40,.75);border-radius:5px;padding:1px 8px}
+  .d2p .cmpctl{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:12.5px;color:var(--ink2)}
+  .d2p .cmpctl input{flex:1}
+  @media print{
+    .d2p .dm,.d2p .chg,.d2p .ghost,.d2p .dsum{display:none!important}
+  }
   @media print{
     .d2p{position:static;display:block}
     .d2p nav.toc,.d2p .refs,.d2p .toast,.d2p .dot,.d2p .hs,.d2p .lnk,.d2p .bh,.d2p .hl,.d2p .rowhit,.d2p iframe.live,.d2p .livebadge,.d2p .copybtn,.d2p .cap{display:none!important}
@@ -220,6 +268,44 @@
     ctl.append(r2);
     nav.append(ctl);
 
+    /* ---------- 버전 비교 (diff.json) ---------- */
+    const D = model.diff || null;
+    const dPage = {};       // 새 페이지 index → diff 항목
+    if (D) for (const e of D.pages || []) dPage[e.page - 1] = e;
+    if (D) {
+      root.classList.add('has-diff');
+      if (opts.diffOn !== false) root.classList.add('diff-on');
+      const dc = el('div', 'ctl dctl');
+      const rr = el('div', 'row'); rr.append(el('b', null, `변경 사항 · ${D.base} → ${model.version || ''}`));
+      const dsw = el('button', 'sw sm' + (root.classList.contains('diff-on') ? ' on' : '')); dsw.setAttribute('aria-label', '변경 사항 표시'); rr.append(dsw);
+      dc.append(rr);
+      const cnt = el('div', 'cnt'); const C = D.counts || {};
+      if (C.modified) cnt.append(el('i', 'tag modified', `수정 ${C.modified}쪽`));
+      if (C.added) cnt.append(el('i', 'tag added', `신규 ${C.added}쪽`));
+      if (C.removed) cnt.append(el('i', 'tag removed', `삭제 ${C.removed}쪽`));
+      if (!cnt.children.length) cnt.append(el('span', null, '바뀐 페이지가 없어요'));
+      dc.append(cnt, el('small', null, '초록 = 추가, 주황 = 수정, 빨강 = 삭제. 표시를 누르면 이전 → 현재 내용이 보여요.'));
+      const go = el('button', null, '변경 요약 보기'); go.style.width = '100%'; go.style.fontSize = '12.5px';
+      go.onclick = () => { if (!root.classList.contains('diff-on')) dsw.click(); main.scrollTo({ top: 0, behavior: 'smooth' }); };
+      dc.append(go);
+      dsw.onclick = () => { dsw.classList.toggle('on'); root.classList.toggle('diff-on', dsw.classList.contains('on')); refs.classList.remove('open'); slides.forEach(sendChanged); };
+      nav.append(dc);
+    }
+    const baseImg = (n) => (D && D.baseDir ? `${D.baseDir}p${n}.jpg` : null);
+    const TAG = { added: '추가', modified: '수정', removed: '삭제', moved: '이동' };
+    // 요약표용: 바뀌지 않은 긴 부분은 앞뒤만 남기고 줄인다
+    const trimSegs = (segs) => segs.map(([op, t], k, arr) => {
+      if (op !== '=' || t.length <= 36) return [op, t.replace(/\n/g, ' ')];
+      const f = t.replace(/\n/g, ' ');
+      return ['=', k === 0 ? '…' + f.slice(-16) : k === arr.length - 1 ? f.slice(0, 16) + '…' : f.slice(0, 12) + ' … ' + f.slice(-12)];
+    });
+    const pad = (r) => ({ l: r.l - 0.25, t: r.t - 0.35, w: r.w + 0.5, h: r.h + 0.7 });
+    const segHtml = (segs) => {
+      const box = el('div', 'seg');
+      for (const [op, t] of segs) box.append(op === '=' ? document.createTextNode(t) : el(op === '+' ? 'ins' : 'del', null, t));
+      return box;
+    };
+
     const tocLinks = P.map((p, i) => {
       const a = el('a');
       const kind = p.kind || 'page';
@@ -228,6 +314,7 @@
       if (p.num && kind !== 'chapter') a.append(el('em', null, p.num));
       a.append(el('span', null, p.label || p.title || `페이지 ${i + 1}`));
       if (liveByPage[i]) a.append(el('i', 'lv', 'LIVE'));
+      if (dPage[i] && dPage[i].status !== 'same') a.append(el('i', 'tag ' + dPage[i].status, dPage[i].status === 'added' ? '신규' : '수정'));
       a.onclick = (e) => { e.preventDefault(); goto(i); };
       nav.append(a);
       return a;
@@ -319,6 +406,8 @@
       [...stage.querySelectorAll('.ov')].sort((a, b) => areaOf(b) - areaOf(a)).forEach((n) => stage.append(n));
       stage.onclick = () => { clearActive(); clearFloating(); };
 
+      if (dPage[i]) mountDiff(S, i, dPage[i]);
+      if (S.chg) sec.append(S.chg);
       scroll.append(stage); sec.append(scroll);
       const cap = el('div', 'cap');
       if (p.num) cap.append(el('b', null, p.num));
@@ -329,6 +418,151 @@
       sec.append(cap);
       main.append(sec);
     });
+
+    /* ---------- 버전 비교 표시 ---------- */
+    function rowRectOf(pi, key) { const r = (P[pi].rows || []).find((x) => x.key === key); return r ? r.rect : null; }
+    function inFrame(pi, rect) { const f = liveByPage[pi]; if (!f || !rect) return false; const cx = rect.l + rect.w / 2, cy = rect.t + rect.h / 2; return cx > f.rect.l && cx < f.rect.l + f.rect.w && cy > f.rect.t && cy < f.rect.t + f.rect.h; }
+    function changeItems(pi, e) {
+      const items = [];
+      for (const r of e.rows || []) {
+        if (r.status === 'renum') continue;
+        const label = r.status === 'removed' ? `${r.old_key}번 삭제` : r.status === 'added' ? `${r.key}번 추가` : `${r.key}번 수정`;
+        items.push({ kind: 'row', st: r.status, label, title: (r.title || '').split('\n')[0], rect: r.status === 'removed' ? null : rowRectOf(pi, r.key), d: r });
+      }
+      for (const sh of e.shapes || []) {
+        const st = sh.status === 'modified' && sh.changes.length === 1 && sh.changes[0] === 'moved' ? 'moved' : sh.status;
+        const what = st === 'moved' ? '위치 이동' : st === 'added' ? '화면 요소 추가' : st === 'removed' ? '화면 요소 삭제' : sh.changes.includes('text') ? '글자 수정' : '모양 수정';
+        items.push({ kind: 'shape', st, label: what, title: (sh.text || sh.new || '').split('\n')[0].slice(0, 40) || '글자 없는 도형', rect: sh.rect || null, old: sh.old_rect || null, d: sh });
+      }
+      return items;
+    }
+    function mountDiff(S, pi, e) {
+      if (e.status === 'same') return;
+      const chg = el('div', 'chg ' + e.status); S.chg = chg;
+      const ch = el('div', 'ch');
+      if (e.status === 'added') {
+        ch.append(el('i', 'tag added', '신규 페이지'), el('b', null, `${D.base}에 없던 페이지예요`));
+        chg.append(ch); return;
+      }
+      ch.append(el('i', 'tag modified', '수정'), el('b', null, `${D.base} 대비 · ${e.summary || ''}`));
+      if (e.base !== pi + 1) ch.append(el('span', null, `(${D.base} ${e.base}p)`));
+      if (baseImg(e.base)) { const cb = el('button', null, '이전 버전과 겹쳐 보기'); cb.onclick = () => compare(pi, e); ch.append(cb); }
+      chg.append(ch);
+      const ul = el('ul');
+      for (const it of changeItems(pi, e)) {
+        const li = el('li'); li.append(el('i', 'tag ' + it.st, TAG[it.st]), el('span', null, it.label), el('span', 'tx', it.title));
+        li.onclick = () => showChange(pi, it);
+        ul.append(li);
+        // 슬라이드 위 표시
+        const live = inFrame(pi, it.rect || it.old);
+        if (it.rect && it.st !== 'removed') {
+          const m = el('div', 'dm ' + (it.st === 'moved' ? 'modified' : it.st) + (live ? ' inlive' : '')); place(m, pad(it.rect));
+          const t = el('i', 'tag ' + it.st, TAG[it.st]); t.onclick = (ev) => { ev.stopPropagation(); showChange(pi, it); }; m.append(t);
+          S.stage.append(m);
+        }
+        if (it.old) {
+          const m = el('div', 'dm ' + (it.st === 'removed' ? 'removed' : 'was') + (live ? ' inlive' : '')); place(m, pad(it.old));
+          const t = el('i', 'tag ' + (it.st === 'removed' ? 'removed' : 'moved'), it.st === 'removed' ? '삭제' : '이전 위치'); t.onclick = (ev) => { ev.stopPropagation(); showChange(pi, it); }; m.append(t);
+          S.stage.append(m);
+        }
+      }
+      chg.append(ul);
+    }
+    function showChange(pi, it) {
+      refs.innerHTML = '';
+      const head = el('div', 'rh'); head.append(el('b', null, `변경 내용 · ${pi + 1}p ${it.label}`));
+      const x = el('button', null, '✕'); x.onclick = () => refs.classList.remove('open'); head.append(x);
+      refs.append(head);
+      const box = el('div', 'it'); const d = it.d;
+      const k = el('div', 'k'); k.append(el('i', 'tag ' + it.st, TAG[it.st]), el('span', null, it.title || it.label)); box.append(k);
+      if (d.segs) { box.append(el('div', 'lbl', `${D.base} → ${model.version || '현재'}`), segHtml(d.segs)); }
+      else if (it.st === 'added' && (d.new || d.text)) box.append(el('div', 'lbl', '추가된 내용'), segHtml([['+', d.new || d.text]]));
+      else if (it.st === 'removed' && (d.old || d.text)) box.append(el('div', 'lbl', `${D.base}에 있던 내용`), segHtml([['-', d.old || d.text]]));
+      if (it.st === 'moved') box.append(el('p', null, '위치가 바뀌었어요. 보라색 점선이 이전 위치예요.'));
+      if (it.kind === 'row' && d.old_key && d.key && d.old_key !== d.key) box.append(el('p', null, `번호 변경: ${d.old_key} → ${d.key}`));
+      refs.append(box);
+      refs.classList.add('open');
+      clearLit();
+      if (it.rect) light(pi, it.rect); if (it.old) light(pi, it.old, true);
+      if (!isVisible(slides[pi].sec)) goto(pi);
+    }
+    function compare(pi, e) {
+      const bd = el('div', 'backdrop'); const m = el('div', 'modal');
+      const mh = el('div', 'mh'); const x = el('button', null, '✕');
+      mh.append(el('b', null, `${pi + 1}p 겹쳐 보기 — 왼쪽 ${D.base} ${e.base}p / 오른쪽 ${model.version || '현재'}`), x);
+      const box = el('div', 'cmpbox'); box.style.setProperty('--ar', `${WPT}/${HPT}`); box.style.setProperty('--x', '50%');
+      const a = el('img'); a.src = P[pi].img; const b = el('img', 'old'); b.src = baseImg(e.base);
+      const bar = el('div', 'bar'); const l1 = el('span', 'lab', D.base); l1.style.left = '8px'; const l2 = el('span', 'lab', model.version || '현재'); l2.style.right = '8px';
+      box.append(a, b, bar, l1, l2);
+      const ctl = el('div', 'cmpctl'); const rg = el('input'); rg.type = 'range'; rg.min = 0; rg.max = 100; rg.value = 50;
+      rg.oninput = () => box.style.setProperty('--x', rg.value + '%');
+      const blink = el('button', null, '번갈아 보기'); let bt = null;
+      blink.onclick = () => { if (bt) { clearInterval(bt); bt = null; blink.textContent = '번갈아 보기'; return; } let on = false; bt = setInterval(() => { on = !on; box.style.setProperty('--x', on ? '100%' : '0%'); }, 700); blink.textContent = '멈춤'; };
+      ctl.append(el('span', null, D.base), rg, el('span', null, model.version || '현재'), blink);
+      const drag = (ev) => { const r = box.getBoundingClientRect(); const v = Math.max(0, Math.min(100, (ev.clientX - r.left) / r.width * 100)); rg.value = v; box.style.setProperty('--x', v + '%'); };
+      box.onpointerdown = (ev) => { box.setPointerCapture(ev.pointerId); drag(ev); box.onpointermove = drag; };
+      box.onpointerup = () => { box.onpointermove = null; };
+      m.append(mh, box, ctl); m.style.maxWidth = 'none'; bd.append(m); root.append(bd);
+      const close = () => { if (bt) clearInterval(bt); bd.remove(); }; x.onclick = close; bd.onclick = (ev) => { if (ev.target === bd) close(); };
+    }
+    function sendChanged(S) {
+      const pi = slides.indexOf(S), e = dPage[pi];
+      if (!S.iframe) return;
+      const on = root.classList.contains('diff-on') && e && e.status !== 'same';
+      let refsCh = [];
+      if (on && e.status === 'added') refsCh = (P[pi].rows || []).map((r) => `${pi + 1}:${r.key}`);
+      else if (on) {
+        refsCh = (e.rows || []).filter((r) => r.status === 'added' || r.status === 'modified').map((r) => `${pi + 1}:${r.key}`);
+        // 동작 화면 안에서 바뀐 도형 → 겹치는 번호 마커의 기획 번호로 알린다
+        const hit = (a, b) => a.l < b.l + b.w && b.l < a.l + a.w && a.t < b.t + b.h && b.t < a.t + a.h;
+        for (const sh of e.shapes || []) {
+          const r = sh.rect || sh.old_rect; if (!inFrame(pi, r)) continue;
+          for (const h of P[pi].hotspots || []) if (h.marker != null && hit(h.rect, r)) refsCh.push(`${pi + 1}:${h.marker}`);
+        }
+        refsCh = [...new Set(refsCh)];
+      }
+      send(S, { type: 'changed', refs: refsCh, base: D ? D.base : '' });
+    }
+    // 삭제된 페이지: 이전 버전 스냅샷을 회색으로 끼워 넣기
+    function mountGhosts() {
+      if (!D) return;
+      for (const g of D.removed || []) {
+        const sec = el('section', 'slide-wrap ghost'); sec.id = 'g' + g.base;
+        const chg = el('div', 'chg'); chg.style.borderLeftColor = 'var(--del)';
+        const ch = el('div', 'ch'); ch.append(el('i', 'tag removed', '삭제된 페이지'), el('b', null, `${D.base} ${g.base}p · ${g.title}`)); chg.append(ch);
+        sec.append(chg);
+        const sc = el('div', 'slide-scroll'); const st = el('div', 'slide'); st.style.aspectRatio = `${WPT}/${HPT}`;
+        if (baseImg(g.base)) { const im = el('img', 'bg'); im.src = baseImg(g.base); im.loading = 'lazy'; st.append(im); }
+        sc.append(st, el('div', 'gban', `${model.version || '이번 버전'}에서 삭제된 페이지예요`)); sec.append(sc);
+        const prev = g.after > 0 ? slides[g.after - 1] : null;
+        if (prev) prev.sec.after(sec); else main.prepend(sec);
+        const a = el('a', 'sec ghost'); a.href = '#g' + g.base;
+        if (g.num) a.append(el('em', null, g.num));
+        a.append(el('span', null, g.title), el('i', 'tag removed', '삭제'));
+        a.onclick = (ev) => { ev.preventDefault(); sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+        const pl = g.after > 0 ? tocLinks[g.after - 1] : null;
+        if (pl) pl.after(a); else tocLinks[0] && tocLinks[0].before(a);
+      }
+      // 문서 첫머리 변경 요약표
+      const sum = el('section', 'dsum'); sum.id = 'changes';
+      sum.append(el('h2', null, `변경 요약 · ${D.base} → ${model.version || ''}`));
+      const C = D.counts || {};
+      sum.append(el('div', 'sub', `수정 ${C.modified || 0}쪽 · 신규 ${C.added || 0}쪽 · 삭제 ${C.removed || 0}쪽 — 행을 누르면 해당 페이지로 이동해요`));
+      const tb = el('table'); const hr = el('tr'); ['페이지', '구분', '제목', '바뀐 내용'].forEach((h) => hr.append(el('th', null, h))); tb.append(hr);
+      const rows = [];
+      for (const e of D.pages || []) if (e.status !== 'same') rows.push({ pos: e.page, st: e.status, pg: `${e.page}p` + (e.base && e.base !== e.page ? ` (←${e.base}p)` : ''), title: e.title, what: e.status === 'added' ? '새 페이지' : e.summary, go: () => goto(e.page - 1), e });
+      for (const g of D.removed || []) rows.push({ pos: g.after + 0.5, st: 'removed', pg: `${D.base} ${g.base}p`, title: g.title, what: '페이지 삭제', go: () => document.getElementById('g' + g.base).scrollIntoView({ behavior: 'smooth' }) });
+      rows.sort((a, b) => a.pos - b.pos);
+      for (const r of rows) {
+        const tr = el('tr', 'go'); tr.onclick = r.go;
+        const t1 = el('td', 'pg', r.pg); const t2 = el('td'); t2.append(el('i', 'tag ' + r.st, r.st === 'added' ? '신규' : r.st === 'removed' ? '삭제' : '수정'));
+        const t4 = el('td'); t4.append(el('div', null, r.what || ''));
+        if (r.e && r.e.rows) for (const x of r.e.rows) if (x.segs) { const sg = segHtml(trimSegs(x.segs)); sg.style.fontSize = '12px'; t4.append(sg); }
+        tr.append(t1, t2, el('td', null, r.title), t4); tb.append(tr);
+      }
+      sum.append(tb);
+      main.prepend(sum);
+    }
 
     /* ---------- 텍스트 층 줄 폭 맞춤 ---------- */
     function fitText(S) {
@@ -377,6 +611,7 @@
       const S = slides.find((s) => s.iframe && s.iframe.contentWindow === e.source); if (!S) return;
       const pi = slides.indexOf(S);
       if (m.type === 'spec') showRefs(pi, m.refs, m.label);
+      else if (m.type === 'ready' && D) sendChanged(S);
     });
 
     /* ---------- 하이라이트 ---------- */
@@ -539,6 +774,7 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { clearFloating(); refs.classList.remove('open'); const bd = root.querySelector('.backdrop'); if (bd) bd.remove(); } });
     window.addEventListener('hashchange', applyHash);
 
+    mountGhosts();
     root.append(nav, main, refs, toast);
     setTimeout(applyHash, 50);
     return { goto, lightRef };

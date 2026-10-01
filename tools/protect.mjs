@@ -16,6 +16,8 @@ const model = {
   title: data.title, version: data.version, generated: data.generated, size: data.size,
   pages: data.pages.map((p) => ({ ...p, img: 'data:image/jpeg;base64,' + fs.readFileSync(path.join(dir, p.img)).toString('base64') })),
 };
+// 버전 비교 결과가 있으면 함께 (이전 버전 이미지는 넣지 않음 — 겹쳐 보기 대신 글자 비교만)
+if (fs.existsSync(path.join(dir, 'diff.json'))) model.diff = JSON.parse(fs.readFileSync(path.join(dir, 'diff.json'), 'utf8'));
 // 동작 화면(live)이 있으면 한 파일 안에 넣고, 열 때 blob URL로 띄운다
 let liveHtml = null;
 if (fs.existsSync(path.join(dir, 'live.json'))) {

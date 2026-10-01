@@ -200,6 +200,27 @@ def shape_text(shape):
     return ''
 
 
+def signatures(slide, SW, SH):
+    """버전 비교용 도형 서명: 최상위 도형마다 id·이름·위치·글자·모양 요약 (표는 행 단위로 따로 비교)."""
+    out = []
+    for sh, r, d in walk(slide.shapes, SW, SH):
+        if d or (getattr(sh, 'has_table', False) and sh.has_table):
+            continue
+        if sh.is_placeholder and sh.placeholder_format.type is not None and 'SLIDE_NUMBER' in str(sh.placeholder_format.type):
+            continue
+        if sh.shape_type == MSO_SHAPE_TYPE.GROUP:
+            text = '\n'.join(t for t in (shape_text(c) for c, _, _ in walk(sh.shapes, SW, SH)) if t)
+        else:
+            text = shape_text(sh)
+        el = sh._element
+        geo = el.find('.//a:prstGeom', NS)
+        fill = el.find('.//p:spPr/a:solidFill', NS) if sh.shape_type != MSO_SHAPE_TYPE.GROUP else None
+        clr = fill[0].get('val') if fill is not None and len(fill) else ''
+        look = '|'.join(x for x in [geo.get('prst') if geo is not None else '', clr] if x)
+        out.append({'id': sh.shape_id, 'name': sh.name, 'rect': {k: round(v, 2) for k, v in r.items()}, 'text': text[:400], 'look': look[:120]})
+    return out
+
+
 def walk(shapes, SW, SH, xf=None, depth=0):
     """그룹을 풀어 (shape, rect%, depth, group_root_id) 목록으로. xf = 그룹 좌표 변환."""
     out = []
@@ -768,6 +789,15 @@ def refine_rows(pdf, pages):
         words = [(w[0] / PW * 100, w[1] / PH * 100, w[2] / PW * 100, w[3] / PH * 100, w[4], w[5], w[6], w[7]) for w in page.get_text('words')]
         for t in p['tables']:
             r = t['rect']
+            # 글이 늘어 표가 원래 높이보다 길게 그려진 경우: 이어지는 글자 아래 끝까지 표 하단을 늘린다
+            col = sorted((w for w in words if r['l'] - 0.5 <= w[0] <= r['l'] + r['w'] and w[1] >= r['t'] - 0.5), key=lambda w: w[1])
+            bottom = r['t']
+            for w in col:
+                if w[1] > max(bottom, r['t'] + r['h']) + 1.5:
+                    break
+                bottom = max(bottom, w[3])
+            if bottom + 0.6 > r['t'] + r['h']:
+                r = t['rect'] = {**r, 'h': round(bottom + 0.6 - r['t'], 3)}
             inside = [w for w in words if r['l'] - 0.5 <= w[0] <= r['l'] + t['col0_w'] + 0.5 and r['t'] - 0.5 <= w[1] <= r['t'] + r['h'] + 0.5]
             inside.sort(key=lambda w: w[1])
             ys, used = [], set()
@@ -775,6 +805,9 @@ def refine_rows(pdf, pages):
                 key = row['key'].split()[0] if row['key'] else ''
                 last_y = next((y for y in reversed(ys) if y is not None), -1)
                 hit = next((w for w in inside if id(w) not in used and w[1] > last_y and key and w[4].startswith(key[:4])), None)
+                if hit is None and len(key) > 1:   # 좁은 번호 칸에서 '10'이 '1' / '0' 두 줄로 접힌 경우
+                    hit = next((w for w in inside if id(w) not in used and w[1] > last_y and w[4] == key[0]
+                                and any(abs(v[0] - w[0]) < 1.5 and 0 < v[1] - w[1] < 3.5 and key[1:].startswith(v[4]) for v in inside)), None)
                 if hit is None:
                     ys.append(None)
                     continue
@@ -879,6 +912,7 @@ def main():
     ap.add_argument('--pdf', help='이미 내보낸 PDF (LibreOffice/PowerPoint 없을 때)')
     ap.add_argument('--docs', default=str(Path(__file__).resolve().parent.parent / 'docs'), help='docs 폴더 경로')
     ap.add_argument('--no-render', action='store_true', help='페이지 이미지 생성 생략')
+    ap.add_argument('--sign-only', action='store_true', help='기존 data.json에 버전 비교용 서명(sid·shapes)만 추가')
     ap.add_argument('--protect', metavar='비밀번호', help='비밀번호로 잠근 단일 index.html로 배포 (원본 data.json·이미지는 work/ 로 이동)')
     args = ap.parse_args()
 
@@ -894,6 +928,14 @@ def main():
 
     prs = Presentation(str(pptx_path))
     SW, SH = prs.slide_width, prs.slide_height
+    if args.sign_only:
+        data = json.loads((outdir / 'data.json').read_text(encoding='utf-8'))
+        for p, slide in zip(data['pages'], prs.slides):
+            p['sid'] = slide.slide_id
+            p['shapes'] = signatures(slide, SW, SH)
+        (outdir / 'data.json').write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
+        print(f'✓ {outdir}/data.json 서명 추가 ({len(data["pages"])}장)')
+        return
     pages = []
     for i, slide in enumerate(prs.slides):
         pages.append(analyze_slide(slide, i, SW, SH))
@@ -934,6 +976,7 @@ def main():
                           **({'marker': h['marker'], 'marker_rect': h['marker_rect']} if h.get('marker') is not None else {}),
                           **({'sub': h['sub']} if h.get('sub') else {})} for h in p['hotspots']],
             'links': p['links'], 'behaviors': p['behaviors'], 'text': p.get('text', []),
+            'sid': p['slide_id'], 'shapes': signatures(prs.slides[p['index']], SW, SH),
         } for p in pages],
     }
     (outdir / 'data.json').write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')

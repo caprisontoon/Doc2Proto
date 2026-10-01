@@ -24,14 +24,22 @@ async function openDoc(docPath) {
   const data = await res.json();
   const live = await fetch(base + 'live.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (live) live.src = base + live.src;
+  // 버전 비교: 새 버전 폴더의 diff.json (이전 버전 대비)
+  const diff = await fetch(base + 'diff.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const versions = await versionsOf(data.slug, data.version);
+  if (diff) {
+    const b = versions && versions.find((v) => v.version === diff.base);
+    if (!b || !b.protected) diff.baseDir = base.replace(/[^/]+\/$/, '') + diff.base + '/';
+  }
   const model = {
     title: data.title, version: data.version, generated: data.generated, size: data.size,
-    pages: data.pages.map((p) => ({ ...p, img: base + p.img })), live,
+    pages: data.pages.map((p) => ({ ...p, img: base + p.img })), live, diff,
   };
   status('');
   start(model, {
     getShareUrl: async () => location.href,
-    versions: await versionsOf(data.slug, data.version),
+    versions,
+    diffOn: q.get('diff') !== '0',
   });
 }
 
@@ -39,7 +47,7 @@ async function versionsOf(slug, current) {
   const idx = await fetch('docs/index.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const doc = idx && idx.docs.find((d) => d.slug === slug);
   if (!doc) return null;
-  return doc.versions.map((v) => ({ label: v.version + (v.protected ? ' 🔒' : ''), href: v.protected ? `docs/${slug}/${v.version}/index.html` : `?doc=docs/${slug}/${v.version}`, current: v.version === current }));
+  return doc.versions.map((v) => ({ version: v.version, protected: !!v.protected, label: v.version + (v.protected ? ' 🔒' : ''), href: v.protected ? `docs/${slug}/${v.version}/index.html` : `?doc=docs/${slug}/${v.version}`, current: v.version === current }));
 }
 
 /* ---------- 랜딩: 문서 목록 ---------- */
