@@ -12,6 +12,9 @@ const MAX_SHARE = 4 * 1024 * 1024; // Vercel 함수 본문 한도(4.5MB) 이하
 let sharedSrc = null; // 이미 URL로 접근 가능한 PDF 경로
 let localBytes = null; // 업로드된 파일 원본(공유 시 서버로 전송)
 let docName = 'document.pdf';
+let currentModel = null;
+let app = null;
+const sharedId = () => { const m = /api\/file\?id=([0-9a-f-]{36})/.exec(sharedSrc || ''); return m ? m[1] : null; };
 
 function status(msg) {
   statusEl.textContent = msg;
@@ -60,6 +63,7 @@ async function buildModel(data, name) {
       blocks: p.blocks.map((b) => ({ id: b.id, rect: toRect(b.bbox, p), text: b.text, caption: b.caption, sub: !!b.sub })),
       hotspots: p.hotspots.map((h) => ({ id: h.id, rect: toRect(h.bbox, p), label: h.label, targets: h.targets })),
       links: p.links.map((l) => ({ page: l.page, hotspot: l.hotspot, rect: toRect(l.bbox, p) })),
+      behaviors: [],
     });
   }
   status('');
@@ -81,20 +85,95 @@ async function getShareUrl() {
         : '업로드에 실패했어요' + (msg ? `: ${msg.slice(0, 80)}` : ''));
     }
     sharedSrc = 'api/file?id=' + (await res.json()).id;
+    await saveBehaviors();
   }
   const u = new URL(location.href);
   u.search = '?src=' + encodeURIComponent(sharedSrc) + '&name=' + encodeURIComponent(docName);
   return u.href;
 }
 
+// 페이지 이미지를 AI용으로 축소(최대 1536px 폭) → base64
+function shrink(dataUrl, maxW) {
+  return new Promise((resolve) => {
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, maxW / im.width);
+      const c = document.createElement('canvas');
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      resolve(c.toDataURL('image/jpeg', 0.8).split(',')[1]);
+    };
+    im.src = dataUrl;
+  });
+}
+
+async function saveBehaviors() {
+  const id = sharedId();
+  if (!id || !currentModel || !currentModel.pages.some((p) => p.behaviors.length)) return;
+  await fetch('api/behaviors?id=' + id, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ pages: currentModel.pages.map((p) => p.behaviors) }),
+  }).catch(() => null);
+}
+
+async function loadBehaviors(model) {
+  const id = sharedId();
+  if (!id) return false;
+  const res = await fetch('api/behaviors?id=' + id).catch(() => null);
+  if (!res || !res.ok) return false;
+  const data = await res.json().catch(() => null);
+  if (!data || !Array.isArray(data.pages)) return false;
+  data.pages.forEach((b, i) => { if (model.pages[i] && Array.isArray(b)) model.pages[i].behaviors = b; });
+  return model.pages.some((p) => p.behaviors.length);
+}
+
+// 모든 페이지를 AI로 분석해 프로토타입 동작을 채운다 (동시 3페이지)
+async function generateBehaviors(onProgress) {
+  const model = currentModel;
+  const pageTitles = model.pages.map((p) => p.title);
+  let done = 0, failed = 0, lastErr = '';
+  const queue = model.pages.map((_, i) => i);
+  async function worker() {
+    while (queue.length) {
+      const i = queue.shift();
+      const p = model.pages[i];
+      try {
+        const image = await shrink(p.img, 1536);
+        const res = await fetch('api/analyze', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            image, pageIndex: i, title: p.title, pageTitles,
+            blocks: p.blocks.filter((b) => !b.sub && b.text).map((b) => ({ rect: b.rect, text: b.text, caption: b.caption })),
+            hotspots: p.hotspots.map((h) => ({ rect: h.rect, label: h.label })),
+          }),
+        });
+        if (!res.ok) throw new Error(await res.text().catch(() => res.status));
+        p.behaviors = (await res.json()).behaviors || [];
+      } catch (e) { failed++; lastErr = e && e.message ? e.message : String(e); }
+      done++;
+      onProgress(done, model.pages.length);
+    }
+  }
+  await Promise.all([worker(), worker(), worker()]);
+  if (failed === model.pages.length) throw new Error(lastErr || 'AI 분석에 실패했어요');
+  await saveBehaviors();
+  return { failed, lastErr };
+}
+
 async function open(data, name) {
   docName = name;
   try {
     const model = await buildModel(data, name);
+    currentModel = model;
+    status('프로토타입 동작 불러오는 중…');
+    const hasAI = await loadBehaviors(model);
+    status('');
     landing.hidden = true;
     document.title = model.title + ' — Doc2Proto';
-    window.D2P.init(model, {
+    app = window.D2P.init(model, {
       getShareUrl,
+      hasAI,
+      generate: generateBehaviors,
       onNew: () => { location.href = location.pathname; },
     });
   } catch (e) {
