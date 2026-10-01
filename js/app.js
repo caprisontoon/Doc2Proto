@@ -780,6 +780,8 @@
       if (!items.length) return;
       clearLit(); clearActive();
       items.filter((r) => r.pi === pi).forEach((r) => { lightRef(`${r.pi + 1}:${r.key}`, true); markHotspots(pi, r.key); });
+      // 관련 기획이 모두 이 페이지에 있으면 Description 하이라이트로 충분 — 패널은 띄우지 않는다
+      if (items.every((r) => r.pi === pi)) { closePanel(); root.classList.remove('rp-has'); return; }
       const key = pi + '|' + list.join(' ');
       const hi = refHist.findIndex((e) => e.key === key); if (hi >= 0) refHist.splice(hi, 1);
       refHist.unshift({ key, pi, list, label }); refHist.length = Math.min(refHist.length, 8);
