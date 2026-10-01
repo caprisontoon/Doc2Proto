@@ -4,9 +4,9 @@
 window.D2P_COMMENTS = {
   domain: 'toonation.co.kr',
   firebase: {
-    apiKey: '',
-    authDomain: '',
-    projectId: '',
-    appId: '',
+    apiKey: 'AIzaSyCbFvN7QgRu4ctG595V_H1YAcvF6PTRCNc',
+    authDomain: 'doc2proto-16f74.firebaseapp.com',
+    projectId: 'doc2proto-16f74',
+    appId: '1:336272072448:web:2707a1afb607259e8d1de5',
   },
 };

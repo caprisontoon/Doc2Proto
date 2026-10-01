@@ -936,6 +936,7 @@
       const ROLES = ['기획', '디자인', '개발', 'QA'];
       let role = (() => { try { return localStorage.getItem('d2p.role') || ''; } catch { return ''; } })();
       let threads = [], me = null, authErr = '', pop = null, popUnsub = null, filter = 'open', mine = false, placing = false;
+      let first = true, unsub = null, needLogin = false;
       const fmtT = (t) => { const d = (Date.now() - t) / 1000; if (d < 60) return '방금'; if (d < 3600) return Math.floor(d / 60) + '분 전'; if (d < 86400) return Math.floor(d / 3600) + '시간 전'; const x = new Date(t); return `${x.getMonth() + 1}/${x.getDate()}`; };
       const roleChip = (r) => (r ? el('i', 'rl ' + r, r) : null);
       const bodyNode = (txt) => { const p = el('p'); String(txt).split(/(@[\w가-힣.]+)/).forEach((part) => p.append(part.startsWith('@') ? el('span', 'mn', part) : document.createTextNode(part))); return p; };
@@ -958,7 +959,7 @@
         const out = el('button', null, '로그아웃'); out.onclick = () => C.signOut();
         who.append(sel, out);
       }
-      C.onAuth((u, err) => { me = u; authErr = err || ''; if (err) say(err); renderWho(); renderPins(); if (pop) refreshPop(); });
+      C.onAuth((u, err) => { const was = me && me.uid; me = u; authErr = err || ''; if (err) say(err); renderWho(); if ((me && me.uid) !== was) startSub(); else { renderPins(); if (pop) refreshPop(); } });
       cshow.onclick = () => { cshow.classList.toggle('on'); root.classList.toggle('c-show', cshow.classList.contains('on')); };
       const setPlacing = (on) => { placing = on; root.classList.toggle('c-placing', on); add.textContent = on ? '취소 (Esc) — 기획서를 눌러 위치 지정' : '+ 코멘트 달기'; };
       add.onclick = async () => {
@@ -1104,6 +1105,7 @@
         let list = threads.filter((x) => filter === 'all' || (filter === 'open' ? x.status !== 'resolved' : x.status === 'resolved'));
         if (mine && me) list = list.filter((x) => (x.author && x.author.uid === me.uid));
         list.sort((a, b) => a.page - b.page || a.createdAt - b.createdAt);
+        if (needLogin) { const e = el('div', 'empty'); e.append('사내 Google 계정(@' + (C.domain || '회사') + ')으로 로그인하면 코멘트가 보여요. '); const b = el('button', null, '로그인'); b.style.cssText = 'font-size:11.5px;padding:1px 8px'; b.onclick = () => C.signIn().catch((er) => say('로그인하지 못했어요: ' + (er.code || er.message))); e.append(b); clist.append(e); return; }
         if (!list.length) clist.append(el('div', 'empty', threads.length ? '해당하는 코멘트가 없어요' : '아직 코멘트가 없어요. "+ 코멘트 달기"로 첫 문의를 남겨 보세요.'));
         for (const x of list) {
           const it = el('div', 'ci' + (x.status === 'resolved' ? ' resolved' : ''));
@@ -1114,11 +1116,19 @@
           clist.append(it);
         }
       }
-      let first = true;
-      C.subscribe((list) => {
-        threads = list; renderPins(); if (pop && pop.id) refreshPop();
-        if (first) { first = false; const m = /#c=([\w-]+)/.exec(location.hash); if (m) setTimeout(() => openThread(m[1]), 500); }
-      }, (e) => { say('코멘트를 불러오지 못했어요: ' + (e.code || e.message)); if (e.code === 'permission-denied') mode.textContent = '사내 Google 계정으로 로그인해야 코멘트를 볼 수 있어요.'; });
+      // 클라우드 모드: 사내 계정으로 로그인해야 읽을 수 있다 (보안 규칙) → 로그인 후에 구독
+      function startSub() {
+        if (unsub) { unsub(); unsub = null; }
+        threads = []; closePop();
+        needLogin = C.mode === 'cloud' && !me;
+        renderPins();
+        if (needLogin) return;
+        unsub = C.subscribe((list) => {
+          threads = list; renderPins(); if (pop && pop.id) refreshPop();
+          if (first) { first = false; const m = /#c=([\w-]+)/.exec(location.hash); if (m) setTimeout(() => openThread(m[1]), 500); }
+        }, (e) => { say('코멘트를 불러오지 못했어요: ' + (e.code || e.message)); if (e.code === 'permission-denied') { needLogin = true; renderList(); } });
+      }
+      startSub();
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (placing) setPlacing(false); closePop(); } });
       main.addEventListener('click', (e) => { if (pop && !e.target.closest('.cpop,.cpin')) closePop(); });
     }

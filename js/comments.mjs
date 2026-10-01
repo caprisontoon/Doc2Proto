@@ -4,18 +4,19 @@
 // 데이터 (Firestore)
 //   threads/{id}            { doc, version, page, x, y, anchor, body, author{uid,name,email,photo}, role, status, createdAt, updatedAt, replies, lastAt }
 //   threads/{id}/replies/{rid} { body, author, role, createdAt }
-const SDK = 'https://www.gstatic.com/firebasejs/10.12.2/';
+// Firebase SDK는 사이트 안에 번들해 둔다 (vendor/firebase, CDN이 막힌 사내망에서도 동작) — 다시 만들기: COMMENTS_SETUP.md 참고
+const SDK_URL = new URL('../vendor/firebase/firebase-10.12.2.mjs', import.meta.url).href;
 
 export async function createComments({ doc, version }) {
-  const cfg = window.D2P_COMMENTS && window.D2P_COMMENTS.firebase && window.D2P_COMMENTS.firebase.apiKey ? window.D2P_COMMENTS : null;
+  const forceDemo = new URLSearchParams(location.search).has('cdemo');   // 테스트용: &cdemo=1 이면 데모 모드
+  const cfg = !forceDemo && window.D2P_COMMENTS && window.D2P_COMMENTS.firebase && window.D2P_COMMENTS.firebase.apiKey ? window.D2P_COMMENTS : null;
   return cfg ? firebaseBackend(cfg, doc, version) : demoBackend(doc, version);
 }
 
 /* ---------------- Google Cloud Firestore ---------------- */
 async function firebaseBackend(cfg, doc, version) {
-  const [{ initializeApp }, A, F] = await Promise.all([
-    import(SDK + 'firebase-app.js'), import(SDK + 'firebase-auth.js'), import(SDK + 'firebase-firestore.js'),
-  ]);
+  const M = await import(SDK_URL);
+  const { initializeApp } = M, A = M, F = M;
   const app = initializeApp(cfg.firebase);
   const auth = A.getAuth(app);
   const db = F.getFirestore(app);

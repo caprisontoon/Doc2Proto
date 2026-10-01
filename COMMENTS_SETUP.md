@@ -5,13 +5,13 @@
 
 ## 1. Google Cloud 프로젝트 만들기
 1. https://console.cloud.google.com/projectcreate
-2. 프로젝트 이름: `doc2proto-comments-dev` → **만들기**
+2. 프로젝트 이름: `doc2proto-16f74` → **만들기**
 3. 결제 계정 연결: 탐색 메뉴 → **결제** → 이 프로젝트에 기존 결제 계정 연결
    (Slack 알림 함수(Cloud Functions)에 결제 계정이 필요해요. 사용량은 무료 범위 안이에요.)
 
 ## 2. 이 프로젝트에 Firebase 붙이기
 1. https://console.firebase.google.com → **프로젝트 추가**
-2. **"기존 Google Cloud 프로젝트에 Firebase 추가"** → `doc2proto-comments-dev` 선택
+2. **"기존 Google Cloud 프로젝트에 Firebase 추가"** → `doc2proto-16f74` 선택
 3. Google 애널리틱스는 **사용 안 함**으로 해도 돼요.
 
 ## 3. Google 로그인 켜기
@@ -39,9 +39,20 @@
    ```bash
    git clone -b feature/comments https://github.com/caprisontoon/Doc2Proto.git && cd Doc2Proto
    firebase login --no-localhost        # 안내된 주소로 로그인 후 코드 붙여넣기
-   firebase use doc2proto-comments-dev
+   firebase use doc2proto-16f74
    firebase functions:secrets:set SLACK_WEBHOOK_URL    # 웹훅 주소 붙여넣기
    (cd functions && npm install)
    firebase deploy --only firestore:rules,functions
    ```
    테스트 중 알림의 링크를 미리보기 주소로 받고 싶으면 배포할 때 `SITE_URL` 값을 물어보면 미리보기 주소를 입력하세요 (기본: 운영 주소).
+
+## 참고: Firebase SDK 번들 다시 만들기
+`vendor/firebase/firebase-10.12.2.mjs` 는 필요한 함수만 묶은 파일이에요.
+```bash
+npm i firebase@10.12.2 esbuild && cat > entry.js <<'X'
+export { initializeApp } from 'firebase/app';
+export { getAuth, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider } from 'firebase/auth';
+export { getFirestore, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
+X
+npx esbuild entry.js --bundle --format=esm --minify --target=es2020 --outfile=firebase-10.12.2.mjs
+```
