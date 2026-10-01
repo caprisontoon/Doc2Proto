@@ -936,7 +936,7 @@
       const ROLES = ['기획', '디자인', '개발', 'QA'];
       let role = (() => { try { return localStorage.getItem('d2p.role') || ''; } catch { return ''; } })();
       let threads = [], me = null, authErr = '', pop = null, popUnsub = null, filter = 'open', mine = false, placing = false;
-      let first = true, unsub = null, needLogin = false, noAccess = false;
+      let first = true, unsub = null, needLogin = false, noAccess = false, access = Promise.resolve();
       const fmtT = (t) => { const d = (Date.now() - t) / 1000; if (d < 60) return '방금'; if (d < 3600) return Math.floor(d / 60) + '분 전'; if (d < 86400) return Math.floor(d / 3600) + '시간 전'; const x = new Date(t); return `${x.getMonth() + 1}/${x.getDate()}`; };
       const roleChip = (r) => (r ? el('i', 'rl ' + r, r) : null);
       const bodyNode = (txt) => { const p = el('p'); String(txt).split(/(@[\w가-힣.]+)/).forEach((part) => p.append(part.startsWith('@') ? el('span', 'mn', part) : document.createTextNode(part))); return p; };
@@ -966,7 +966,8 @@
       add.onclick = async () => {
         if (placing) return setPlacing(false);
         if (!me) { try { await C.signIn(); } catch (e) { say('로그인하지 못했어요'); return; } if (!C.me()) return; }
-        if (noAccess) { say('이 계정은 아직 코멘트 권한이 없어요 — 관리자에게 허용 목록 추가를 요청하세요', 3500); return; }
+        await access;   // 권한 확인이 끝난 뒤에만 코멘트 달기
+        if (noAccess) { say(noAccess === 'rules' ? 'Firestore 보안 규칙이 예전 것이에요 — 새 규칙을 게시해 주세요' : '이 계정은 아직 코멘트 권한이 없어요 — 허용 목록(members)을 확인해 주세요'); renderList(); return; }
         closePop(); setPlacing(true); say('코멘트를 남길 곳을 누르세요');
       };
       // 위치 지정 레이어 (동작 화면 위에서도 위치를 고를 수 있게 맨 위에 덮음)
@@ -1019,7 +1020,7 @@
           const body = ta.value.trim(); if (!body) { ta.focus(); return; }
           ok.disabled = true;
           try { const id = await C.create({ page: pi + 1, x: +x.toFixed(2), y: +y.toFixed(2), anchor: a, body, role, pageLabel: P[pi].label || P[pi].title || '' }); closePop(); say('코멘트를 남겼어요'); setTimeout(() => openThread(id), 300); }
-          catch (e) { ok.disabled = false; say('저장하지 못했어요: ' + (e.code || e.message)); }
+          catch (e) { ok.disabled = false; say(e.code === 'permission-denied' ? '저장이 거절됐어요 — Firestore에 게시된 보안 규칙이 최신인지 확인해 주세요' : '저장하지 못했어요: ' + (e.code || e.message)); console.warn('코멘트 저장 실패', e); }
         };
         ta.onkeydown = (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ok.click(); };
         bt.append(cancel, ok); rf.append(ta, bt);
@@ -1133,7 +1134,7 @@
         needLogin = C.mode === 'cloud' && !me; noAccess = false;
         renderPins();
         if (needLogin) return;
-        const ok = await C.allowed();
+        access = C.allowed(); const ok = await access;
         if (ok !== true) { noAccess = ok || 'missing'; renderPins(); renderWho(); return; }   // 로그인했지만 허용 목록에 없음
         unsub = C.subscribe((list) => {
           threads = list; renderPins(); if (pop && pop.id) refreshPop();
