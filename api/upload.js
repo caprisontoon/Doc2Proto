@@ -1,5 +1,5 @@
 // PDF를 Vercel Blob에 저장하고 공개 URL을 돌려준다.
-// 프로젝트에 Blob 스토어가 연결되어 있어야 한다 (BLOB_READ_WRITE_TOKEN).
+// 프로젝트에 Blob 스토어가 연결되어 있어야 한다 (OIDC 또는 BLOB_READ_WRITE_TOKEN).
 import { put } from '@vercel/blob';
 import { randomUUID } from 'node:crypto';
 
@@ -9,10 +9,6 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.statusCode = 405;
     return res.end('Method Not Allowed');
-  }
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    res.statusCode = 503;
-    return res.end('공유 저장소(Vercel Blob)가 연결되지 않았어요');
   }
   const chunks = [];
   let size = 0;
@@ -26,11 +22,16 @@ export default async function handler(req, res) {
     res.statusCode = 415;
     return res.end('PDF 파일이 아니에요');
   }
-  const blob = await put(`specs/${randomUUID()}.pdf`, buf, {
-    access: 'public',
-    contentType: 'application/pdf',
-    addRandomSuffix: false,
-  });
-  res.setHeader('content-type', 'application/json');
-  res.end(JSON.stringify({ url: blob.url }));
+  try {
+    const blob = await put(`specs/${randomUUID()}.pdf`, buf, {
+      access: 'public',
+      contentType: 'application/pdf',
+      addRandomSuffix: false,
+    });
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ url: blob.url }));
+  } catch (e) {
+    res.statusCode = 503;
+    res.end('공유 저장소(Vercel Blob)에 올리지 못했어요: ' + (e && e.message ? e.message : e));
+  }
 }
