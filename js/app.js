@@ -26,7 +26,8 @@
   .d2p button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--side);color:var(--ink);border-radius:8px;padding:6px 11px}
   .d2p button:hover{border-color:var(--brand)}
   /* ---- 사이드바 ---- */
-  .d2p nav.toc{overflow:auto;padding:22px 14px 30px;background:var(--side);border-right:1px solid var(--line)}
+  .d2p nav.toc{display:flex;flex-direction:column;min-height:0;overflow:hidden;background:var(--side);border-right:1px solid var(--line)}
+  .d2p .navtop{flex:1;min-height:0;overflow:auto;padding:22px 14px 30px;position:relative}
   .d2p .toc .home{display:block;font-size:11px;letter-spacing:.14em;color:var(--brand);text-decoration:none;font-weight:800;padding:0 10px 6px}
   .d2p .toc .brand{font-weight:800;font-size:14px;padding:0 10px 2px;line-height:1.35}
   .d2p .toc .ver{font-size:12px;color:var(--muted);padding:0 10px 14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -107,48 +108,28 @@
   .d2p .modal .mh{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)} .d2p .modal .mh b{flex:1}
   .d2p .modal .mb{padding:14px} .d2p .modal .mb p{margin:0 0 10px;color:var(--ink2);font-size:13px;white-space:pre-wrap}
   .d2p .fakein{position:absolute;z-index:23;font:inherit;font-size:13px;padding:4px 8px;border:2px solid var(--brand);border-radius:6px;background:#fff;color:#1b1d22;outline:0}
-  /* 관련 기획 카드 */
-  /* 관련 기획 패널: 넓은 화면 = 오른쪽 칸(기획서를 밀어냄), 좁은 화면 = 하단 접이식 시트 */
-  .d2p .refs{display:none;background:var(--side);overflow:auto;min-width:0}
-  .d2p.rp-open .refs{display:block}
-  .d2p .refs .rh .cnt{font-weight:400;color:var(--muted);font-size:12px;margin-left:4px}
-  .d2p .refs .it.here{padding:7px 14px;cursor:pointer}
+  /* 관련 기획: 왼쪽 메뉴 하단 칸 (작게) */
+  .d2p .refs{display:none;flex:none;max-height:40%;overflow:auto;border-top:1px solid var(--line);background:var(--bg);font-size:12px}
+  .d2p.rp-has .refs{display:block}
+  .d2p .refs .rh .cnt{font-weight:400;color:var(--muted);font-size:11px;margin-left:4px}
+  .d2p .refs .it.here{cursor:pointer}
   .d2p .refs .it.here .k{font-weight:600}
-  .d2p .refs .it.here .k .tg{margin-left:auto;color:var(--muted);font-size:11px;font-weight:400}
+  .d2p .refs .it.here .k .tg{margin-left:auto;color:var(--muted);font-size:10.5px;font-weight:400;white-space:nowrap}
   .d2p .refs .it.here:hover{background:var(--brand-soft)}
-  .d2p .refs .sect{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);padding:12px 14px 4px}
-  .d2p .refs .hist{padding:0 8px 14px}
-  .d2p .refs .hist button{display:flex;width:100%;text-align:left;gap:6px;border:0;background:none;border-radius:7px;padding:5px 8px;font-size:12.5px;color:var(--ink2)}
-  .d2p .refs .hist button:hover{background:var(--brand-soft);color:var(--brand)}
-  .d2p .refs .hist button em{font-style:normal;color:var(--muted);min-width:34px}
-  .d2p .rtab{display:none;position:fixed;z-index:31;border:1px solid var(--line);background:var(--side);color:var(--ink);box-shadow:var(--shadow);font-weight:700;font-size:12.5px;cursor:pointer}
-  .d2p.rp-has:not(.rp-open):not(.off) .rtab{display:flex}
-  .d2p .rtab b{background:var(--brand);color:#fff;border-radius:999px;font-size:11px;padding:0 6px;line-height:17px}
-  @media (min-width:1101px){
-    .d2p.rp-open{grid-template-columns:260px minmax(0,1fr) 340px}
-    .d2p.rp-open.nav-off{grid-template-columns:minmax(0,1fr) 340px}
-    .d2p .refs{height:100%;border-left:1px solid var(--line)}
-    .d2p .rtab{right:0;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;padding:14px 7px;border-radius:10px 0 0 10px;border-right:0;gap:8px;align-items:center}
-    .d2p .rtab b{writing-mode:horizontal-tb}
-    .d2p.rp-has:not(.rp-open):not(.off) main{padding-right:46px}
-  }
-  @media (max-width:1100px){
-    .d2p .refs{position:fixed;left:0;right:0;bottom:0;max-height:46vh;z-index:30;border-top:1px solid var(--line);box-shadow:0 -6px 24px rgba(20,24,40,.14);border-radius:14px 14px 0 0}
-    .d2p .rtab{left:50%;bottom:12px;transform:translateX(-50%);padding:8px 14px;border-radius:999px;gap:8px;align-items:center;max-width:calc(100vw - 32px);white-space:nowrap}
-    .d2p .rtab span{overflow:hidden;text-overflow:ellipsis}
-    .d2p.rp-open main{padding-bottom:48vh}
-  }
-  .d2p .refs .rh{position:sticky;top:0;background:var(--side);display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
-  .d2p .refs .rh b{flex:1;font-size:13.5px}
+  .d2p .navopen b{background:var(--brand);color:#fff;border-radius:999px;font-size:10.5px;padding:0 6px;line-height:16px;display:none}
+  .d2p.rp-has .navopen b{display:inline-block}
+  .d2p .refs .rh{position:sticky;top:0;z-index:1;background:var(--bg);display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line)}
+  .d2p .refs .rh b{flex:1;font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .d2p .refs .rh button{padding:2px 8px;font-size:12px}
-  .d2p .refs .it{padding:10px 14px;border-bottom:1px solid var(--line)}
+  .d2p .refs .it{padding:7px 14px;border-bottom:1px solid var(--line)}
   .d2p .refs .it:last-child{border-bottom:0}
-  .d2p .refs .it .k{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700}
+  .d2p .refs .it .k{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;flex-wrap:wrap;line-height:1.4}
   .d2p .refs .it .k i{font-style:normal;background:#d93025;color:#fff;border-radius:999px;padding:0 6px;font-size:11px}
   .d2p .refs .it .k b.kn{white-space:nowrap;color:var(--ink)}
   .d2p .refs .it .k .here{color:var(--link);font-size:11px;font-weight:700}
   .d2p .refs .it .k button{margin-left:auto;padding:1px 8px;font-size:11.5px}
-  .d2p .refs .it p{margin:4px 0 0;font-size:12.5px;color:var(--ink2);white-space:pre-wrap;line-height:1.5}
+  .d2p .refs .it p{margin:3px 0 0;font-size:11.5px;color:var(--ink2);white-space:pre-wrap;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+  .d2p .refs .it p.full{display:block}
   .d2p .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:9px;font-size:13px;opacity:0;transition:opacity .25s;z-index:40;pointer-events:none}
   .d2p .toast.show{opacity:.95}
   .d2p .slide-wrap .cap{font-size:12px;color:var(--muted);margin:6px 4px 0;display:flex;gap:10px;align-items:center}
@@ -206,7 +187,7 @@
   }
   @media print{
     .d2p{position:static;display:block}
-    .d2p nav.toc,.d2p .refs,.d2p .rtab,.d2p .toast,.d2p .dot,.d2p .hs,.d2p .lnk,.d2p .bh,.d2p .hl,.d2p .rowhit,.d2p iframe.live,.d2p .livebadge,.d2p .copybtn,.d2p .cap{display:none!important}
+    .d2p nav.toc,.d2p .refs,.d2p .toast,.d2p .dot,.d2p .hs,.d2p .lnk,.d2p .bh,.d2p .hl,.d2p .rowhit,.d2p iframe.live,.d2p .livebadge,.d2p .copybtn,.d2p .cap{display:none!important}
     .d2p main{overflow:visible;padding:0}
     .d2p .slide-wrap{max-width:none;margin:0;page-break-after:always}
     .d2p .slide-scroll{box-shadow:none;border-radius:0}
@@ -224,7 +205,7 @@
   @media print{ .d2p .navopen{display:none!important} }
   @media (max-width:760px){
     .d2p{grid-template-columns:1fr} .d2p nav.toc{display:none} .d2p main{padding:12px;padding-top:58px} .d2p .navopen{display:flex}
-    .d2p.nav-show nav.toc{display:block;position:fixed;inset:0 auto 0 0;width:min(300px,86vw);z-index:60;box-shadow:var(--shadow)}
+    .d2p.nav-show nav.toc{display:flex;position:fixed;inset:0 auto 0 0;width:min(300px,86vw);z-index:60;box-shadow:var(--shadow)}
     .d2p.nav-show .navopen{display:none}
   }
   `;
@@ -250,10 +231,7 @@
     /* ---------- 공통 UI ---------- */
     const toast = el('div', 'toast'); let toastT;
     const say = (m) => { toast.textContent = m; toast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('show'), 1800); };
-    const refs = el('aside', 'refs');
-    const rtab = el('button', 'rtab'); rtab.setAttribute('aria-label', '관련 기획 펼치기');
-    const refHist = [];   // 최근 본 기획 (동작 화면 요소 단위)
-    let refLabel = '';
+    const refs = el('section', 'refs');   // 왼쪽 메뉴 하단 '관련 기획' 칸
 
     /* ---------- 참조 해석: "21:7", "8:1-4", "20:공통" ---------- */
     function resolve(ref) {
@@ -281,11 +259,12 @@
 
     /* ---------- 사이드바 ---------- */
     const nav = el('nav', 'toc');
+    const navTop = el('div', 'navtop');   // 위: 컨트롤·목차 (스크롤) / 아래: 관련 기획
     const home = el('a', 'home', 'DOC2PROTO'); home.href = opts.homeHref || './';
-    nav.append(home, el('div', 'brand', model.title));
+    navTop.append(home, el('div', 'brand', model.title));
     // 사이드 메뉴 접기/펴기 (상태는 이 브라우저에 기억)
     const fold = el('button', 'fold', '«'); fold.title = '메뉴 접기 ( [ )'; fold.setAttribute('aria-label', '사이드 메뉴 접기');
-    const navOpen = el('button', 'navopen', '☰ 메뉴'); navOpen.title = '메뉴 펼치기 ( [ )'; navOpen.setAttribute('aria-label', '사이드 메뉴 펼치기');
+    const navOpen = el('button', 'navopen', '☰ 메뉴'); navOpen.append(el('b')); navOpen.title = '메뉴 펼치기 ( [ )'; navOpen.setAttribute('aria-label', '사이드 메뉴 펼치기');
     const mobile = () => matchMedia('(max-width:760px)').matches;
     const setNav = (show) => {
       if (mobile()) { root.classList.toggle('nav-show', show); return; }
@@ -295,7 +274,7 @@
     fold.onclick = () => setNav(false);
     navOpen.onclick = () => setNav(true);
     try { if (localStorage.getItem('d2p.nav') === '0') root.classList.add('nav-off'); } catch {}
-    nav.append(fold);
+    navTop.append(fold);
     const ver = el('div', 'ver');
     if (opts.versions && opts.versions.length > 1) {
       const sel = el('select');
@@ -304,7 +283,7 @@
       ver.append(sel);
     } else if (model.version) ver.append(el('span', null, model.version));
     if (model.generated) ver.append(el('span', null, '· ' + model.generated));
-    nav.append(ver);
+    navTop.append(ver);
 
     const ctl = el('div', 'ctl');
     const r1 = el('div', 'row'); r1.append(el('b', null, '인터랙션'));
@@ -345,7 +324,7 @@
     const bShare = el('button', null, '링크 복사');
     r2.append(bShare);
     ctl.append(r2);
-    nav.append(ctl);
+    navTop.append(ctl);
 
     /* ---------- 버전 비교 (diff.json) ---------- */
     const D = model.diff || null;
@@ -368,7 +347,7 @@
       go.onclick = () => { if (!root.classList.contains('diff-on')) dsw.click(); main.scrollTo({ top: 0, behavior: 'smooth' }); };
       dc.append(go);
       dsw.onclick = () => { dsw.classList.toggle('on'); root.classList.toggle('diff-on', dsw.classList.contains('on')); closePanel(); slides.forEach(sendChanged); };
-      nav.append(dc);
+      navTop.append(dc);
     }
     const baseImg = (n) => (D && D.baseDir ? `${D.baseDir}p${n}.jpg` : null);
     const TAG = { added: '추가', modified: '수정', removed: '삭제', moved: '이동' };
@@ -395,7 +374,7 @@
       if (liveByPage[i]) a.append(el('i', 'lv', 'LIVE'));
       if (dPage[i] && dPage[i].status !== 'same') a.append(el('i', 'tag ' + dPage[i].status, dPage[i].status === 'added' ? '신규' : '수정'));
       a.onclick = (e) => { e.preventDefault(); goto(i); };
-      nav.append(a);
+      navTop.append(a);
       return a;
     });
 
@@ -548,7 +527,7 @@
       chg.append(ul);
     }
     function showChange(pi, it) {
-      panelStart(`변경 내용 · ${pi + 1}p ${it.label}`, '', '변경 내용');
+      panelStart(`변경 내용 · ${pi + 1}p ${it.label}`, '');
       const box = el('div', 'it'); const d = it.d;
       const k = el('div', 'k'); k.append(el('i', 'tag ' + it.st, TAG[it.st]), el('span', null, it.title || it.label)); box.append(k);
       if (d.segs) { box.append(el('div', 'lbl', `${D.base} → ${model.version || '현재'}`), segHtml(d.segs)); }
@@ -556,7 +535,7 @@
       else if (it.st === 'removed' && (d.old || d.text)) box.append(el('div', 'lbl', `${D.base}에 있던 내용`), segHtml([['-', d.old || d.text]]));
       if (it.st === 'moved') box.append(el('p', null, '위치가 바뀌었어요. 보라색 점선이 이전 위치예요.'));
       if (it.kind === 'row' && d.old_key && d.key && d.old_key !== d.key) box.append(el('p', null, `번호 변경: ${d.old_key} → ${d.key}`));
-      refs.append(box); panelHistory();
+      refs.append(box);
       openPanel();
       clearLit();
       if (it.rect) light(pi, it.rect); if (it.old) light(pi, it.old, true);
@@ -743,49 +722,32 @@
       send(S, { type: 'focus', ref });
     }
     // 동작 화면 요소 클릭 → 관련 기획 표시
-    function panelStart(title, count, tabText) {
+    function panelStart(title, count) {
       refs.innerHTML = '';
       const head = el('div', 'rh'); const t = el('b', null, title); if (count) t.append(el('span', 'cnt', count)); head.append(t);
-      const x = el('button', null, matchMedia('(max-width:1100px)').matches ? '▼' : '»'); x.title = '접기 (Esc)'; x.onclick = closePanel; head.append(x);
+      const x = el('button', null, '✕'); x.title = '닫기 (Esc)'; x.onclick = closePanel; head.append(x);
       refs.append(head);
-      refLabel = tabText || title;
-      rtab.innerHTML = ''; rtab.append(el('span', null, '관련 기획'), el('b', null, count ? count.replace(/\D/g, '') || '1' : '1'));
-      if (tabText) rtab.append(el('span', null, tabText));
-      rtab.title = `${refLabel} — 펼치기`;
-      root.classList.add('rp-has');
+      navOpen.querySelector('b').textContent = (count || '1').replace(/\D/g, '') || '1';
+      navOpen.title = `메뉴 펼치기 ( [ ) — 관련 기획 ${count || ''}`;
     }
-    function panelHistory() {
-      if (refHist.length < 2) return;
-      refs.append(el('div', 'sect', '최근 본 기획'));
-      const h = el('div', 'hist');
-      for (const e of refHist.slice(1, 6)) {
-        const b = el('button'); b.append(el('em', null, `${e.pi + 1}p`), el('span', null, e.label || '선택한 요소'));
-        b.onclick = () => { if (!isVisible(slides[e.pi].sec)) goto(e.pi); showRefs(e.pi, e.list, e.label); };
-        h.append(b);
-      }
-      refs.append(h);
-    }
-    // 패널을 열고 닫아도 보던 위치 유지 (폭이 바뀌면 슬라이드 높이도 바뀜)
+    // 폭이 바뀌어도 보던 위치 유지 (메뉴 접기/펼치기)
     function relayout(fn) {
       const top = main.scrollTop, S = slides.find((x) => x.sec.offsetTop + x.sec.offsetHeight > top) || slides[currentIdx];
       const frac = S ? (top - S.sec.offsetTop) / Math.max(1, S.sec.offsetHeight) : 0;
       fn();
       if (S) { main.style.scrollBehavior = 'auto'; main.scrollTop = S.sec.offsetTop + frac * S.sec.offsetHeight; main.style.scrollBehavior = ''; navLock = Date.now() + 300; }
     }
-    function openPanel() { if (!root.classList.contains('rp-open')) relayout(() => root.classList.add('rp-open')); }
-    function closePanel() { if (root.classList.contains('rp-open')) relayout(() => root.classList.remove('rp-open')); }
-    rtab.onclick = openPanel;
+    // 관련 기획은 메뉴 안에 보여 줄 뿐, 접힌 메뉴를 자동으로 펼치지 않는다
+    function openPanel() { root.classList.add('rp-has'); refs.scrollTop = 0; }
+    function closePanel() { root.classList.remove('rp-has'); }
     function showRefs(pi, list, label) {
       const items = list.map(resolve).filter(Boolean);
       if (!items.length) return;
       clearLit(); clearActive();
       items.filter((r) => r.pi === pi).forEach((r) => { lightRef(`${r.pi + 1}:${r.key}`, true); markHotspots(pi, r.key); });
       // 관련 기획이 모두 이 페이지에 있으면 Description 하이라이트로 충분 — 패널은 띄우지 않는다
-      if (items.every((r) => r.pi === pi)) { closePanel(); root.classList.remove('rp-has'); return; }
-      const key = pi + '|' + list.join(' ');
-      const hi = refHist.findIndex((e) => e.key === key); if (hi >= 0) refHist.splice(hi, 1);
-      refHist.unshift({ key, pi, list, label }); refHist.length = Math.min(refHist.length, 8);
-      panelStart(`관련 기획 · ${label || '선택한 요소'}`, `${items.length}건`, label || '');
+      if (items.every((r) => r.pi === pi)) { closePanel(); return; }
+      panelStart(`관련 기획 · ${label || '선택한 요소'}`, `${items.length}건`);
       items.sort((a, b) => (a.pi === pi ? -1 : 0) - (b.pi === pi ? -1 : 0) || a.pi - b.pi);
       for (const r of items) {
         if (r.pi === pi) {   // 이 페이지 항목: 이미 노랗게 표시되므로 한 줄로 (누르면 내용 펼침)
@@ -807,10 +769,9 @@
         else { const go = el('button', null, '보기 →'); go.onclick = () => { goto(r.pi); setTimeout(() => { lightRef(`${r.pi + 1}:${r.key}`); markHotspots(r.pi, r.key); }, 450); }; k.append(go); }
         it.append(k);
         const body = r.text.split('\n').slice(1).join('\n').trim();
-        if (body) it.append(el('p', null, body.length > 320 ? body.slice(0, 320) + '…' : body));
+        if (body) { const bp = el('p', null, body); bp.title = '눌러서 전체 보기'; bp.onclick = () => bp.classList.toggle('full'); it.append(bp); }
         refs.append(it);
       }
-      panelHistory();
       openPanel();
     }
 
@@ -910,7 +871,8 @@
 
     mountGhosts();
     syncEvents();
-    root.append(nav, main, refs, toast, navOpen, rtab);
+    nav.append(navTop, refs);
+    root.append(nav, main, toast, navOpen);
     document.addEventListener('keydown', (e) => {
       if (e.key !== '[' || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''))) return;
       setNav(mobile() ? !root.classList.contains('nav-show') : root.classList.contains('nav-off'));
