@@ -184,7 +184,21 @@
     .d2p .slide-scroll{box-shadow:none;border-radius:0}
     .d2p .slide{min-width:0}
   }
-  @media (max-width:760px){ .d2p{grid-template-columns:1fr} .d2p nav.toc{display:none} .d2p main{padding:12px} }
+  /* ---- 사이드 메뉴 접기 ---- */
+  .d2p .toc .fold{position:absolute;top:16px;right:10px;width:28px;height:28px;padding:0;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px;line-height:1}
+  .d2p .toc .fold:hover{color:var(--brand)}
+  .d2p nav.toc{position:relative} .d2p .toc .brand{padding-right:30px}
+  .d2p .navopen{position:fixed;left:14px;top:14px;z-index:45;display:none;align-items:center;gap:6px;padding:7px 12px;border-radius:9px;box-shadow:var(--shadow);font-size:13px;font-weight:700}
+  .d2p.nav-off{grid-template-columns:minmax(0,1fr)}
+  .d2p.nav-off nav.toc{display:none}
+  .d2p.nav-off .navopen{display:flex}
+  .d2p.nav-off main{padding-top:58px} .d2p.nav-off .slide-wrap,.d2p.nav-off .dsum{scroll-margin-top:52px}
+  @media print{ .d2p .navopen{display:none!important} }
+  @media (max-width:760px){
+    .d2p{grid-template-columns:1fr} .d2p nav.toc{display:none} .d2p main{padding:12px;padding-top:58px} .d2p .navopen{display:flex}
+    .d2p.nav-show nav.toc{display:block;position:fixed;inset:0 auto 0 0;width:min(300px,86vw);z-index:60;box-shadow:var(--shadow)}
+    .d2p.nav-show .navopen{display:none}
+  }
   `;
 
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
@@ -238,6 +252,21 @@
     const nav = el('nav', 'toc');
     const home = el('a', 'home', 'DOC2PROTO'); home.href = opts.homeHref || './';
     nav.append(home, el('div', 'brand', model.title));
+    // 사이드 메뉴 접기/펴기 (상태는 이 브라우저에 기억)
+    const fold = el('button', 'fold', '«'); fold.title = '메뉴 접기 ( [ )'; fold.setAttribute('aria-label', '사이드 메뉴 접기');
+    const navOpen = el('button', 'navopen', '☰ 메뉴'); navOpen.title = '메뉴 펼치기 ( [ )'; navOpen.setAttribute('aria-label', '사이드 메뉴 펼치기');
+    const mobile = () => matchMedia('(max-width:760px)').matches;
+    const setNav = (show) => {
+      if (mobile()) { root.classList.toggle('nav-show', show); return; }
+      const keep = slides[currentIdx];   // 폭이 바뀌어도 보던 페이지에 머문다
+      root.classList.toggle('nav-off', !show);
+      if (keep) requestAnimationFrame(() => { main.style.scrollBehavior = 'auto'; keep.sec.scrollIntoView({ block: 'start' }); main.style.scrollBehavior = ''; navLock = Date.now() + 300; });
+      try { localStorage.setItem('d2p.nav', show ? '1' : '0'); } catch {}
+    };
+    fold.onclick = () => setNav(false);
+    navOpen.onclick = () => setNav(true);
+    try { if (localStorage.getItem('d2p.nav') === '0') root.classList.add('nav-off'); } catch {}
+    nav.append(fold);
     const ver = el('div', 'ver');
     if (opts.versions && opts.versions.length > 1) {
       const sel = el('select');
@@ -809,7 +838,13 @@
 
     mountGhosts();
     syncEvents();
-    root.append(nav, main, refs, toast);
+    root.append(nav, main, refs, toast, navOpen);
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== '[' || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''))) return;
+      setNav(mobile() ? !root.classList.contains('nav-show') : root.classList.contains('nav-off'));
+    });
+    // 모바일: 목차 항목을 누르면 메뉴를 닫는다
+    nav.addEventListener('click', (e) => { if (mobile() && e.target.closest('a.sec')) root.classList.remove('nav-show'); });
     setTimeout(applyHash, 50);
     return { goto, lightRef };
   }
