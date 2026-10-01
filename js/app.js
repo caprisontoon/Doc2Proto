@@ -1107,7 +1107,14 @@
         let list = threads.filter((x) => filter === 'all' || (filter === 'open' ? x.status !== 'resolved' : x.status === 'resolved'));
         if (mine && me) list = list.filter((x) => (x.author && x.author.uid === me.uid));
         list.sort((a, b) => a.page - b.page || a.createdAt - b.createdAt);
-        if (noAccess) { clist.append(el('div', 'empty', `${me.email} 계정은 아직 코멘트 권한이 없어요. 관리자에게 이 이메일을 허용 목록에 추가해 달라고 요청하세요.`)); return; }
+        if (noAccess) {
+          const msg = noAccess === 'rules'
+            ? `보안 규칙이 아직 예전 것이에요 — Firestore 규칙 탭에 새 규칙을 붙여넣고 [게시]해 주세요. (로그인 계정: ${me.email})`
+            : noAccess === 'missing'
+              ? `허용 목록(members)에 "${me.email}" 문서가 없어요. 문서 ID가 이 이메일과 정확히 같은지(대소문자·공백) 확인해 주세요.`
+              : `권한을 확인하지 못했어요 (${noAccess}). 로그인 계정: ${me.email}`;
+          clist.append(el('div', 'empty', msg)); return;
+        }
         if (needLogin) { const e = el('div', 'empty'); e.append((C.domain ? `@${C.domain} ` : '') + 'Google 계정으로 로그인하면 코멘트가 보여요. '); const b = el('button', null, '로그인'); b.style.cssText = 'font-size:11.5px;padding:1px 8px'; b.onclick = () => C.signIn().catch((er) => say('로그인하지 못했어요: ' + (er.code || er.message))); e.append(b); clist.append(e); return; }
         if (!list.length) clist.append(el('div', 'empty', threads.length ? '해당하는 코멘트가 없어요' : '아직 코멘트가 없어요. "+ 코멘트 달기"로 첫 문의를 남겨 보세요.'));
         for (const x of list) {
@@ -1126,7 +1133,8 @@
         needLogin = C.mode === 'cloud' && !me; noAccess = false;
         renderPins();
         if (needLogin) return;
-        if (!(await C.allowed())) { noAccess = true; renderPins(); renderWho(); return; }   // 로그인했지만 허용 목록에 없음
+        const ok = await C.allowed();
+        if (ok !== true) { noAccess = ok || 'missing'; renderPins(); renderWho(); return; }   // 로그인했지만 허용 목록에 없음
         unsub = C.subscribe((list) => {
           threads = list; renderPins(); if (pop && pop.id) refreshPop();
           if (first) { first = false; const m = /#c=([\w-]+)/.exec(location.hash); if (m) setTimeout(() => openThread(m[1]), 500); }

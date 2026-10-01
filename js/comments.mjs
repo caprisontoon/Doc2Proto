@@ -47,7 +47,12 @@ async function firebaseBackend(cfg, doc, version) {
     signOut: () => A.signOut(auth),
     me: () => user,
     // 허용 목록에 있는지 (없으면 permission-denied)
-    async allowed() { if (!user) return false; try { const d = await F.getDoc(F.doc(db, 'members', user.email)); return d.exists(); } catch { return false; } },
+    // 허용 목록 확인 → true | 'missing'(목록에 이 이메일 문서가 없음) | 'rules'(보안 규칙이 예전 것이라 확인 자체가 막힘)
+    async allowed() {
+      if (!user) return false;
+      try { const d = await F.getDoc(F.doc(db, 'members', user.email)); return d.exists() ? true : 'missing'; }
+      catch (e) { console.warn('members 확인 실패', e); return e.code === 'permission-denied' ? 'rules' : 'error:' + (e.code || e.message); }
+    },
     subscribe(cb, onErr) {
       const qy = F.query(col, F.where('doc', '==', doc), F.where('version', '==', version));
       return F.onSnapshot(qy, (snap) => cb(snap.docs.map(thread)), (e) => onErr && onErr(e));
