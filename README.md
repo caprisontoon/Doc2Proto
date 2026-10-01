@@ -23,7 +23,8 @@
 | `js/analyzer.mjs` | PDF 오퍼레이터/텍스트 분석 — 빨간 점선 핫스팟, 연결 화살표, 디스크립션 블록, 페이지 간 프로토타입 링크 추출 |
 | `js/main.mjs` | pdf.js 로딩, 페이지 렌더링, 모델 생성, URL 공유 |
 | `js/app.js` | 뷰어 UI (인터랙션/인쇄 모드, 하이라이트, 딥링크) |
-| `api/upload.js` | 공유용 PDF 업로드 (Vercel Blob, ≤4MB) |
+| `api/upload.js` | 공유용 PDF 업로드 (비공개 Vercel Blob, ≤4MB) |
+| `api/file.js` | 공유된 PDF 열람 (`?id=` → Blob에서 스트리밍) |
 | `vendor/pdfjs/` | pdf.js 배포본 (CDN 없이 동작) |
 | `sample.pdf` | 샘플 상세기획서 |
 

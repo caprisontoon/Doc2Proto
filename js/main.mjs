@@ -11,6 +11,7 @@ const MAX_SHARE = 4 * 1024 * 1024; // Vercel 함수 본문 한도(4.5MB) 이하
 
 let sharedSrc = null; // 이미 URL로 접근 가능한 PDF 경로
 let localBytes = null; // 업로드된 파일 원본(공유 시 서버로 전송)
+let docName = 'document.pdf';
 
 function status(msg) {
   statusEl.textContent = msg;
@@ -70,7 +71,7 @@ async function getShareUrl() {
     if (!localBytes) throw new Error('공유할 문서가 없어요');
     if (localBytes.byteLength > MAX_SHARE) throw new Error('4MB 이하 PDF만 URL로 공유할 수 있어요');
     status('공유 URL 만드는 중…');
-    const res = await fetch('api/upload', { method: 'POST', headers: { 'content-type': 'application/pdf' }, body: localBytes })
+    const res = await fetch('api/upload?name=' + encodeURIComponent(docName), { method: 'POST', headers: { 'content-type': 'application/pdf' }, body: localBytes })
       .catch(() => null);
     status('');
     if (!res || !res.ok) {
@@ -79,14 +80,15 @@ async function getShareUrl() {
         ? '이 배포에는 공유 저장소가 아직 연결되지 않았어요'
         : '업로드에 실패했어요' + (msg ? `: ${msg.slice(0, 80)}` : ''));
     }
-    sharedSrc = (await res.json()).url;
+    sharedSrc = 'api/file?id=' + (await res.json()).id;
   }
   const u = new URL(location.href);
-  u.search = '?src=' + encodeURIComponent(sharedSrc);
+  u.search = '?src=' + encodeURIComponent(sharedSrc) + '&name=' + encodeURIComponent(docName);
   return u.href;
 }
 
 async function open(data, name) {
+  docName = name;
   try {
     const model = await buildModel(data, name);
     landing.hidden = true;
@@ -121,9 +123,10 @@ async function openFromSrc(src) {
   const res = await fetch(u).catch(() => null);
   if (!res || !res.ok) { status('문서를 내려받지 못했어요'); return; }
   const buf = await res.arrayBuffer();
-  sharedSrc = u.origin === location.origin ? u.pathname.replace(/^\//, '') : u.href;
+  sharedSrc = u.origin === location.origin ? (u.pathname + u.search).replace(/^\//, '') : u.href;
   localBytes = buf.slice(0);
-  const name = decodeURIComponent(u.pathname.split('/').pop() || 'document.pdf');
+  const name = new URLSearchParams(location.search).get('name') ||
+    decodeURIComponent(u.pathname.split('/').pop() || 'document.pdf');
   open(new Uint8Array(buf), name);
 }
 
