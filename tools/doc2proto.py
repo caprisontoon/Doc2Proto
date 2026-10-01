@@ -822,6 +822,38 @@ def refine_rows(pdf, pages):
                     blk['subs'] = subs
 
 
+def extract_text(pdf, pages, pptx_lines):
+    """스냅샷 위에 깔 '선택 가능한 텍스트 층'. PDF의 줄 단위 위치·크기 그대로.
+    PowerPoint PDF가 띄어쓰기를 잃은 줄(제목 등)은 PPTX의 같은 글자 줄로 바로잡는다."""
+    try:
+        import pymupdf
+    except ImportError:
+        return
+    doc = pymupdf.open(str(pdf))
+    for p in pages:
+        if p['index'] >= doc.page_count:
+            break
+        page = doc[p['index']]
+        PW, PH = page.rect.width, page.rect.height
+        fix = {re.sub(r'\s+', '', t): t for t in pptx_lines.get(p['index'], []) if ' ' in t}
+        out = []
+        for b in page.get_text('dict')['blocks']:
+            for l in b.get('lines', []):
+                if l['dir'][1] != 0:
+                    continue  # 세로쓰기·회전 텍스트는 건너뜀
+                txt = ''.join(sp['text'] for sp in l['spans'])
+                if not txt.strip():
+                    continue
+                if ' ' not in txt.strip() and len(txt.strip()) > 4:
+                    txt = fix.get(re.sub(r'\s+', '', txt), txt)
+                x0, y0, x1, y1 = l['bbox']
+                size = max(sp['size'] for sp in l['spans'])
+                bold = any('Bold' in sp['font'] or sp['flags'] & 16 for sp in l['spans'])
+                out.append({'l': round(x0 / PW * 100, 3), 't': round(y0 / PH * 100, 3), 'w': round((x1 - x0) / PW * 100, 3),
+                            'h': round((y1 - y0) / PH * 100, 3), 's': round(size / PW * 100, 4), 'b': 1 if bold else 0, 'x': txt.rstrip()})
+        p['text'] = out
+
+
 def render_pages(pdf, outdir, width=1920):
     try:
         import pymupdf
@@ -874,6 +906,15 @@ def main():
             pdf = Path(args.pdf) if args.pdf else pptx_to_pdf(pptx_path, Path(td))
             n = render_pages(pdf, outdir)
             refine_rows(pdf, pages)
+            pptx_lines = {}
+            for i, slide in enumerate(prs.slides):
+                lines = []
+                for sh, r, d in walk(slide.shapes, SW, SH):
+                    for ln in shape_text(sh).split('\n'):
+                        if ln.strip():
+                            lines.append(ln.strip())
+                pptx_lines[i] = lines
+            extract_text(pdf, pages, pptx_lines)
         if n != len(pages):
             print(f'경고: 슬라이드 {len(pages)}장 vs 렌더링 {n}장 — 숨긴 슬라이드가 있으면 번호가 어긋날 수 있어요', file=sys.stderr)
 
@@ -892,7 +933,7 @@ def main():
             'hotspots': [{'id': h['id'], 'rect': h['rect'], 'label': h['label'], 'targets': h['targets'],
                           **({'marker': h['marker'], 'marker_rect': h['marker_rect']} if h.get('marker') is not None else {}),
                           **({'sub': h['sub']} if h.get('sub') else {})} for h in p['hotspots']],
-            'links': p['links'], 'behaviors': p['behaviors'],
+            'links': p['links'], 'behaviors': p['behaviors'], 'text': p.get('text', []),
         } for p in pages],
     }
     (outdir / 'data.json').write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')

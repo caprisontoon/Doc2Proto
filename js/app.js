@@ -69,6 +69,13 @@
   .d2p .rowhit{position:absolute;cursor:pointer;border-radius:2px}
   .d2p .rowhit:hover{background:rgba(74,85,224,.07)}
   .d2p.off .rowhit,.d2p.off .dot,.d2p.off .hs,.d2p.off .lnk,.d2p.off .bh{display:none}
+  /* 선택 가능한 텍스트 층 (인터랙션 OFF) — 원본 위에 투명하게 겹친 같은 글자 */
+  .d2p .tl{position:absolute;inset:0;z-index:20;display:none;line-height:1;cursor:text;user-select:text;-webkit-user-select:text}
+  .d2p.off .tl{display:block}
+  .d2p .tl span{position:absolute;white-space:pre;color:transparent;transform-origin:0 0;font-family:var(--fm)}
+  .d2p .tl span.b{font-weight:700}
+  .d2p .tl ::selection{background:rgba(74,85,224,.32);color:transparent}
+
   /* 번호 마커 위 클릭 영역 (원본 마커 그대로, 테두리만) */
   .d2p .dot{position:absolute;z-index:12;transform:translate(-50%,-50%);width:calc(var(--d)*1.25);height:calc(var(--d)*1.25);border-radius:999px;cursor:pointer}
   .d2p .dot:hover,.d2p .dot.active{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--brand)}
@@ -185,10 +192,11 @@
     const r1 = el('div', 'row'); r1.append(el('b', null, '인터랙션'));
     const sw = el('button', 'sw on'); sw.setAttribute('aria-label', '인터랙션 모드'); r1.append(sw);
     ctl.append(r1);
+    const offHint = el('small', null, '인터랙션을 끄면 원본 기획서를 그대로 보면서 텍스트를 드래그해 복사할 수 있어요.');
     const hint = el('small', null, LIVE
       ? '목업 자리의 화면이 실제로 동작해요. 요소를 누르면 해당 Description이 노랗게 표시되고, 다른 페이지의 관련 기획은 오른쪽 아래에 떠요. 끄면 원본 기획서 그대로 보여요.'
       : '번호 마커를 누르면 Description이 노랗게 표시돼요. Description을 누르면 화면 위치가 표시돼요.');
-    ctl.append(hint);
+    ctl.append(hint, offHint); offHint.style.display = 'none';
     if (LIVE) {
       const r3 = el('div', 'row live-only'); r3.style.display = 'flex';
       r3.append(el('span', null, '기획 번호 표시'));
@@ -287,6 +295,19 @@
         cb.onclick = (e) => { e.stopPropagation(); copyTable(t); };
         stage.append(cb);
       }
+      // 선택 가능한 텍스트 층
+      if ((p.text || []).length) {
+        const tl = el('div', 'tl');
+        for (const t of p.text) {
+          const sp = el('span', t.b ? 'b' : null, t.x);
+          sp.style.left = t.l + '%'; sp.style.top = t.t + '%';
+          sp.style.lineHeight = `calc(100cqw * ${(t.h * HPT / WPT).toFixed(4)} / 100)`;
+          sp.style.fontSize = `calc(100cqw * ${t.s} / 100)`;
+          sp.dataset.w = t.w;
+          tl.append(sp, document.createElement('br'));
+        }
+        stage.append(tl); S.tl = tl;
+      }
       // 동작 화면 자리
       if (S.frame) {
         const badge = el('div', 'livebadge', '● 동작 화면');
@@ -308,6 +329,26 @@
       sec.append(cap);
       main.append(sec);
     });
+
+    /* ---------- 텍스트 층 줄 폭 맞춤 ---------- */
+    function fitText(S) {
+      if (!S.tl || S.tlFit) return;
+      const W = S.stage.clientWidth; if (!W) return;
+      S.tl.style.display = 'block';
+      for (const sp of S.tl.children) {
+        if (sp.tagName !== 'SPAN') continue;
+        sp.style.transform = '';
+        const target = W * (+sp.dataset.w) / 100, real = sp.getBoundingClientRect().width;
+        if (real > 0) sp.style.transform = `scaleX(${target / real})`;
+      }
+      S.tl.style.display = '';
+      S.tlFit = true;
+    }
+    const tio = new IntersectionObserver((ents) => {
+      for (const e of ents) if (e.isIntersecting) { const S = slides.find((s) => s.sec === e.target); if (S) fitText(S); }
+    }, { root: main, rootMargin: '600px 0px' });
+    slides.forEach((S) => S.tl && tio.observe(S.sec));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => slides.forEach((S) => { if (S.tlFit) { S.tlFit = false; fitText(S); } }));
 
     /* ---------- 동작 화면 iframe (보이는 슬라이드만 띄움) ---------- */
     function mountLive(S) {
@@ -486,6 +527,7 @@
       sw.classList.toggle('on');
       const on = sw.classList.contains('on');
       root.classList.toggle('off', !on);
+      hint.style.display = on ? '' : 'none'; offHint.style.display = on ? 'none' : '';
       if (LIVE) root.classList.toggle('live-on', on);
       if (!on) { refs.classList.remove('open'); clearLit(); clearActive(); }
     };
