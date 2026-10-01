@@ -1,0 +1,1853 @@
+{
+ "title": "투네이션 채팅 상세기획서 (샘플)",
+ "slug": "sample",
+ "version": "v0.1",
+ "source": "투네이션채팅_상세기획서_샘플.pptx",
+ "generated": "2026-10-01",
+ "aspect": 1.7778,
+ "pages": [
+  {
+   "title": "화면 영역",
+   "img": "p1.jpg",
+   "blocks": [
+    {
+     "id": 0,
+     "rect": {
+      "l": 1.2,
+      "t": 2.0,
+      "w": 97.5,
+      "h": 4.5
+     },
+     "text": "Page Name | 화면 영역 | Project | 투네이션 채팅",
+     "caption": "",
+     "kind": "table",
+     "inner": false
+    },
+    {
+     "id": 1,
+     "rect": {
+      "l": 1.2,
+      "t": 8.0,
+      "w": 20.0,
+      "h": 4.0
+     },
+     "text": "화면 영역",
+     "caption": "Page Name | 화면 영역 | Project | 투네이션 채팅",
+     "kind": "shape",
+     "inner": false
+    },
+    {
+     "id": 2,
+     "rect": {
+      "l": 2.0,
+      "t": 14.0,
+      "w": 30.0,
+      "h": 80.0
+     },
+     "text": "● 투네이션 999\n● 유튜브 999\n● 트위치 999\n⋮\n📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\nSVIP\n열혈팬1호 오늘도 화이팅\nSVIP 열혈팬1호                           1,000 캐시\n텍스트후원 오늘 방송 미쳤다 후원 받아라~\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\n😊  채팅 입력\n보내기",
+     "caption": "화면 영역",
+     "kind": "group",
+     "inner": false
+    },
+    {
+     "id": 3,
+     "rect": {
+      "l": 2.0,
+      "t": 14.0,
+      "w": 30.0,
+      "h": 80.0
+     },
+     "text": "",
+     "caption": "화면 영역",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 4,
+     "rect": {
+      "l": 3.0,
+      "t": 15.5,
+      "w": 8.0,
+      "h": 4.5
+     },
+     "text": "● 투네이션 999",
+     "caption": "● 투네이션 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 5,
+     "rect": {
+      "l": 11.5,
+      "t": 15.5,
+      "w": 7.0,
+      "h": 4.5
+     },
+     "text": "● 유튜브 999",
+     "caption": "● 유튜브 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 6,
+     "rect": {
+      "l": 19.0,
+      "t": 15.5,
+      "w": 7.0,
+      "h": 4.5
+     },
+     "text": "● 트위치 999",
+     "caption": "● 트위치 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 7,
+     "rect": {
+      "l": 28.5,
+      "t": 15.5,
+      "w": 2.5,
+      "h": 4.5
+     },
+     "text": "⋮",
+     "caption": "⋮",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 8,
+     "rect": {
+      "l": 3.0,
+      "t": 21.5,
+      "w": 28.0,
+      "h": 4.5
+     },
+     "text": "📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요",
+     "caption": "● 투네이션 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 9,
+     "rect": {
+      "l": 3.5,
+      "t": 27.5,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "VIP",
+     "caption": "📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 10,
+     "rect": {
+      "l": 8.0,
+      "t": 27.5,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "단골도네 다음 방송 언제예요?",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 11,
+     "rect": {
+      "l": 3.5,
+      "t": 31.7,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "FR",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 12,
+     "rect": {
+      "l": 8.0,
+      "t": 31.7,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬 방송 잘 보고 있어요",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 13,
+     "rect": {
+      "l": 3.5,
+      "t": 35.9,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "SVIP",
+     "caption": "FR",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 14,
+     "rect": {
+      "l": 8.0,
+      "t": 35.9,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬1호 오늘도 화이팅",
+     "caption": "열혈팬 방송 잘 보고 있어요",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 15,
+     "rect": {
+      "l": 3.5,
+      "t": 40.1,
+      "w": 27.0,
+      "h": 8.0
+     },
+     "text": "SVIP 열혈팬1호                           1,000 캐시\n텍스트후원 오늘 방송 미쳤다 후원 받아라~",
+     "caption": "SVIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 16,
+     "rect": {
+      "l": 3.5,
+      "t": 49.3,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "VIP",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 17,
+     "rect": {
+      "l": 8.0,
+      "t": 49.3,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "단골도네 다음 방송 언제예요?",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 18,
+     "rect": {
+      "l": 3.5,
+      "t": 53.5,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "FR",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 19,
+     "rect": {
+      "l": 8.0,
+      "t": 53.5,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬 방송 잘 보고 있어요",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 20,
+     "rect": {
+      "l": 3.5,
+      "t": 57.7,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "VIP",
+     "caption": "FR",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 21,
+     "rect": {
+      "l": 8.0,
+      "t": 57.7,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "단골도네 다음 방송 언제예요?",
+     "caption": "열혈팬 방송 잘 보고 있어요",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 22,
+     "rect": {
+      "l": 3.5,
+      "t": 61.9,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "FR",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 23,
+     "rect": {
+      "l": 8.0,
+      "t": 61.9,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬 방송 잘 보고 있어요",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 24,
+     "rect": {
+      "l": 3.5,
+      "t": 85.0,
+      "w": 22.0,
+      "h": 5.5
+     },
+     "text": "😊  채팅 입력",
+     "caption": "😊  채팅 입력",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 25,
+     "rect": {
+      "l": 26.0,
+      "t": 85.0,
+      "w": 5.0,
+      "h": 5.5
+     },
+     "text": "보내기",
+     "caption": "보내기",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 26,
+     "rect": {
+      "l": 36.0,
+      "t": 14.0,
+      "w": 12.0,
+      "h": 3.5
+     },
+     "text": "채널 영역",
+     "caption": "채널 영역",
+     "kind": "shape",
+     "inner": false
+    },
+    {
+     "id": 27,
+     "rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 40.0,
+      "h": 16.0
+     },
+     "text": "채널 탭 표시 | 투네이션·유튜브·트위치 탭이 나열. 각 탭에는 현재 채팅 숫자 노출\n채널 전환 | 탭을 클릭하면 그 채널로 즉시 전환된다.\n대화 이력 보존 | 다른 채널로 이동했다가 돌아오면, 이전 대화 이력이 그대로 유지\n관리 메뉴 | 클린봇 설정, 채팅입력제한, 채팅 얼리기, 매니저 모드, 입장표시, 글자크기, 차단목록",
+     "caption": "채널 영역",
+     "kind": "table",
+     "inner": false
+    },
+    {
+     "id": 28,
+     "rect": {
+      "l": 36.0,
+      "t": 40.0,
+      "w": 12.0,
+      "h": 3.5
+     },
+     "text": "채팅 뷰어 영역",
+     "caption": "채팅 뷰어 영역",
+     "kind": "shape",
+     "inner": false
+    },
+    {
+     "id": 29,
+     "rect": {
+      "l": 36.0,
+      "t": 44.0,
+      "w": 40.0,
+      "h": 13.0
+     },
+     "text": "공지 (고정) | 공지사항(매니저 모드) 등록/수정, 상단 고정\n채팅 | 투네이션 VIP 등급 표시, 도네이터 명 클릭 시 프로필 및 차단/신고, 이모티콘\n스크롤 시 최근 후원 | 스크롤 이동 시 최근 후원 노출",
+     "caption": "채팅 뷰어 영역",
+     "kind": "table",
+     "inner": false
+    },
+    {
+     "id": 30,
+     "rect": {
+      "l": 36.0,
+      "t": 66.0,
+      "w": 12.0,
+      "h": 3.5
+     },
+     "text": "채팅 입력 영역",
+     "caption": "채팅 입력 영역",
+     "kind": "shape",
+     "inner": false
+    },
+    {
+     "id": 31,
+     "rect": {
+      "l": 36.0,
+      "t": 70.0,
+      "w": 40.0,
+      "h": 10.0
+     },
+     "text": "이모티콘 | 채팅용 이모티콘 기본 제공. 😊 아이콘에 마우스를 올리면 \"이모티콘 선택\" 툴팁 노출\n채팅 | 최대 120자 이내 채팅 입력. 보내기 클릭 시 전송",
+     "caption": "채팅 입력 영역",
+     "kind": "table",
+     "inner": false
+    }
+   ],
+   "hotspots": [
+    {
+     "id": 0,
+     "rect": {
+      "l": 1.6,
+      "t": 14.5,
+      "w": 31.0,
+      "h": 6.5
+     },
+     "label": "⋮",
+     "targets": [
+      27
+     ]
+    },
+    {
+     "id": 1,
+     "rect": {
+      "l": 1.6,
+      "t": 21.0,
+      "w": 31.0,
+      "h": 62.5
+     },
+     "label": "VIP",
+     "targets": [
+      29
+     ]
+    },
+    {
+     "id": 2,
+     "rect": {
+      "l": 1.6,
+      "t": 84.0,
+      "w": 31.0,
+      "h": 8.0
+     },
+     "label": "보내기",
+     "targets": [
+      31
+     ]
+    }
+   ],
+   "links": [
+    {
+     "page": 1,
+     "hotspot": 0,
+     "rect": {
+      "l": 28.0,
+      "t": 15.0,
+      "w": 3.3,
+      "h": 5.5
+     }
+    },
+    {
+     "page": 2,
+     "hotspot": 0,
+     "rect": {
+      "l": 3.0,
+      "t": 84.5,
+      "w": 5.5,
+      "h": 6.5
+     }
+    }
+   ],
+   "behaviors": [
+    {
+     "kind": "navigate",
+     "trigger": "click",
+     "rect": {
+      "l": 26.0,
+      "t": 85.0,
+      "w": 5.0,
+      "h": 5.5
+     },
+     "label": "보내기",
+     "content": "채팅 입력 영역(으)로 이동",
+     "show_rect": null,
+     "target_page": 3,
+     "source": "hyperlink"
+    },
+    {
+     "kind": "tooltip",
+     "trigger": "hover",
+     "rect": {
+      "l": 3.5,
+      "t": 85.0,
+      "w": 3.2,
+      "h": 5.5
+     },
+     "label": "이모티콘 아이콘",
+     "content": "이모티콘 선택",
+     "show_rect": null,
+     "target_page": null,
+     "source": "claude"
+    },
+    {
+     "kind": "input",
+     "trigger": "click",
+     "rect": {
+      "l": 6.7,
+      "t": 85.0,
+      "w": 18.8,
+      "h": 5.5
+     },
+     "label": "채팅 입력",
+     "content": "최대 120자 이내 채팅 입력",
+     "show_rect": null,
+     "target_page": null,
+     "source": "claude"
+    }
+   ]
+  },
+  {
+   "title": "채널 영역",
+   "img": "p2.jpg",
+   "blocks": [
+    {
+     "id": 0,
+     "rect": {
+      "l": 1.2,
+      "t": 2.0,
+      "w": 97.5,
+      "h": 4.5
+     },
+     "text": "Page Name | 채널 영역 | Project | 투네이션 채팅",
+     "caption": "",
+     "kind": "table",
+     "inner": false
+    },
+    {
+     "id": 1,
+     "rect": {
+      "l": 1.2,
+      "t": 8.0,
+      "w": 20.0,
+      "h": 4.0
+     },
+     "text": "채널 영역",
+     "caption": "Page Name | 채널 영역 | Project | 투네이션 채팅",
+     "kind": "shape",
+     "inner": false
+    },
+    {
+     "id": 2,
+     "rect": {
+      "l": 2.0,
+      "t": 14.0,
+      "w": 30.0,
+      "h": 80.0
+     },
+     "text": "● 투네이션 999\n● 유튜브 999\n● 트위치 999\n⋮\n📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\nSVIP\n열혈팬1호 오늘도 화이팅\nSVIP 열혈팬1호                           1,000 캐시\n텍스트후원 오늘 방송 미쳤다 후원 받아라~\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\n😊  채팅 입력\n보내기",
+     "caption": "채널 영역",
+     "kind": "group",
+     "inner": true
+    },
+    {
+     "id": 3,
+     "rect": {
+      "l": 2.0,
+      "t": 14.0,
+      "w": 30.0,
+      "h": 80.0
+     },
+     "text": "",
+     "caption": "채널 영역",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 4,
+     "rect": {
+      "l": 3.0,
+      "t": 15.5,
+      "w": 8.0,
+      "h": 4.5
+     },
+     "text": "● 투네이션 999",
+     "caption": "● 투네이션 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 5,
+     "rect": {
+      "l": 11.5,
+      "t": 15.5,
+      "w": 7.0,
+      "h": 4.5
+     },
+     "text": "● 유튜브 999",
+     "caption": "● 유튜브 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 6,
+     "rect": {
+      "l": 19.0,
+      "t": 15.5,
+      "w": 7.0,
+      "h": 4.5
+     },
+     "text": "● 트위치 999",
+     "caption": "● 트위치 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 7,
+     "rect": {
+      "l": 28.5,
+      "t": 15.5,
+      "w": 2.5,
+      "h": 4.5
+     },
+     "text": "⋮",
+     "caption": "⋮",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 8,
+     "rect": {
+      "l": 3.0,
+      "t": 21.5,
+      "w": 28.0,
+      "h": 4.5
+     },
+     "text": "📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요",
+     "caption": "● 투네이션 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 9,
+     "rect": {
+      "l": 3.5,
+      "t": 27.5,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "VIP",
+     "caption": "📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 10,
+     "rect": {
+      "l": 8.0,
+      "t": 27.5,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "단골도네 다음 방송 언제예요?",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 11,
+     "rect": {
+      "l": 3.5,
+      "t": 31.7,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "FR",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 12,
+     "rect": {
+      "l": 8.0,
+      "t": 31.7,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬 방송 잘 보고 있어요",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 13,
+     "rect": {
+      "l": 3.5,
+      "t": 35.9,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "SVIP",
+     "caption": "FR",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 14,
+     "rect": {
+      "l": 8.0,
+      "t": 35.9,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬1호 오늘도 화이팅",
+     "caption": "열혈팬 방송 잘 보고 있어요",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 15,
+     "rect": {
+      "l": 3.5,
+      "t": 40.1,
+      "w": 27.0,
+      "h": 8.0
+     },
+     "text": "SVIP 열혈팬1호                           1,000 캐시\n텍스트후원 오늘 방송 미쳤다 후원 받아라~",
+     "caption": "SVIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 16,
+     "rect": {
+      "l": 3.5,
+      "t": 49.3,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "VIP",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 17,
+     "rect": {
+      "l": 8.0,
+      "t": 49.3,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "단골도네 다음 방송 언제예요?",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 18,
+     "rect": {
+      "l": 3.5,
+      "t": 53.5,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "FR",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 19,
+     "rect": {
+      "l": 8.0,
+      "t": 53.5,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬 방송 잘 보고 있어요",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 20,
+     "rect": {
+      "l": 3.5,
+      "t": 57.7,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "VIP",
+     "caption": "FR",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 21,
+     "rect": {
+      "l": 8.0,
+      "t": 57.7,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "단골도네 다음 방송 언제예요?",
+     "caption": "열혈팬 방송 잘 보고 있어요",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 22,
+     "rect": {
+      "l": 3.5,
+      "t": 61.9,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "FR",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 23,
+     "rect": {
+      "l": 8.0,
+      "t": 61.9,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬 방송 잘 보고 있어요",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 24,
+     "rect": {
+      "l": 3.5,
+      "t": 85.0,
+      "w": 22.0,
+      "h": 5.5
+     },
+     "text": "😊  채팅 입력",
+     "caption": "😊  채팅 입력",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 25,
+     "rect": {
+      "l": 26.0,
+      "t": 85.0,
+      "w": 5.0,
+      "h": 5.5
+     },
+     "text": "보내기",
+     "caption": "보내기",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 26,
+     "rect": {
+      "l": 36.0,
+      "t": 14.0,
+      "w": 12.0,
+      "h": 3.5
+     },
+     "text": "설정 메뉴",
+     "caption": "설정 메뉴",
+     "kind": "shape",
+     "inner": false
+    },
+    {
+     "id": 27,
+     "rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 22.0,
+      "h": 46.0
+     },
+     "text": "설정\n노출 설정\n● 클린봇\n중 ▼\n● 채팅입력제한\n5초 ▼\n● 채팅 얼리기\n● 입장 표시\n● 글자 크게\n부가 기능\n● 투표 만들기\n● 승부 예측",
+     "caption": "설정 메뉴",
+     "kind": "group",
+     "inner": false
+    },
+    {
+     "id": 28,
+     "rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 22.0,
+      "h": 46.0
+     },
+     "text": "",
+     "caption": "설정 메뉴",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 29,
+     "rect": {
+      "l": 37.0,
+      "t": 19.0,
+      "w": 10.0,
+      "h": 4.0
+     },
+     "text": "설정",
+     "caption": "설정 메뉴",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 30,
+     "rect": {
+      "l": 37.0,
+      "t": 24.0,
+      "w": 8.0,
+      "h": 3.0
+     },
+     "text": "노출 설정",
+     "caption": "설정",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 31,
+     "rect": {
+      "l": 37.0,
+      "t": 27.5,
+      "w": 11.0,
+      "h": 4.2
+     },
+     "text": "● 클린봇",
+     "caption": "노출 설정",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 32,
+     "rect": {
+      "l": 49.0,
+      "t": 27.5,
+      "w": 7.0,
+      "h": 4.2
+     },
+     "text": "중 ▼",
+     "caption": "중 ▼",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 33,
+     "rect": {
+      "l": 37.0,
+      "t": 32.5,
+      "w": 11.0,
+      "h": 4.2
+     },
+     "text": "● 채팅입력제한",
+     "caption": "● 클린봇",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 34,
+     "rect": {
+      "l": 49.0,
+      "t": 32.5,
+      "w": 7.0,
+      "h": 4.2
+     },
+     "text": "5초 ▼",
+     "caption": "중 ▼",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 35,
+     "rect": {
+      "l": 37.0,
+      "t": 37.5,
+      "w": 11.0,
+      "h": 4.2
+     },
+     "text": "● 채팅 얼리기",
+     "caption": "● 채팅입력제한",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 36,
+     "rect": {
+      "l": 37.0,
+      "t": 42.5,
+      "w": 10.0,
+      "h": 4.2
+     },
+     "text": "● 입장 표시",
+     "caption": "● 채팅 얼리기",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 37,
+     "rect": {
+      "l": 48.0,
+      "t": 42.5,
+      "w": 9.0,
+      "h": 4.2
+     },
+     "text": "● 글자 크게",
+     "caption": "● 글자 크게",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 38,
+     "rect": {
+      "l": 37.0,
+      "t": 48.0,
+      "w": 8.0,
+      "h": 3.0
+     },
+     "text": "부가 기능",
+     "caption": "● 입장 표시",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 39,
+     "rect": {
+      "l": 37.0,
+      "t": 51.5,
+      "w": 10.0,
+      "h": 4.2
+     },
+     "text": "● 투표 만들기",
+     "caption": "부가 기능",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 40,
+     "rect": {
+      "l": 48.0,
+      "t": 51.5,
+      "w": 9.0,
+      "h": 4.2
+     },
+     "text": "● 승부 예측",
+     "caption": "● 승부 예측",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 41,
+     "rect": {
+      "l": 62.0,
+      "t": 14.0,
+      "w": 16.0,
+      "h": 3.5
+     },
+     "text": "부가기능 (투표 만들기)",
+     "caption": "부가기능 (투표 만들기)",
+     "kind": "shape",
+     "inner": false
+    },
+    {
+     "id": 42,
+     "rect": {
+      "l": 62.0,
+      "t": 18.0,
+      "w": 20.0,
+      "h": 42.0
+     },
+     "text": "📋 투표 만들기\n질문\n오늘 방송 몇 시까지?\n항목 (선택지)\n1시간\n2시간\n밤샘 각\n+ 항목 추가",
+     "caption": "부가기능 (투표 만들기)",
+     "kind": "group",
+     "inner": false
+    },
+    {
+     "id": 43,
+     "rect": {
+      "l": 62.0,
+      "t": 18.0,
+      "w": 20.0,
+      "h": 42.0
+     },
+     "text": "",
+     "caption": "부가기능 (투표 만들기)",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 44,
+     "rect": {
+      "l": 63.0,
+      "t": 19.0,
+      "w": 12.0,
+      "h": 4.0
+     },
+     "text": "📋 투표 만들기",
+     "caption": "부가기능 (투표 만들기)",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 45,
+     "rect": {
+      "l": 63.0,
+      "t": 24.0,
+      "w": 6.0,
+      "h": 3.0
+     },
+     "text": "질문",
+     "caption": "📋 투표 만들기",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 46,
+     "rect": {
+      "l": 63.0,
+      "t": 27.0,
+      "w": 18.0,
+      "h": 4.5
+     },
+     "text": "오늘 방송 몇 시까지?",
+     "caption": "질문",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 47,
+     "rect": {
+      "l": 63.0,
+      "t": 32.5,
+      "w": 8.0,
+      "h": 3.0
+     },
+     "text": "항목 (선택지)",
+     "caption": "오늘 방송 몇 시까지?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 48,
+     "rect": {
+      "l": 63.0,
+      "t": 35.5,
+      "w": 15.0,
+      "h": 4.2
+     },
+     "text": "1시간",
+     "caption": "항목 (선택지)",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 49,
+     "rect": {
+      "l": 63.0,
+      "t": 40.5,
+      "w": 15.0,
+      "h": 4.2
+     },
+     "text": "2시간",
+     "caption": "1시간",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 50,
+     "rect": {
+      "l": 63.0,
+      "t": 45.5,
+      "w": 15.0,
+      "h": 4.2
+     },
+     "text": "밤샘 각",
+     "caption": "2시간",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 51,
+     "rect": {
+      "l": 63.0,
+      "t": 52.0,
+      "w": 18.0,
+      "h": 4.2
+     },
+     "text": "+ 항목 추가",
+     "caption": "밤샘 각",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 52,
+     "rect": {
+      "l": 36.0,
+      "t": 66.0,
+      "w": 42.0,
+      "h": 12.0
+     },
+     "text": "설정 메뉴 설명 | 더보기(⋮) 아이콘 클릭 시 설정 메뉴가 열린다. 크리에이터만 노출. \"클린봇\" 토글은 ON/OFF, 강도는 약/중/강 드롭다운. \"투표 만들기\"를 누르면 투표 편집 폼이 뜬다.",
+     "caption": "",
+     "kind": "shape",
+     "inner": false
+    }
+   ],
+   "hotspots": [
+    {
+     "id": 0,
+     "rect": {
+      "l": 28.0,
+      "t": 15.0,
+      "w": 3.3,
+      "h": 5.5
+     },
+     "label": "⋮",
+     "targets": [
+      27
+     ]
+    },
+    {
+     "id": 1,
+     "rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 22.0,
+      "h": 46.0
+     },
+     "label": "설정",
+     "targets": [
+      42
+     ]
+    }
+   ],
+   "links": [
+    {
+     "page": 2,
+     "hotspot": 0,
+     "rect": {
+      "l": 3.0,
+      "t": 84.5,
+      "w": 5.5,
+      "h": 6.5
+     }
+    }
+   ],
+   "behaviors": [
+    {
+     "kind": "navigate",
+     "trigger": "click",
+     "rect": {
+      "l": 26.0,
+      "t": 85.0,
+      "w": 5.0,
+      "h": 5.5
+     },
+     "label": "보내기",
+     "content": "채팅 입력 영역(으)로 이동",
+     "show_rect": null,
+     "target_page": 3,
+     "source": "hyperlink"
+    },
+    {
+     "kind": "popup",
+     "trigger": "click",
+     "rect": {
+      "l": 28.0,
+      "t": 15.0,
+      "w": 3.3,
+      "h": 5.5
+     },
+     "label": "더보기(⋮) 아이콘",
+     "content": "설정 메뉴가 열린다. 크리에이터만 노출.",
+     "show_rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 22.0,
+      "h": 46.0
+     },
+     "target_page": null,
+     "source": "claude"
+    },
+    {
+     "kind": "toggle",
+     "trigger": "click",
+     "rect": {
+      "l": 37.0,
+      "t": 27.5,
+      "w": 11.0,
+      "h": 4.2
+     },
+     "label": "클린봇 토글",
+     "content": "클린봇 ON/OFF. OFF로 두면 판정 대상 메시지도 원문 그대로 보인다",
+     "show_rect": null,
+     "target_page": null,
+     "source": "claude"
+    },
+    {
+     "kind": "dropdown",
+     "trigger": "click",
+     "rect": {
+      "l": 49.0,
+      "t": 27.5,
+      "w": 7.0,
+      "h": 4.2
+     },
+     "label": "클린봇 강도",
+     "content": "강도 선택: 약 / 중 / 강",
+     "show_rect": null,
+     "target_page": null,
+     "source": "claude"
+    },
+    {
+     "kind": "dropdown",
+     "trigger": "click",
+     "rect": {
+      "l": 49.0,
+      "t": 32.5,
+      "w": 7.0,
+      "h": 4.2
+     },
+     "label": "채팅입력제한 간격",
+     "content": "5초 / 10초 / 30초 / 60초 중 선택",
+     "show_rect": null,
+     "target_page": null,
+     "source": "claude"
+    },
+    {
+     "kind": "toggle",
+     "trigger": "click",
+     "rect": {
+      "l": 37.0,
+      "t": 42.5,
+      "w": 10.0,
+      "h": 4.2
+     },
+     "label": "입장 표시",
+     "content": "입장 알림을 화면에 표시한다",
+     "show_rect": null,
+     "target_page": null,
+     "source": "claude"
+    },
+    {
+     "kind": "popup",
+     "trigger": "click",
+     "rect": {
+      "l": 37.0,
+      "t": 51.5,
+      "w": 10.0,
+      "h": 4.2
+     },
+     "label": "투표 만들기",
+     "content": "투표 편집 폼이 뜬다. 질문(최대 40자)과 항목(2~6개)을 입력",
+     "show_rect": {
+      "l": 62.0,
+      "t": 18.0,
+      "w": 20.0,
+      "h": 42.0
+     },
+     "target_page": null,
+     "source": "claude"
+    },
+    {
+     "kind": "tooltip",
+     "trigger": "hover",
+     "rect": {
+      "l": 3.5,
+      "t": 85.0,
+      "w": 3.2,
+      "h": 5.5
+     },
+     "label": "이모티콘 아이콘",
+     "content": "이모티콘 선택",
+     "show_rect": null,
+     "target_page": null,
+     "source": "claude"
+    }
+   ]
+  },
+  {
+   "title": "채팅 입력 영역",
+   "img": "p3.jpg",
+   "blocks": [
+    {
+     "id": 0,
+     "rect": {
+      "l": 1.2,
+      "t": 2.0,
+      "w": 97.5,
+      "h": 4.5
+     },
+     "text": "Page Name | 채팅 입력 영역 | Project | 투네이션 채팅",
+     "caption": "",
+     "kind": "table",
+     "inner": false
+    },
+    {
+     "id": 1,
+     "rect": {
+      "l": 1.2,
+      "t": 8.0,
+      "w": 20.0,
+      "h": 4.0
+     },
+     "text": "채팅 입력 영역",
+     "caption": "채팅 입력 영역",
+     "kind": "shape",
+     "inner": false
+    },
+    {
+     "id": 2,
+     "rect": {
+      "l": 2.0,
+      "t": 14.0,
+      "w": 30.0,
+      "h": 80.0
+     },
+     "text": "● 투네이션 999\n● 유튜브 999\n● 트위치 999\n⋮\n📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\nSVIP\n열혈팬1호 오늘도 화이팅\nSVIP 열혈팬1호                           1,000 캐시\n텍스트후원 오늘 방송 미쳤다 후원 받아라~\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\nVIP\n단골도네 다음 방송 언제예요?\nFR\n열혈팬 방송 잘 보고 있어요\n😊  채팅 입력\n보내기",
+     "caption": "채팅 입력 영역",
+     "kind": "group",
+     "inner": true
+    },
+    {
+     "id": 3,
+     "rect": {
+      "l": 2.0,
+      "t": 14.0,
+      "w": 30.0,
+      "h": 80.0
+     },
+     "text": "",
+     "caption": "채팅 입력 영역",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 4,
+     "rect": {
+      "l": 3.0,
+      "t": 15.5,
+      "w": 8.0,
+      "h": 4.5
+     },
+     "text": "● 투네이션 999",
+     "caption": "● 투네이션 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 5,
+     "rect": {
+      "l": 11.5,
+      "t": 15.5,
+      "w": 7.0,
+      "h": 4.5
+     },
+     "text": "● 유튜브 999",
+     "caption": "● 유튜브 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 6,
+     "rect": {
+      "l": 19.0,
+      "t": 15.5,
+      "w": 7.0,
+      "h": 4.5
+     },
+     "text": "● 트위치 999",
+     "caption": "● 트위치 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 7,
+     "rect": {
+      "l": 28.5,
+      "t": 15.5,
+      "w": 2.5,
+      "h": 4.5
+     },
+     "text": "⋮",
+     "caption": "⋮",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 8,
+     "rect": {
+      "l": 3.0,
+      "t": 21.5,
+      "w": 28.0,
+      "h": 4.5
+     },
+     "text": "📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요",
+     "caption": "● 투네이션 999",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 9,
+     "rect": {
+      "l": 3.5,
+      "t": 27.5,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "VIP",
+     "caption": "📢 공지  채팅 매너 지켜주세요. 투표 참여 부탁드려요",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 10,
+     "rect": {
+      "l": 8.0,
+      "t": 27.5,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "단골도네 다음 방송 언제예요?",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 11,
+     "rect": {
+      "l": 3.5,
+      "t": 31.7,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "FR",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 12,
+     "rect": {
+      "l": 8.0,
+      "t": 31.7,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬 방송 잘 보고 있어요",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 13,
+     "rect": {
+      "l": 3.5,
+      "t": 35.9,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "SVIP",
+     "caption": "FR",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 14,
+     "rect": {
+      "l": 8.0,
+      "t": 35.9,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬1호 오늘도 화이팅",
+     "caption": "열혈팬 방송 잘 보고 있어요",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 15,
+     "rect": {
+      "l": 3.5,
+      "t": 40.1,
+      "w": 27.0,
+      "h": 8.0
+     },
+     "text": "SVIP 열혈팬1호                           1,000 캐시\n텍스트후원 오늘 방송 미쳤다 후원 받아라~",
+     "caption": "SVIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 16,
+     "rect": {
+      "l": 3.5,
+      "t": 49.3,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "VIP",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 17,
+     "rect": {
+      "l": 8.0,
+      "t": 49.3,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "단골도네 다음 방송 언제예요?",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 18,
+     "rect": {
+      "l": 3.5,
+      "t": 53.5,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "FR",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 19,
+     "rect": {
+      "l": 8.0,
+      "t": 53.5,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬 방송 잘 보고 있어요",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 20,
+     "rect": {
+      "l": 3.5,
+      "t": 57.7,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "VIP",
+     "caption": "FR",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 21,
+     "rect": {
+      "l": 8.0,
+      "t": 57.7,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "단골도네 다음 방송 언제예요?",
+     "caption": "열혈팬 방송 잘 보고 있어요",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 22,
+     "rect": {
+      "l": 3.5,
+      "t": 61.9,
+      "w": 4.0,
+      "h": 3.2
+     },
+     "text": "FR",
+     "caption": "VIP",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 23,
+     "rect": {
+      "l": 8.0,
+      "t": 61.9,
+      "w": 22.0,
+      "h": 3.2
+     },
+     "text": "열혈팬 방송 잘 보고 있어요",
+     "caption": "단골도네 다음 방송 언제예요?",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 24,
+     "rect": {
+      "l": 3.5,
+      "t": 85.0,
+      "w": 22.0,
+      "h": 5.5
+     },
+     "text": "😊  채팅 입력",
+     "caption": "😊  채팅 입력",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 25,
+     "rect": {
+      "l": 26.0,
+      "t": 85.0,
+      "w": 5.0,
+      "h": 5.5
+     },
+     "text": "보내기",
+     "caption": "보내기",
+     "kind": "shape",
+     "inner": true
+    },
+    {
+     "id": 26,
+     "rect": {
+      "l": 36.0,
+      "t": 14.0,
+      "w": 12.0,
+      "h": 3.5
+     },
+     "text": "입력 영역",
+     "caption": "입력 영역",
+     "kind": "shape",
+     "inner": false
+    },
+    {
+     "id": 27,
+     "rect": {
+      "l": 36.0,
+      "t": 18.0,
+      "w": 42.0,
+      "h": 20.0
+     },
+     "text": "텍스트 전송 | 입력 후 Enter 또는 \"보내기\"로 전송한다. 전송하면 입력창이 비워진다. 최대 120자.\n이모티콘 | : 뒤에 글자를 입력하면 스티커 후보 팝업이 뜬다. 😊 아이콘 위에 올리면 \"이모티콘 선택\" 툴팁\n멘션 자동완성 | @ 뒤에 글자를 입력하면 참여자 닉 후보가 뜨고, 선택 시 @닉 이 삽입된다.\n전송 차단 안내 | 얼리기·저속모드·제재 등으로 전송이 막히면 입력창 하단에 사유가 안내되고 입력이 잠긴다.",
+     "caption": "입력 영역",
+     "kind": "table",
+     "inner": false
+    }
+   ],
+   "hotspots": [
+    {
+     "id": 0,
+     "rect": {
+      "l": 3.0,
+      "t": 84.5,
+      "w": 5.5,
+      "h": 6.5
+     },
+     "label": "",
+     "targets": [
+      27
+     ]
+    }
+   ],
+   "links": [
+    {
+     "page": 1,
+     "hotspot": 0,
+     "rect": {
+      "l": 28.0,
+      "t": 15.0,
+      "w": 3.3,
+      "h": 5.5
+     }
+    }
+   ],
+   "behaviors": [
+    {
+     "kind": "tooltip",
+     "trigger": "hover",
+     "rect": {
+      "l": 3.5,
+      "t": 85.0,
+      "w": 3.2,
+      "h": 5.5
+     },
+     "label": "이모티콘 아이콘",
+     "content": "이모티콘 선택",
+     "show_rect": null,
+     "target_page": null,
+     "source": "claude"
+    },
+    {
+     "kind": "input",
+     "trigger": "click",
+     "rect": {
+      "l": 6.7,
+      "t": 85.0,
+      "w": 18.8,
+      "h": 5.5
+     },
+     "label": "채팅 입력",
+     "content": "입력 후 Enter 또는 보내기로 전송. 최대 120자",
+     "show_rect": null,
+     "target_page": null,
+     "source": "claude"
+    },
+    {
+     "kind": "navigate",
+     "trigger": "click",
+     "rect": {
+      "l": 26.0,
+      "t": 85.0,
+      "w": 5.0,
+      "h": 5.5
+     },
+     "label": "보내기 버튼",
+     "content": "전송하면 입력창이 비워진다",
+     "show_rect": null,
+     "target_page": 1,
+     "source": "claude"
+    }
+   ]
+  }
+ ]
+}

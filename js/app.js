@@ -98,6 +98,7 @@
   .d2p .modal canvas{border:1px solid var(--line);border-radius:8px;background:#fff}
   .d2p .fakein{position:absolute;z-index:23;font:inherit;font-size:13px;padding:4px 8px;border:2px solid var(--brand);
     border-radius:6px;background:#fff;color:#1b1d22;outline:0;box-shadow:var(--shadow)}
+  .d2p .vers{font:inherit;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--side);color:var(--ink)}
   .d2p .aibtn.has{border-color:var(--link);color:var(--link);font-weight:700}
   .d2p .legend{display:inline-flex;gap:10px;margin-left:8px;color:var(--muted);font-size:12px;align-items:center}
   .d2p .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
@@ -151,7 +152,13 @@
     const bShare = el('button', 'primary', 'URL로 공유');
     const bPrintGo = el('button', null, '인쇄');
     const bAI = el('button', 'aibtn', 'AI 프로토타입 생성');
-    header.append(logo, title, pager, modes, bAI, bShare, bPrintGo);
+    if (!opts.generate) bAI.hidden = true;
+    const verSel = el('select', 'vers');
+    if (opts.versions && opts.versions.length > 1) {
+      for (const v of opts.versions) { const o = el('option', null, v.label); o.value = v.href; o.selected = !!v.current; verSel.append(o); }
+      verSel.onchange = () => { location.href = verSel.value + location.hash; };
+    } else verSel.hidden = true;
+    header.append(logo, title, verSel, pager, modes, bAI, bShare, bPrintGo);
     if (opts.onNew) { const b = el('button', null, '새 문서'); b.onclick = opts.onNew; header.append(b); }
 
     /* ---------- body ---------- */
@@ -222,6 +229,7 @@
       const blkEls = {};
       for (const b of p.blocks) {
         if (b.rect.w < 1 || b.rect.h < 0.6) continue;
+        if (b.inner) continue; // 목업·그룹 안쪽 도형은 클릭 영역에서 제외
         if (isMock(b)) continue; // 목업 전체는 클릭 영역에서 제외(핫스팟만 동작)
         const n = el('div', 'ov blk');
         place(n, b.rect);
@@ -374,6 +382,9 @@
         panel.classList.remove('open');
         clearFloating();
       };
+      // 작은 오버레이가 큰 오버레이에 가려지지 않게 면적 내림차순으로 쌓는다
+      const areaOf = (n) => parseFloat(n.style.width) * parseFloat(n.style.height);
+      [...stage.querySelectorAll('.ov')].sort((a, b) => areaOf(b) - areaOf(a)).forEach((n) => stage.append(n));
       main.append(hint, stage);
       renderInter.activate = (hsId) => {
         const n = hsEls[hsId];
@@ -443,6 +454,7 @@
       bAI.textContent = n ? `AI 프로토타입 ✓ ${n}개 (다시 생성)` : 'AI 프로토타입 생성';
       bAI.classList.toggle('has', n > 0);
       root.classList.toggle('showai', n > 0);
+      if (!opts.generate) bAI.hidden = true;
     }
     bAI.onclick = async () => {
       if (!opts.generate) return;

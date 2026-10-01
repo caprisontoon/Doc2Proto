@@ -1,0 +1,15 @@
+{
+ "docs": [
+  {
+   "slug": "sample",
+   "title": "투네이션 채팅 상세기획서 (샘플)",
+   "versions": [
+    {
+     "version": "v0.1",
+     "date": "2026-10-01",
+     "pages": 3
+    }
+   ]
+  }
+ ]
+}
