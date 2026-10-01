@@ -61,6 +61,11 @@ git push
 
 공유 링크: `https://doc2proto.vercel.app/?doc=docs/<slug>/<version>` · 특정 페이지 `#s8` · 특정 마커 `#p=8&h=3`.
 
+## 스냅샷은 반드시 PowerPoint PDF로
+
+LibreOffice로 그리면 맑은 고딕이 없어 다른 글꼴로 바뀌고 글자 위치가 원본과 달라진다. 변환기가 "⚠ 스냅샷 PDF를 만든 프로그램"
+경고를 내면 배포하지 말고 기획자에게 PowerPoint에서 내보낸 PDF를 받아 `--pdf`로 다시 돌린다 (새 버전 포함).
+
 ## 새 버전이 왔을 때 (변경 사항 표시)
 
 작업자가 "어디가 바뀌었는지" 바로 보게 하는 것이 목적이다.

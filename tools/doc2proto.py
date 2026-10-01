@@ -755,6 +755,31 @@ def find_soffice():
     return None
 
 
+def check_renderer(pdf, prs):
+    """스냅샷이 원본과 같은 글꼴로 그려졌는지 확인. PowerPoint가 아니면 글꼴이 바뀌어 글자 위치가 달라진다."""
+    try:
+        import pymupdf
+    except ImportError:
+        return
+    doc = pymupdf.open(str(pdf))
+    producer = (doc.metadata or {}).get('producer') or ''
+    used = {f[3].split('+')[-1].replace(' ', '').lower() for i in range(min(doc.page_count, 12)) for f in doc.get_page_fonts(i)}
+    want = set()
+    for slide in list(prs.slides)[:12]:
+        for el in slide._element.iter('{%s}latin' % NS['a'], '{%s}ea' % NS['a']):
+            tf = el.get('typeface') or ''
+            if tf and not tf.startswith('+'):
+                want.add(tf)
+    alias = {'맑은 고딕': 'malgungothic', '굴림': 'gulim', '돋움': 'dotum', '바탕': 'batang', '나눔고딕': 'nanumgothic', '나눔스퀘어': 'nanumsquare'}
+    key = lambda f: alias.get(f, f.replace(' ', '').lower())
+    missing = [f for f in want if not any(key(f) in u for u in used)]
+    if 'powerpoint' not in producer.lower():
+        print(f'\n⚠ 스냅샷 PDF를 만든 프로그램: {producer or "알 수 없음"}', file=sys.stderr)
+        if missing:
+            print(f'  원본 글꼴이 PDF에 없어요: {", ".join(sorted(missing)[:6])} → 다른 글꼴로 바뀌어 원본과 다르게 보여요', file=sys.stderr)
+        print('  원본 그대로 보이게 하려면 PowerPoint에서 PDF로 내보낸 뒤 --pdf 로 넘기세요.\n', file=sys.stderr)
+
+
 def pptx_to_pdf(pptx, workdir):
     soffice = find_soffice()
     if soffice:
@@ -946,6 +971,7 @@ def main():
     if not args.no_render:
         with tempfile.TemporaryDirectory() as td:
             pdf = Path(args.pdf) if args.pdf else pptx_to_pdf(pptx_path, Path(td))
+            check_renderer(pdf, prs)
             n = render_pages(pdf, outdir)
             refine_rows(pdf, pages)
             pptx_lines = {}
