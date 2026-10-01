@@ -46,6 +46,8 @@ async function firebaseBackend(cfg, doc, version) {
     },
     signOut: () => A.signOut(auth),
     me: () => user,
+    // 허용 목록에 있는지 (없으면 permission-denied)
+    async allowed() { if (!user) return false; try { const d = await F.getDoc(F.doc(db, 'members', user.email)); return d.exists(); } catch { return false; } },
     subscribe(cb, onErr) {
       const qy = F.query(col, F.where('doc', '==', doc), F.where('version', '==', version));
       return F.onSnapshot(qy, (snap) => cb(snap.docs.map(thread)), (e) => onErr && onErr(e));
@@ -87,7 +89,7 @@ function demoBackend(doc, version) {
   }
   const id = () => Math.random().toString(36).slice(2, 10);
   return {
-    mode: 'demo', domain: '',
+    mode: 'demo', domain: '', allowed: async () => true,
     onAuth(cb) { authCbs.push(cb); cb(user); },
     async signIn() {
       const name = (prompt('데모 모드 — 표시할 이름을 입력하세요 (실제 서비스는 Google 로그인)', '') || '').trim();

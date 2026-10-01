@@ -1,14 +1,20 @@
 rules_version = '2';
-// Doc2Proto 코멘트 — @toonation.co.kr 계정만 읽고 쓸 수 있다
+// Doc2Proto 코멘트 — 허용 목록(members)에 있는 Google 계정만 읽고 쓸 수 있다
 service cloud.firestore {
   match /databases/{database}/documents {
+    // 허용 목록: members/{이메일} 문서가 있는 Google 계정만 (Firebase 콘솔에서 추가)
     function staff() {
       return request.auth != null
         && request.auth.token.email_verified == true
-        && request.auth.token.email.matches('.*@toonation[.]co[.]kr$');
+        && exists(/databases/$(database)/documents/members/$(request.auth.token.email));
     }
     function mine(d) { return d.author.uid == request.auth.uid; }
     function okBody(d) { return d.body is string && d.body.size() > 0 && d.body.size() <= 2000; }
+
+    // 내 이메일이 허용 목록에 있는지만 확인할 수 있다 (추가·삭제는 콘솔에서만)
+    match /members/{email} {
+      allow get: if request.auth != null && request.auth.token.email == email;
+    }
 
     match /threads/{id} {
       allow read: if staff();

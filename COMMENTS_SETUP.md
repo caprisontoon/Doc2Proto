@@ -24,7 +24,10 @@
 1. Firebase 콘솔 → **Firestore Database** → 데이터베이스 만들기
 2. 위치: **asia-northeast3 (서울)**, 모드: **프로덕션 모드**
 3. **규칙** 탭 → 저장소의 `firestore.rules` 내용을 붙여넣고 **게시**
-   (@toonation.co.kr 계정만 읽고 쓸 수 있게 하는 규칙이에요)
+   (허용 목록 `members`에 이메일이 있는 Google 계정만 읽고 쓸 수 있게 하는 규칙이에요)
+4. **허용 목록 만들기**: Firestore → 데이터 → **컬렉션 시작** → 컬렉션 ID `members`
+   → 문서 ID에 **허용할 Google 이메일**(예: `someone@gmail.com`) → 필드 `name`(문자열)에 이름 → 저장.
+   사람을 추가할 때마다 `members`에 문서를 하나씩 추가하고, 빼려면 그 문서를 삭제해요.
 
 ## 5. 웹 앱 설정값 받기
 1. Firebase 콘솔 → 프로젝트 설정(⚙) → 일반 → **내 앱** → 웹(`</>`) → 앱 닉네임 `doc2proto` → 등록
@@ -52,7 +55,7 @@
 npm i firebase@10.12.2 esbuild && cat > entry.js <<'X'
 export { initializeApp } from 'firebase/app';
 export { getAuth, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider } from 'firebase/auth';
-export { getFirestore, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
+export { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
 X
 npx esbuild entry.js --bundle --format=esm --minify --target=es2020 --outfile=firebase-10.12.2.mjs
 ```

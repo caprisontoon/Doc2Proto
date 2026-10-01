@@ -936,7 +936,7 @@
       const ROLES = ['기획', '디자인', '개발', 'QA'];
       let role = (() => { try { return localStorage.getItem('d2p.role') || ''; } catch { return ''; } })();
       let threads = [], me = null, authErr = '', pop = null, popUnsub = null, filter = 'open', mine = false, placing = false;
-      let first = true, unsub = null, needLogin = false;
+      let first = true, unsub = null, needLogin = false, noAccess = false;
       const fmtT = (t) => { const d = (Date.now() - t) / 1000; if (d < 60) return '방금'; if (d < 3600) return Math.floor(d / 60) + '분 전'; if (d < 86400) return Math.floor(d / 3600) + '시간 전'; const x = new Date(t); return `${x.getMonth() + 1}/${x.getDate()}`; };
       const roleChip = (r) => (r ? el('i', 'rl ' + r, r) : null);
       const bodyNode = (txt) => { const p = el('p'); String(txt).split(/(@[\w가-힣.]+)/).forEach((part) => p.append(part.startsWith('@') ? el('span', 'mn', part) : document.createTextNode(part))); return p; };
@@ -952,7 +952,8 @@
         who.innerHTML = '';
         if (!me) { const b = el('button', null, C.mode === 'demo' ? '이름 입력' : 'Google 로그인'); b.onclick = () => C.signIn().catch((e) => say('로그인하지 못했어요: ' + (e.code || e.message))); who.append(b); if (authErr) who.append(el('span', null, authErr)); return; }
         if (me.photo) { const im = el('img'); im.src = me.photo; im.alt = ''; who.append(im); }
-        who.append(el('b', null, me.name));
+        who.append(el('b', null, me.name)); who.title = me.email;
+        if (noAccess) who.append(el('span', null, '· 권한 없음'));
         const sel = el('select'); sel.title = '내 역할';
         sel.append(...['역할 선택', ...ROLES].map((r, i) => { const o = el('option', null, r); o.value = i ? r : ''; o.selected = (i ? r : '') === role; return o; }));
         sel.onchange = () => { role = sel.value; try { localStorage.setItem('d2p.role', role); } catch {} };
@@ -965,6 +966,7 @@
       add.onclick = async () => {
         if (placing) return setPlacing(false);
         if (!me) { try { await C.signIn(); } catch (e) { say('로그인하지 못했어요'); return; } if (!C.me()) return; }
+        if (noAccess) { say('이 계정은 아직 코멘트 권한이 없어요 — 관리자에게 허용 목록 추가를 요청하세요', 3500); return; }
         closePop(); setPlacing(true); say('코멘트를 남길 곳을 누르세요');
       };
       // 위치 지정 레이어 (동작 화면 위에서도 위치를 고를 수 있게 맨 위에 덮음)
@@ -1105,7 +1107,8 @@
         let list = threads.filter((x) => filter === 'all' || (filter === 'open' ? x.status !== 'resolved' : x.status === 'resolved'));
         if (mine && me) list = list.filter((x) => (x.author && x.author.uid === me.uid));
         list.sort((a, b) => a.page - b.page || a.createdAt - b.createdAt);
-        if (needLogin) { const e = el('div', 'empty'); e.append('사내 Google 계정(@' + (C.domain || '회사') + ')으로 로그인하면 코멘트가 보여요. '); const b = el('button', null, '로그인'); b.style.cssText = 'font-size:11.5px;padding:1px 8px'; b.onclick = () => C.signIn().catch((er) => say('로그인하지 못했어요: ' + (er.code || er.message))); e.append(b); clist.append(e); return; }
+        if (noAccess) { clist.append(el('div', 'empty', `${me.email} 계정은 아직 코멘트 권한이 없어요. 관리자에게 이 이메일을 허용 목록에 추가해 달라고 요청하세요.`)); return; }
+        if (needLogin) { const e = el('div', 'empty'); e.append((C.domain ? `@${C.domain} ` : '') + 'Google 계정으로 로그인하면 코멘트가 보여요. '); const b = el('button', null, '로그인'); b.style.cssText = 'font-size:11.5px;padding:1px 8px'; b.onclick = () => C.signIn().catch((er) => say('로그인하지 못했어요: ' + (er.code || er.message))); e.append(b); clist.append(e); return; }
         if (!list.length) clist.append(el('div', 'empty', threads.length ? '해당하는 코멘트가 없어요' : '아직 코멘트가 없어요. "+ 코멘트 달기"로 첫 문의를 남겨 보세요.'));
         for (const x of list) {
           const it = el('div', 'ci' + (x.status === 'resolved' ? ' resolved' : ''));
@@ -1117,12 +1120,13 @@
         }
       }
       // 클라우드 모드: 사내 계정으로 로그인해야 읽을 수 있다 (보안 규칙) → 로그인 후에 구독
-      function startSub() {
+      async function startSub() {
         if (unsub) { unsub(); unsub = null; }
         threads = []; closePop();
-        needLogin = C.mode === 'cloud' && !me;
+        needLogin = C.mode === 'cloud' && !me; noAccess = false;
         renderPins();
         if (needLogin) return;
+        if (!(await C.allowed())) { noAccess = true; renderPins(); renderWho(); return; }   // 로그인했지만 허용 목록에 없음
         unsub = C.subscribe((list) => {
           threads = list; renderPins(); if (pop && pop.id) refreshPop();
           if (first) { first = false; const m = /#c=([\w-]+)/.exec(location.hash); if (m) setTimeout(() => openThread(m[1]), 500); }
