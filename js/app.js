@@ -46,6 +46,8 @@
   .d2p .hs:hover,.d2p .hs.active{border-color:var(--hot);background:var(--hot-soft)}
   .d2p .hs.active{box-shadow:0 0 0 3px var(--hot-soft)}
   .d2p .blk{cursor:pointer;border:2px solid transparent}
+  .d2p .blk.quiet{pointer-events:none;cursor:default}
+  .d2p .blk.quiet:hover{border-color:transparent;background:transparent}
   .d2p .blk:hover{border-color:var(--brand);background:rgba(74,85,224,.06)}
   .d2p .blk.lit{border-color:var(--brand);background:var(--brand-soft);animation:d2pPulse 1.2s ease 2;
     mix-blend-mode:multiply}
@@ -75,7 +77,7 @@
   .d2p.showai .bh{box-shadow:inset 0 0 0 1px rgba(14,122,143,.35)}
   .d2p .bh:hover{background:rgba(14,122,143,.14);border-color:var(--link)}
   .d2p .bh.on{background:rgba(74,85,224,.18);border-color:var(--brand)}
-  .d2p .bh.input{cursor:text}
+  .d2p .bh.k-input{cursor:text}
   .d2p .tip{position:absolute;z-index:25;max-width:280px;background:var(--ink);color:var(--bg);font-size:12.5px;
     line-height:1.5;padding:8px 11px;border-radius:8px;box-shadow:var(--shadow);pointer-events:none;
     animation:d2pIn .15s ease}
@@ -229,8 +231,14 @@
       const blkEls = {};
       for (const b of p.blocks) {
         if (b.rect.w < 1 || b.rect.h < 0.6) continue;
-        if (b.inner) continue; // 목업·그룹 안쪽 도형은 클릭 영역에서 제외
-        if (isMock(b)) continue; // 목업 전체는 클릭 영역에서 제외(핫스팟만 동작)
+        if (b.inner || isMock(b)) {
+          // 목업·그룹 안쪽 도형, 표의 행: 클릭은 안 되지만 하이라이트 대상으로는 필요
+          const q = el('div', 'ov blk quiet');
+          place(q, b.rect);
+          stage.append(q);
+          blkEls[b.id] = q;
+          continue;
+        }
         const n = el('div', 'ov blk');
         place(n, b.rect);
         n.title = b.caption || '';
@@ -331,9 +339,9 @@
         floating = inp;
       }
       for (const b of (p.behaviors || [])) {
-        const n = el('div', 'ov bh ' + b.kind);
+        const n = el('div', 'ov bh k-' + b.kind);
         place(n, b.rect);
-        n.title = `${b.label || ''} · ${({ tooltip: '툴팁', popup: '팝업', dropdown: '드롭다운', navigate: '화면 이동', toggle: '토글', input: '입력' })[b.kind] || b.kind}`;
+        n.title = `${b.label || ''} · ${({ tooltip: '툴팁', popup: '팝업', dropdown: '드롭다운', navigate: '화면 이동', toggle: '토글', input: '입력', toast: '토스트' })[b.kind] || b.kind}`;
         const run = (e) => {
           e.stopPropagation();
           if (b.kind === 'tooltip') { if (floating && floating._src === n) { clearFloating(); return; } showTip(n, b.content); floating._src = n; }
@@ -343,6 +351,7 @@
             if (b.target_page != null && P[b.target_page - 1]) goto(b.target_page - 1);
             else say('이동: ' + (b.content || b.label));
           }
+          else if (b.kind === 'toast') say(b.content || b.label);
           else if (b.kind === 'toggle') { n.classList.toggle('on'); say((n.classList.contains('on') ? 'ON — ' : 'OFF — ') + (b.content || b.label)); }
           else if (b.kind === 'input') showInput(n, b);
         };

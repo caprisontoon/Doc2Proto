@@ -28,6 +28,9 @@ pip install python-pptx pymupdf
 
 | 표기 | 해석 |
 |---|---|
+| 빨간 테두리 작은 원 + 숫자 (번호 마커) | 마커가 붙은 UI 요소가 핫스팟, Description 표의 같은 번호 행이 설명 |
+| 머리글에 "툴팁"이 있는 표 (항목 \| 툴팁) | 목업의 항목 옆 `?` 아이콘에 hover 툴팁 자동 생성 |
+| 말풍선(callout) 도형 | 꼬리가 가리키는 아이콘의 hover 툴팁 |
 | 빨간 점선 사각형 (채움·텍스트 없음) | 핫스팟 (클릭 영역) |
 | 빨간 연결선, 시작은 핫스팟·끝은 설명 표/그룹에 스냅 | 핫스팟 → 설명 연결. 화살촉은 설명 쪽 |
 | 시작을 붙이지 않은 연결선 | 시작점에서 가장 가까운 도형이 핫스팟 (버튼 → 폼) |
@@ -35,7 +38,8 @@ pip install python-pptx pymupdf
 | 팝업·폼 목업을 그룹으로 | 팝업 동작의 `show_rect`로 바로 사용 |
 | 헤더 표 `Page Name` 오른쪽 칸 | 페이지 제목 |
 
-샘플: `samples/투네이션채팅_상세기획서_샘플.pptx` → `docs/sample/v0.1`
+샘플: `samples/투네이션채팅_상세기획서_샘플.pptx` → `docs/sample/v0.1` (점선+연결선 스타일),
+`docs/스트리밍서비스/v0.01` (번호 마커 + 툴팁 표 스타일, 실제 기획서)
 
 ## 구조
 
@@ -58,4 +62,4 @@ pip install python-pptx pymupdf
  "show_rect": {"l": 36, "t": 18, "w": 22, "h": 46}, "target_page": null, "source": "claude"}
 ```
 
-`kind`: `tooltip` · `popup` · `dropdown` · `navigate`(`target_page` 1부터) · `toggle` · `input`
+`kind`: `tooltip` · `popup` · `dropdown` · `navigate`(`target_page` 1부터) · `toggle` · `input` · `toast`

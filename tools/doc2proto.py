@@ -190,6 +190,18 @@ def page_title(items):
 def analyze_slide(slide, idx, SW, SH):
     items = walk(slide.shapes, SW, SH)
     title = page_title(items)
+    if not title:
+        try:
+            if slide.shapes.title is not None and slide.shapes.title.has_text_frame:
+                title = slide.shapes.title.text_frame.text.strip().split('\n')[0]
+        except Exception:
+            pass
+    if title:
+        shorter = [shape_text(sh).split('\n')[0].strip() for sh, r, d in items
+                   if r['t'] < 15 and shape_text(sh) and len(shape_text(sh).split('\n')[0].strip()) < len(title)
+                   and title.endswith(shape_text(sh).split('\n')[0].strip())]
+        if shorter:
+            title = min(shorter, key=len)
 
     hotspots, blocks, connectors, nav = [], [], [], []
     id_to_block, id_to_hotspot = {}, {}
@@ -247,9 +259,138 @@ def analyze_slide(slide, idx, SW, SH):
                         if rel is not None and hasattr(rel.target_part, 'slide_id'):
                             nav.append({'rect': r, 'label': run.text[:30], 'target_slide_id': rel.target_part.slide_id})
 
+    # 표의 행을 블록으로 (번호 행 ↔ 번호 마커 매핑, 툴팁 표용). 저장된 행 높이는 최소값이라 줄 수로 가중해 프레임에 맞춘다
+    numbered_rows, tooltip_rows, tables = {}, [], []
+    for sh, r, depth in items:
+        if not (getattr(sh, 'has_table', False) and sh.has_table):
+            continue
+        rows = list(sh.table.rows)
+        if not rows:
+            continue
+        texts = [[c.text.strip() for c in row.cells] for row in rows]
+        col0_w = (sh.table.columns[0].width / SW * 100) if len(sh.table.columns) else r['w'] * 0.3
+        tmeta = {'rect': r, 'col0_w': col0_w, 'rows': []}
+        tables.append(tmeta)
+        weights = []
+        for row, cells in zip(rows, texts):
+            lines = max(len(c.replace('\x0b', '\n').split('\n')) + sum(len(l) // 28 for l in c.replace('\x0b', '\n').split('\n')) for c in cells) if any(cells) else 1
+            weights.append(max(row.height / SH * 100, lines * 2.1))
+        scale = r['h'] / sum(weights) if sum(weights) else 1
+        y = r['t']
+        is_tip_table = any('툴팁' in c for c in texts[0])
+        for i, (row, cells) in enumerate(zip(rows, texts)):
+            h = weights[i] * scale
+            rr = {'l': r['l'], 't': round(y, 3), 'w': r['w'], 'h': round(h, 3)}
+            y += h
+            body = ' | '.join(c for c in cells if c)
+            if not body:
+                continue
+            first = cells[0]
+            is_num = bool(re.fullmatch(r'[0-9①-⑳]+', first))
+            blk = {'id': len(blocks), 'rect': rr, 'text': (' | '.join(c for c in cells[1:] if c) if is_num else body),
+                   'caption': (cells[1].split('\n')[0][:30] if len(cells) > 1 and cells[1] else first[:30]), 'shape_id': None, 'depth': 1, 'kind': 'row'}
+            blocks.append(blk)
+            tmeta['rows'].append({'block': blk['id'], 'key': first.replace('\x0b', '\n').split('\n')[0].strip()})
+            m = re.fullmatch(r'0*(\d{1,2})', first)
+            if m:
+                numbered_rows.setdefault(int(m.group(1)), blk)
+            elif first in '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳' and first:
+                numbered_rows.setdefault('①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳'.index(first) + 1, blk)
+            if is_tip_table and i > 0 and len(cells) >= 2 and cells[0] and cells[1]:
+                tooltip_rows.append((cells[0], cells[1], blk))
+
     # 그룹 안쪽 도형, 목업(핫스팟을 품은 큰 블록) 안쪽 도형은 inner 표시 → 뷰어에서 클릭 오버레이 제외
     for b in blocks:
         b['inner'] = b['depth'] > 0
+    # 텍스트 없는 큰 도형 = 화면 컨테이너 → 그 안의 도형은 inner
+    for m in blocks:
+        if not m['text'] and area(m['rect']) > 15 * 100 and m['kind'] in ('shape', 'picture'):
+            for b in blocks:
+                if b is not m and contains(m['rect'], b['rect']):
+                    b['inner'] = True
+
+    def small_text_shapes(pattern):
+        return [b for b in blocks if b['kind'] == 'shape' and b['rect']['w'] < 3.5 and b['rect']['h'] < 5 and re.fullmatch(pattern, b['text'].strip())]
+
+    # 번호 마커(작은 빨간 원 + 숫자) → 번호 행. 마커가 붙어 있는 UI 요소까지 핫스팟으로 확장
+    marker_ids = set()
+    for sh, r, depth in items:
+        text = shape_text(sh).strip()
+        m = re.fullmatch(r'0*(\d{1,2})|([①-⑳])', text)
+        if not m or r['w'] > 3.5 or r['h'] > 5:
+            continue
+        dashed, rgb = line_info(sh)
+        if not (is_red(rgb) or is_red(fill_rgb(sh))):
+            continue
+        n = int(m.group(1)) if m.group(1) else '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳'.index(m.group(2)) + 1
+        marker_ids.add(sh.shape_id)
+        cx, cy = r['l'] + r['w'] / 2, r['t'] + r['h'] / 2
+        cands = [b for b in blocks if b['shape_id'] != sh.shape_id and b['kind'] != 'row' and area(b['rect']) > area(r) * 3
+                 and area(b['rect']) < 45 * 100 and abs(b['rect']['l'] - cx) < 3.5
+                 and (abs(b['rect']['t'] - cy) < 3 or b['rect']['t'] <= cy <= b['rect']['t'] + b['rect']['h'])]
+        if cands:
+            e = min(cands, key=lambda b: (round(((b['rect']['l'] - cx) ** 2 + (b['rect']['t'] - cy) ** 2) ** 0.5), area(b['rect'])))['rect']
+            l, t = min(r['l'], e['l']), min(r['t'], e['t'])
+            hr = {'l': l, 't': t, 'w': max(r['l'] + r['w'], e['l'] + e['w']) - l, 'h': max(r['t'] + r['h'], e['t'] + e['h']) - t}
+        else:
+            hr = {'l': r['l'] - 0.6, 't': r['t'] - 0.6, 'w': max(r['w'] + 1.2, 2.5), 'h': max(r['h'] + 1.2, 3.5)}
+        h = {'id': len(hotspots), 'rect': hr, 'label': f'{n}번', 'targets': [], 'shape_id': sh.shape_id, 'marker': n}
+        row = numbered_rows.get(n)
+        if row is not None:
+            h['targets'].append(row['id'])
+        hotspots.append(h)
+    for b in blocks:
+        if b['shape_id'] in marker_ids:
+            b['inner'] = True
+
+    # 툴팁 표 (항목 | 툴팁): 목업에서 항목 텍스트 도형을 찾고 그 옆 ?/ⓘ 아이콘에 hover 툴팁
+    tooltip_behaviors = []
+    icons = small_text_shapes(r'[?？!ⓘi]')
+    for name, tip, row_blk in tooltip_rows:
+        named = [b for b in blocks if b['kind'] in ('shape',) and b['text'].strip() == name and b is not row_blk]
+        if not named:
+            continue
+        tgt = min(named, key=lambda b: area(b['rect']))
+        near = [(dist_pt_rect(tgt['rect']['l'] + tgt['rect']['w'], tgt['rect']['t'] + tgt['rect']['h'] / 2, i['rect']), i) for i in icons]
+        near = [x for x in near if x[0] < 6]
+        anchor = min(near, key=lambda x: x[0])[1]['rect'] if near else tgt['rect']
+        ar = {'l': anchor['l'] - 0.3, 't': anchor['t'] - 0.3, 'w': max(anchor['w'] + 0.6, 2), 'h': max(anchor['h'] + 0.6, 3)}
+        tooltip_behaviors.append({'kind': 'tooltip', 'trigger': 'hover', 'rect': ar, 'label': f'{name} 도움말', 'content': tip,
+                                  'show_rect': None, 'target_page': None, 'source': 'tooltip-table'})
+        if near:
+            for b in blocks:
+                if b['rect'] == anchor:
+                    b['inner'] = True
+
+    # 말풍선(callout) 도형: 꼬리가 가리키는 아이콘의 툴팁. 꼬리 위치는 adj1/adj2(도형 중심 기준 % ×1000)
+    for sh, r, depth in items:
+        g = sh._element.find('.//a:prstGeom', NS) if sh._element.tag.endswith('}sp') else None
+        if g is None or 'allout' not in (g.get('prst') or ''):
+            continue
+        text = shape_text(sh).strip()
+        if not text:
+            continue
+        adj = {a.get('name'): a.get('fmla') for a in g.findall('.//a:gd', NS)}
+        def val(k, d):
+            f = adj.get(k)
+            try:
+                return int(f.split()[-1]) / 100000 if f else d
+            except ValueError:
+                return d
+        tx = r['l'] + r['w'] / 2 + val('adj1', -0.2) * r['w']
+        ty = r['t'] + r['h'] / 2 + val('adj2', 0.6) * r['h']
+        cands = [b for b in blocks if b['shape_id'] != sh.shape_id and area(b['rect']) < 40 and b['kind'] == 'shape'
+                 and dist_pt_rect(tx, ty, b['rect']) < 4]
+        if any(bh['content'] == text for bh in tooltip_behaviors):
+            cands = []  # 툴팁 표에서 이미 같은 문구를 붙였으면 중복 생성하지 않음
+        if cands:
+            a = min(cands, key=lambda b: dist_pt_rect(tx, ty, b['rect']))['rect']
+            ar = {'l': a['l'] - 0.3, 't': a['t'] - 0.3, 'w': max(a['w'] + 0.6, 2), 'h': max(a['h'] + 0.6, 3)}
+            tooltip_behaviors.append({'kind': 'tooltip', 'trigger': 'hover', 'rect': ar, 'label': '툴팁', 'content': text,
+                                      'show_rect': None, 'target_page': None, 'source': 'callout'})
+        for b in blocks:
+            if b['shape_id'] == sh.shape_id:
+                b['inner'] = True
     for h in hotspots:
         for m in blocks:
             if contains(m['rect'], h['rect']) and area(m['rect']) > max(area(h['rect']) * 1.5, 300):
@@ -259,12 +400,16 @@ def analyze_slide(slide, idx, SW, SH):
 
     # 그룹 안 핫스팟의 label: 핫스팟 안에 있는 텍스트
     for h in hotspots:
+        if h.get('marker') is not None:
+            continue
         inside = [b for b in blocks if contains(h['rect'], b['rect'], 0.5) and b['text']]
         if inside:
             h['label'] = min(inside, key=lambda b: area(b['rect']))['text'].split('\n')[0][:40]
 
     # 캡션: 블록 바로 위의 짧은 한 줄 텍스트
     for b in blocks:
+        if b['kind'] == 'row':
+            continue
         cands = [o for o in blocks if o is not b and o['text'] and '\n' not in o['text'] and len(o['text']) < 40
                  and 0 <= b['rect']['t'] - (o['rect']['t'] + o['rect']['h']) < 2.5 and abs(o['rect']['l'] - b['rect']['l']) < 4]
         if cands:
@@ -303,17 +448,6 @@ def analyze_slide(slide, idx, SW, SH):
         if tb is not None and tb['id'] not in h['targets']:
             h['targets'].append(tb['id'])
 
-    # 연결선 없는 핫스팟: 오른쪽 가장 가까운 설명 블록
-    for h in hotspots:
-        if h['targets']:
-            continue
-        mock = [b for b in blocks if contains(b['rect'], h['rect']) and area(b['rect']) > area(h['rect'])]
-        cands = [b for b in blocks if b not in mock and b['rect']['l'] >= h['rect']['l'] + h['rect']['w'] - 0.5 and b['text']]
-        if cands:
-            best = min(cands, key=lambda b: dist_pt_rect(h['rect']['l'] + h['rect']['w'], h['rect']['t'] + h['rect']['h'] / 2, b['rect']))
-            if dist_pt_rect(h['rect']['l'] + h['rect']['w'], h['rect']['t'] + h['rect']['h'] / 2, best['rect']) < 15:
-                h['targets'].append(best['id'])
-
     # 목업(핫스팟을 품은 가장 큰 블록) 표시
     for h in hotspots:
         mock = [b for b in blocks if contains(b['rect'], h['rect']) and area(b['rect']) > area(h['rect'])]
@@ -322,8 +456,8 @@ def analyze_slide(slide, idx, SW, SH):
     return {
         'index': idx, 'title': title, 'slide_id': slide.slide_id,
         'blocks': [{k: v for k, v in b.items() if k not in ('depth',)} for b in blocks],
-        'hotspots': [{k: v for k, v in h.items() if k != 'shape_id'} for h in hotspots],
-        'nav': nav, 'links': [], 'behaviors': [],
+        'hotspots': [{k: v for k, v in h.items() if k not in ('shape_id',)} for h in hotspots],
+        'nav': nav, 'links': [], 'behaviors': tooltip_behaviors, 'tables': tables,
     }
 
 
@@ -339,7 +473,7 @@ def cross_page_links(pages):
             if q is p:
                 continue
             for h in q['hotspots']:
-                if h.get('mockup') is None or not h['targets']:
+                if h.get('mockup') is None or h.get('marker') is not None:
                     continue
                 qm = q['blocks'][h['mockup']]['rect']
                 if not any(same_rect(m, qm) for m in mocks):
@@ -398,6 +532,55 @@ def pptx_to_pdf(pptx, workdir):
     sys.exit('LibreOffice(soffice)나 PowerPoint를 찾지 못했어요. PowerPoint에서 PDF로 내보낸 뒤 --pdf 로 넘겨주세요.')
 
 
+def refine_rows(pdf, pages):
+    """렌더링된 PDF에서 각 행 첫 칸 텍스트의 y좌표를 찾아 행 블록의 세로 경계를 정확히 맞춘다."""
+    try:
+        import pymupdf
+    except ImportError:
+        return
+    doc = pymupdf.open(str(pdf))
+    for p in pages:
+        if p['index'] >= doc.page_count:
+            break
+        page = doc[p['index']]
+        PW, PH = page.rect.width, page.rect.height
+        words = [(w[0] / PW * 100, w[1] / PH * 100, w[2] / PW * 100, w[3] / PH * 100, w[4]) for w in page.get_text('words')]
+        for t in p['tables']:
+            r = t['rect']
+            inside = [w for w in words if r['l'] - 0.5 <= w[0] <= r['l'] + t['col0_w'] + 0.5 and r['t'] - 0.5 <= w[1] <= r['t'] + r['h'] + 0.5]
+            inside.sort(key=lambda w: w[1])
+            ys, used = [], set()
+            for row in t['rows']:
+                key = row['key'].split()[0] if row['key'] else ''
+                hit = next((w for w in inside if id(w) not in used and w[1] > (ys[-1] if ys else -1) and key and w[4].startswith(key[:4])), None)
+                if hit is None:
+                    ys.append(None)
+                    continue
+                used.add(id(hit))
+                ys.append(hit[1])
+            if sum(y is not None for y in ys) < 2 and len(t['rows']) > 1:
+                continue
+            # 경계: 연속한 텍스트 y의 중간값. 첫 행은 표 상단, 마지막 행은 표 하단
+            tops = []
+            for i, y in enumerate(ys):
+                tops.append(y)
+            known = [(i, y) for i, y in enumerate(tops) if y is not None]
+            bounds = [None] * (len(tops) + 1)
+            bounds[0] = r['t']
+            bounds[-1] = r['t'] + r['h']
+            # 첫 칸 텍스트는 행 상단에 붙어 있으므로, 행 경계 = 그 텍스트 바로 위
+            for (j, y2) in known[1:]:
+                bounds[j] = y2 - 0.7
+            for i in range(1, len(bounds) - 1):
+                if bounds[i] is None:
+                    prev = max(k for k in range(i) if bounds[k] is not None)
+                    nxt = min(k for k in range(i + 1, len(bounds)) if bounds[k] is not None)
+                    bounds[i] = bounds[prev] + (bounds[nxt] - bounds[prev]) * (i - prev) / (nxt - prev)
+            for i, row in enumerate(t['rows']):
+                blk = p['blocks'][row['block']]
+                blk['rect'] = {'l': r['l'], 't': round(bounds[i], 3), 'w': r['w'], 'h': round(max(bounds[i + 1] - bounds[i], 1.0), 3)}
+
+
 def render_pages(pdf, outdir, width=1920):
     try:
         import pymupdf
@@ -447,6 +630,7 @@ def main():
         with tempfile.TemporaryDirectory() as td:
             pdf = Path(args.pdf) if args.pdf else pptx_to_pdf(pptx_path, Path(td))
             n = render_pages(pdf, outdir)
+            refine_rows(pdf, pages)
         if n != len(pages):
             print(f'경고: 슬라이드 {len(pages)}장 vs 렌더링 {n}장 — 숨긴 슬라이드가 있으면 번호가 어긋날 수 있어요', file=sys.stderr)
 
