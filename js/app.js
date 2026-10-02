@@ -231,8 +231,33 @@
   .d2p .cpop .bt .pri{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
   .d2p .cpop .st{font-size:11px;font-weight:800;border-radius:4px;padding:0 6px;color:#fff;background:var(--brand)} .d2p .cpop .st.resolved{background:#9aa0ab}
   .d2p .cpop .login{padding:10px 12px;font-size:12.5px;color:var(--ink2)}
-  .d2p .clist{display:none;flex:none;max-height:34%;overflow:auto;border-top:1px solid var(--line);background:var(--bg);font-size:12px}
-  .d2p.c-on .clist{display:block}
+  /* 오른쪽 코멘트 사이드 메뉴 */
+  .d2p .cside{display:none;flex-direction:column;min-height:0;min-width:0;background:var(--side);border-left:1px solid var(--line)}
+  .d2p.c-on .cside{display:flex}
+  .d2p .cside .sh{display:flex;align-items:center;gap:8px;padding:18px 14px 10px 18px;font-weight:800;font-size:14px}
+  .d2p .cside .sh b{flex:1}
+  .d2p .cside .sh button{width:28px;height:28px;padding:0;border-radius:7px;color:var(--muted);font-size:15px;line-height:1}
+  .d2p .cside .cctl{margin:0 12px 10px}
+  .d2p .clist{flex:1;min-height:0;overflow:auto;border-top:1px solid var(--line);background:var(--bg);font-size:12px}
+  .d2p .copen{position:fixed;right:14px;top:14px;z-index:45;display:none;align-items:center;gap:6px;padding:7px 12px;border-radius:9px;box-shadow:var(--shadow);font-size:13px;font-weight:700}
+  .d2p .copen b{background:var(--brand);color:#fff;border-radius:999px;font-size:10.5px;padding:0 6px;line-height:16px}
+  .d2p.c-on{grid-template-columns:260px minmax(0,1fr) 300px}
+  .d2p.c-on.nav-off{grid-template-columns:minmax(0,1fr) 300px}
+  .d2p.c-on.cside-off{grid-template-columns:260px minmax(0,1fr)}
+  .d2p.c-on.cside-off.nav-off{grid-template-columns:minmax(0,1fr)}
+  .d2p.c-on.cside-off .cside{display:none}
+  .d2p.c-on.cside-off .copen{display:flex}
+  .d2p.c-on.cside-off main{padding-top:58px}
+  @media (max-width:1180px){
+    .d2p.c-on,.d2p.c-on.cside-off{grid-template-columns:260px minmax(0,1fr)}
+    .d2p.c-on.nav-off,.d2p.c-on.cside-off.nav-off{grid-template-columns:minmax(0,1fr)}
+    .d2p.c-on .cside{display:none}
+    .d2p.c-on .copen{display:flex}
+    .d2p.c-on main{padding-top:58px}
+    .d2p.c-on.cside-show .cside{display:flex;position:fixed;inset:0 0 0 auto;width:min(320px,88vw);z-index:60;box-shadow:var(--shadow)}
+    .d2p.c-on.cside-show .copen{display:none}
+  }
+  @media print{ .d2p .cside,.d2p .copen{display:none!important} }
   .d2p .clist .rh{position:sticky;top:0;z-index:1;background:var(--bg);display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);cursor:pointer}
   .d2p .clist .rh b{flex:1;font-size:12.5px}
   .d2p .clist .rh .cnt{font-weight:400;color:var(--muted);font-size:11px;margin-left:4px}
@@ -790,6 +815,10 @@
     }
     // 폭이 바뀌어도 보던 위치 유지 (메뉴 접기/펼치기)
     function relayout(fn) {
+      if (gotoTarget && Date.now() < navLock) {   // 페이지 이동 중이면 그 페이지로 다시 맞춘다
+        const T = gotoTarget; fn();
+        main.style.scrollBehavior = 'auto'; T.sec.scrollIntoView({ block: 'start' }); main.style.scrollBehavior = ''; return;
+      }
       const top = main.scrollTop, S = slides.find((x) => x.sec.offsetTop + x.sec.offsetHeight > top) || slides[currentIdx];
       const frac = S ? (top - S.sec.offsetTop) / Math.max(1, S.sec.offsetHeight) : 0;
       fn();
@@ -886,11 +915,11 @@
     }
 
     /* ---------- 이동 / 해시 / 목차 ---------- */
-    let navLock = 0;
+    let navLock = 0, gotoTarget = null;
     function goto(i, hsId) {
       const S = slides[i]; if (!S) return;
       tocLinks.forEach((a, k) => a.classList.toggle('on', k === i)); currentIdx = i; syncEvents();
-      navLock = Date.now() + 900;
+      navLock = Date.now() + 900; gotoTarget = S;
       S.sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
       history.replaceState(null, '', '#s' + (i + 1));
       if (hsId != null) { const h = (P[i].hotspots || []).find((x) => x.id === hsId); if (h) setTimeout(() => fromMarker(i, h), 450); }
@@ -929,10 +958,12 @@
 
     /* ---------- 코멘트 (문의·답변) ---------- */
     const clist = el('section', 'clist');
+    const cside = el('aside', 'cside');
+    const copen = el('button', 'copen', '💬 코멘트'); copen.append(el('b', null, '0')); copen.title = '코멘트 메뉴 펼치기 ( ] )';
     async function mountComments(Cp) {
       let C; try { C = await Cp; } catch (e) { console.error(e); return; }
       if (!C) return;
-      root.classList.add('c-on', 'c-show');
+      relayout(() => root.classList.add('c-on', 'c-show'));   // 오른쪽 메뉴가 생겨 폭이 바뀌어도 보던 위치 유지
       const ROLES = ['기획', '디자인', '개발', 'QA'];
       let role = (() => { try { return localStorage.getItem('d2p.role') || ''; } catch { return ''; } })();
       let threads = [], me = null, authErr = '', pop = null, popUnsub = null, filter = 'open', mine = false, placing = false;
@@ -942,12 +973,28 @@
       const bodyNode = (txt) => { const p = el('p'); String(txt).split(/(@[\w가-힣.]+)/).forEach((part) => p.append(part.startsWith('@') ? el('span', 'mn', part) : document.createTextNode(part))); return p; };
       // 사이드바: 로그인·역할·코멘트 달기
       const cc = el('div', 'ctl cctl');
-      const r1 = el('div', 'row'); r1.append(el('b', null, '코멘트'));
+      const r1 = el('div', 'row'); r1.append(el('span', null, '코멘트 핀 표시'));
       const cshow = el('button', 'sw sm on'); cshow.title = '코멘트 핀 표시'; r1.append(cshow); cc.append(r1);
       const who = el('div', 'who'); cc.append(who);
       const add = el('button', 'add', '+ 코멘트 달기'); cc.append(add);
       const mode = el('div', 'mode', C.mode === 'demo' ? '데모 모드 — 이 브라우저에만 저장돼요 (Google Cloud 연결 전)' : '기획서의 원하는 곳을 눌러 문의를 남기세요. 답변·해결은 모두가 볼 수 있어요.'); cc.append(mode);
-      const firstToc = navTop.querySelector('a.sec'); navTop.insertBefore(cc, firstToc);
+      // 오른쪽 사이드 메뉴 (접기 » / 펼치기 💬)
+      const sh = el('div', 'sh'); sh.append(el('b', null, '💬 코멘트'));
+      const cfold = el('button', null, '»'); cfold.title = '코멘트 메뉴 접기 ( ] )'; sh.append(cfold);
+      cside.append(sh, cc, clist);
+      const narrow = () => matchMedia('(max-width:1180px)').matches;
+      const setSide = (show) => {
+        if (narrow()) { root.classList.toggle('cside-show', show); return; }
+        relayout(() => root.classList.toggle('cside-off', !show));
+        try { localStorage.setItem('d2p.cside', show ? '1' : '0'); } catch {}
+      };
+      try { if (localStorage.getItem('d2p.cside') === '0') root.classList.add('cside-off'); } catch {}
+      cfold.onclick = () => setSide(false);
+      copen.onclick = () => setSide(true);
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== ']' || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || '')) return;
+        setSide(narrow() ? !root.classList.contains('cside-show') : root.classList.contains('cside-off'));
+      });
       function renderWho() {
         who.innerHTML = '';
         if (!me) { const b = el('button', null, '이름 입력'); b.onclick = () => C.signIn().catch((e) => say('로그인하지 못했어요: ' + (e.code || e.message))); who.append(b); if (authErr) who.append(el('span', null, authErr)); return; }
@@ -968,7 +1015,7 @@
         if (!me) { try { await C.signIn(); } catch (e) { say('로그인하지 못했어요'); return; } if (!C.me()) return; }
         await access;   // 권한 확인이 끝난 뒤에만 코멘트 달기
         if (noAccess) { say(noAccess === 'rules' ? 'Firestore 보안 규칙이 예전 것이에요 — 새 규칙을 게시해 주세요' : '이 계정은 아직 코멘트 권한이 없어요 — 허용 목록(members)을 확인해 주세요'); renderList(); return; }
-        closePop(); setPlacing(true); say('코멘트를 남길 곳을 누르세요');
+        closePop(); root.classList.remove('cside-show'); setPlacing(true); say('코멘트를 남길 곳을 누르세요');   // 좁은 화면: 서랍을 닫고 기획서를 고르게
       };
       // 위치 지정 레이어 (동작 화면 위에서도 위치를 고를 수 있게 맨 위에 덮음)
       slides.forEach((S, pi) => {
@@ -1098,6 +1145,7 @@
       function renderList() {
         clist.innerHTML = '';
         const open = threads.filter((t) => t.status !== 'resolved').length;
+        copen.querySelector('b').textContent = String(open);
         const h = el('div', 'rh'); const t = el('b', null, '코멘트'); t.append(el('span', 'cnt', `열림 ${open} · 전체 ${threads.length}`)); h.append(t, el('span', null, root.classList.contains('c-fold') ? '▴' : '▾'));
         h.onclick = () => { root.classList.toggle('c-fold'); renderList(); };
         clist.append(h);
@@ -1123,7 +1171,7 @@
           const tt = el('div', 't'); tt.append(el('span', null, `${x.page}p`), el('b', null, (x.author && x.author.name) || '?')); const rc = roleChip(x.role); if (rc) tt.append(rc);
           tt.append(el('span', 'r', (x.replies ? `답글 ${x.replies} · ` : '') + fmtT(x.lastAt || x.createdAt)));
           it.append(tt, el('p', null, x.body));
-          it.onclick = () => openThread(x.id);
+          it.onclick = () => { root.classList.remove('cside-show'); openThread(x.id); };
           clist.append(it);
         }
       }
@@ -1149,8 +1197,8 @@
 
     mountGhosts();
     syncEvents();
-    nav.append(navTop, refs, clist);
-    root.append(nav, main, toast, navOpen);
+    nav.append(navTop, refs);
+    root.append(nav, main, cside, toast, navOpen, copen);
     document.addEventListener('keydown', (e) => {
       if (e.key !== '[' || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''))) return;
       setNav(mobile() ? !root.classList.contains('nav-show') : root.classList.contains('nav-off'));
