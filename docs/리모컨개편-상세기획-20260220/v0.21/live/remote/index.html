@@ -1,0 +1,1079 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>투네이션 리모컨 — 동작 프로토타입</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#fff}</style>
+</head>
+<body>
+<div id="frame"></div>
+<script>
+/* 투네이션 크리에이터 리모컨 동작 프로토타입 (리모컨 개편 상세기획 v0.21 9~28p)
+   좌표·크기 단위 = 기획서 슬라이드의 pt (메인 창 585.3 × 356). data-spec="페이지:항목" 은 기획서 Description 항목.
+   레이아웃 = 이진 분할 트리 { t:'s', dir:'h'|'v', r, a, b } / { t:'w', id } — 위젯 추가는 대상 영역을 ½ 분할, 삭제·이동은 분할 상대가 자리를 채움 */
+(function () {
+'use strict';
+const q = new URLSearchParams(location.search || location.hash.slice(1));
+const EMBED = q.has('embed');
+const ST0 = q.get('state') || 'live';
+const MODES = { normal: [585.3, 356], desktop: [744, 362], window: [327.4, 334.8] };
+const MODE = /^desk|^magnet/.test(ST0) ? 'desktop' : ST0 === 'window' ? 'window' : 'normal';
+const [FW, FH] = MODES[MODE];
+const DESK = MODE !== 'normal';
+const WW = 585.3, WH = 356;                 // 메인 창
+const CX = 3, CY = 31, CW = WW - 3 - 16, CH = WH - 31 - 3;   // 캔버스 (창 기준)
+const G = 1.5;                               // 위젯 사이 간격
+const u = (n) => `calc(${n}*var(--u))`;
+
+const CSS = `
+:root{--u:1px;--fs:1;--blue:#3d6df2;--ink:#23252b;--sub:#6b6f7a;--line:#dfe1e7;--bar:#6f7178;--nb:#e5e6ea;--cv:#2a2c31;--wh:#eef0f3;--wb:#fff;--chip:#f3f4f7;--off:#9a9da6;--desk:#f4f5f8}
+.dark{--ink:#e7e8ec;--sub:#9a9eaa;--line:#3a3d45;--bar:#18191d;--nb:#26282e;--cv:#0e0f12;--wh:#2c2e35;--wb:#1d1f24;--chip:#2a2c33;--off:#5b5e67;--desk:#121317}
+*{box-sizing:border-box}
+body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo','Noto Sans KR',sans-serif;-webkit-font-smoothing:antialiased}
+#frame{position:relative;width:${u(FW)};height:${u(FH)};overflow:hidden;font-size:${u(6)};color:var(--ink);background:${DESK ? 'var(--desk)' : 'var(--cv)'};user-select:none;-webkit-user-select:none}
+${EMBED ? '' : '#frame{margin:0 auto;box-shadow:0 2px 18px rgba(0,0,0,.18)}body{display:flex;align-items:center;justify-content:center;background:#e9ebef}'}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,select{font:inherit;color:inherit}
+.abs{position:absolute}
+#deskL{left:${u(6)};bottom:${u(4)};font-size:${u(5.5)};color:var(--sub);opacity:.7}
+/* 메인 창 */
+#win{position:absolute;width:${u(WW)};height:${u(WH)};background:var(--cv);border:${u(.8)} solid #5c5e64;box-shadow:${DESK ? `0 ${u(2)} ${u(10)} rgba(0,0,0,.25)` : 'none'}}
+#tb{left:0;top:0;width:100%;height:${u(15)};background:var(--bar);display:flex;align-items:center;padding:0 ${u(5)};color:#fff;cursor:${DESK ? 'move' : 'default'}}
+#bi{text-decoration:none;display:flex;align-items:center;gap:${u(2)};font-size:${u(7)};font-weight:700;letter-spacing:-.02em;color:#eef}
+#bi i{font-style:normal;color:#4b8bff;font-size:${u(9)};font-weight:900;line-height:1}
+#tbb{margin-left:auto;display:flex;gap:${u(5)}}
+#tbb button{width:${u(10)};height:${u(10)};display:flex;align-items:center;justify-content:center;font-size:${u(7)};color:#fff;border-radius:${u(2)}}
+#tbb button:hover{background:rgba(255,255,255,.18)}
+#tbb button.on{color:#ffd23f}
+#nb{left:0;top:${u(15)};width:100%;height:${u(14)};background:var(--nb);display:flex;align-items:center;padding:0 ${u(5)};gap:${u(4)};font-weight:700;font-size:${u(6.4)}}
+#nb .tx{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nb .tx:hover{text-decoration:underline}
+#nbr{margin-left:auto;display:flex;gap:${u(5)};align-items:center}
+#nbr button{position:relative;width:${u(11)};height:${u(11)};display:flex;align-items:center;justify-content:center;font-size:${u(8)}}
+#nbr .bd{position:absolute;right:${u(-3)};top:${u(-2)};min-width:${u(7)};height:${u(7)};border-radius:${u(4)};background:#e5322d;color:#fff;font-size:${u(4.8)};font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 ${u(1.5)}}
+#cv{left:${u(CX)};top:${u(CY)};width:${u(CW)};height:${u(CH)};background:var(--cv)}
+#strip{right:${u(2)};top:${u(CY)};width:${u(12)};bottom:${u(3)};background:#000;display:flex;align-items:center;justify-content:center}
+#strip button{width:${u(11)};height:${u(14)};color:#fff;font-size:${u(9)};display:flex;align-items:center;justify-content:center;border-radius:${u(2)}}
+#strip button:hover{background:#333}
+/* 위젯 */
+.wg{position:absolute;display:flex;flex-direction:column;background:var(--wb);border:${u(.7)} solid #55585f;overflow:hidden}
+.wh{flex:none;height:${u(12)};background:var(--wh);display:flex;align-items:center;padding:0 ${u(2)} 0 ${u(4)};font-weight:700;font-size:${u(5.8)};cursor:grab;gap:${u(2)}}
+.wh .bdg{background:#e5322d;color:#fff;border-radius:${u(3)};font-size:${u(4.6)};padding:0 ${u(2)};min-width:${u(7)};text-align:center}
+.wh .wb{margin-left:auto;display:flex;gap:${u(1)}}
+.wh .wb button{width:${u(9)};height:${u(9)};display:flex;align-items:center;justify-content:center;font-size:${u(6)};border-radius:${u(2)};color:var(--sub)}
+.wh .wb button:hover{background:rgba(0,0,0,.08)}
+.wh .wb button.pin.on{color:#f0a400}
+.wc{flex:1;min-height:0;overflow:auto;font-size:calc(5.4*var(--u)*var(--fs));padding:${u(3)}}
+.wc::-webkit-scrollbar{width:${u(3)};height:${u(3)}}.wc::-webkit-scrollbar-thumb{background:#bbb;border-radius:${u(2)}}
+.wg.mini .wc{display:none}
+.wg.dim{opacity:.35}
+.wg.ghost{opacity:.6;pointer-events:none;z-index:300;box-shadow:0 ${u(3)} ${u(14)} rgba(0,0,0,.45)}
+.wg.adding{z-index:150;box-shadow:0 ${u(4)} ${u(18)} rgba(0,0,0,.55),0 0 0 ${u(1.5)} #35c4ff;cursor:grab}
+.wg.adding.dragging{opacity:.6}
+.wg.flash{animation:wflash .9s ease 2}
+@keyframes wflash{50%{box-shadow:inset 0 0 0 ${u(2.5)} #35c4ff}}
+.fw{z-index:20;box-shadow:0 ${u(2)} ${u(10)} rgba(0,0,0,.28)}
+.fw .rs{position:absolute;right:0;bottom:0;width:${u(8)};height:${u(8)};cursor:nwse-resize;background:linear-gradient(135deg,transparent 50%,#9a9da6 50%,#9a9da6 60%,transparent 60%,transparent 70%,#9a9da6 70%,#9a9da6 80%,transparent 80%)}
+.sp{position:absolute;z-index:6}
+.sp.h{cursor:col-resize}.sp.v{cursor:row-resize}
+.sp:hover,.sp.act{background:rgba(53,196,255,.55)}
+.hl-sp .sp{background:rgba(229,50,45,.55)}
+/* 위젯 내용 */
+.tabs{display:flex;gap:${u(1)};margin-bottom:${u(3)};align-items:center}
+.tabs b{flex:1;max-width:${u(52)};text-align:center;padding:${u(2.5)} 0;background:var(--chip);color:var(--sub);font-weight:400;cursor:pointer;border-radius:${u(1.5)} ${u(1.5)} 0 0}
+.tabs b.on{background:var(--wb);color:var(--ink);font-weight:700;box-shadow:inset 0 ${u(-1.2)} 0 var(--ink)}
+.tabs .fl{margin-left:auto;width:${u(9)};height:${u(9)};background:#2a2c31;color:#fff;border-radius:${u(2)};display:flex;align-items:center;justify-content:center;font-size:${u(6)}}
+table{border-collapse:collapse;width:100%}
+.tb th{background:var(--chip);font-weight:700;padding:${u(2.5)} ${u(2)};white-space:nowrap;position:sticky;top:${u(-3)}}
+.tb td{border-top:${u(.5)} dashed var(--line);padding:${u(2.2)} ${u(2)};text-align:center;white-space:nowrap}
+.tb td.nk{text-align:left;font-weight:700;line-height:1.25}.tb td.nk small{display:block;font-weight:400;color:var(--sub);font-size:.85em}
+.tb td.ct{text-align:left;max-width:${u(90)};overflow:hidden;text-overflow:ellipsis}
+.thumb{display:inline-block;background:#8b8e96;color:#fff;font-size:.85em;padding:${u(1)} ${u(3)};margin-right:${u(2)}}
+.yt{color:#e5322d}
+.blk{background:#e5322d;color:#fff;border-radius:${u(2)};padding:${u(1)} ${u(3)};font-size:.9em}
+.blocked td{opacity:.35;text-decoration:line-through}
+.bigb{display:flex;gap:${u(3)}}
+.bigb button{flex:1;background:#33363d;color:#fff;border-radius:${u(2.5)};padding:${u(5)} 0;font-weight:700;white-space:nowrap}
+.bigb button.on{background:var(--blue)}
+.card{border:${u(.6)} solid var(--line);padding:${u(2)};margin-bottom:${u(3)};display:grid;grid-template-columns:1fr 1fr;gap:${u(1.5)};text-align:center}
+.card .tp{color:#fff;font-weight:700;padding:${u(1.5)} 0}
+.card .nm{font-weight:700;padding:${u(1.5)} 0}
+.card .in{font-size:.92em;white-space:nowrap}
+.card button{padding:${u(2)} 0;color:#fff;font-weight:700}
+.card .ok{background:#55585f}.card .no{background:#b9bcc4}
+.t-quest{background:#2d57b8}.t-lucky{background:#7d3cc8}.t-play{background:#3e9a3e}.t-video{background:#d04a4a}
+.empty{color:var(--sub);text-align:center;padding:${u(10)} 0}
+.vr{display:grid;grid-template-columns:${u(26)} 1fr ${u(16)};align-items:center;gap:${u(3)};margin:${u(3.2)} 0}
+.vr b{font-weight:700}.vr em{font-style:normal;font-size:.85em;color:var(--sub);text-align:right}
+input[type=range]{width:100%;height:${u(4)};accent-color:#4fb8e8;margin:0}
+.master{background:#33363d;color:#fff;border-radius:${u(3)};padding:${u(4)} ${u(5)};display:flex;align-items:center;margin-bottom:${u(4)}}
+.master small{display:block;font-size:.8em;opacity:.8;font-weight:400}
+.master b{font-size:1.05em}
+.tg{margin-left:auto;width:${u(15)};height:${u(8)};border-radius:${u(4)};background:#c7c9cf;position:relative;flex:none;cursor:pointer}
+.tg::after{content:'';position:absolute;left:${u(1)};top:${u(1)};width:${u(6)};height:${u(6)};border-radius:50%;background:#fff;transition:left .15s}
+.tg.on{background:#2e3036}.dark .tg.on{background:var(--blue)}.master .tg.on{background:#111}
+.tg.on::after{left:${u(8)}}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:${u(3)}}
+.tgrid button{background:#33363d;color:#fff;border-radius:${u(3)};padding:${u(3)} 0;display:flex;flex-direction:column;align-items:center;gap:${u(2)}}
+.tgrid button.off{background:var(--off)}
+.tgrid button i{width:${u(12)};height:${u(6)};border-radius:${u(3)};background:#fff;position:relative;font-style:normal}
+.tgrid button i::after{content:'';position:absolute;top:${u(1)};left:${u(6.5)};width:${u(4)};height:${u(4)};border-radius:50%;background:#33363d}
+.tgrid button.off i::after{left:${u(1.5)};background:var(--off)}
+.row2{display:flex;align-items:center;padding:${u(3)} 0;border-bottom:${u(.5)} solid var(--line)}
+.sel{border:${u(.6)} solid var(--line);background:var(--wb);border-radius:${u(1.5)};padding:${u(1.5)} ${u(3)};font-size:inherit}
+.vbar{position:relative;border:${u(.6)} solid var(--line);margin:${u(2.5)} 0;padding:${u(2.5)} ${u(4)};cursor:pointer;overflow:hidden}
+.vbar i{position:absolute;left:0;top:0;bottom:0;background:rgba(61,109,242,.18)}
+.vbar span{position:relative}.vbar em{position:relative;float:right;font-style:normal;color:var(--sub)}
+/* Dock */
+#dock{left:50%;bottom:${u(6)};transform:translateX(-50%);height:${u(25)};background:#111;border-radius:${u(4)};display:flex;align-items:center;gap:${u(3)};padding:0 ${u(4)};z-index:40;transition:transform .3s ease,opacity .3s;border:${u(.8)} solid #444}
+#dock.hide{transform:translate(-50%,${u(40)});opacity:0;pointer-events:none}
+#dock .db{position:relative;width:${u(19)};height:${u(19)};border-radius:${u(3)};background:#80838b;color:#fff;font-size:${u(4.3)};line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;white-space:pre-line;padding:0 ${u(.5)}}
+#dock .db.on{background:#4a86e8}
+#dock .db:hover{filter:brightness(1.15)}
+#dock .ctl{background:#5d6068;font-size:${u(8)}}
+#dock .ctl.on{background:#5d6068;color:#fff}
+#dock .ctl.off{color:#ff6b6b}
+#dock .sep{width:${u(.6)};height:${u(13)};background:#888;margin:0 ${u(1.5)}}
+#dock .bd{position:absolute;right:${u(-2.5)};top:${u(-2.5)};min-width:${u(7)};height:${u(7)};border-radius:${u(4)};background:#e5322d;font-size:${u(4.6)};font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 ${u(1.2)}}
+#dockHot{left:0;right:0;bottom:0;height:${u(10)};z-index:39}
+/* 인디케이터 */
+#ind{left:0;top:0;width:100%;height:100%;z-index:200;pointer-events:none}
+#ind .x{position:absolute;width:${u(44)};height:${u(44)};transform:translate(-50%,-50%);pointer-events:none}
+#ind .ib{position:absolute;width:${u(14)};height:${u(14)};background:rgba(28,49,104,.92);border:${u(.8)} solid #9fb4ff;color:#cfe0ff;display:flex;align-items:center;justify-content:center;font-size:${u(7)};pointer-events:auto;cursor:pointer;border-radius:${u(2)}}
+#ind .ib:hover,#ind .ib.hov{background:#35c4ff;color:#fff}
+#ind .ib.dis{opacity:.35;pointer-events:none}
+#ind .ib.c::before{content:'';width:${u(7)};height:${u(7)};background:currentColor;border-radius:${u(1)}}
+#ind .ib.u{left:${u(15)};top:0}#ind .ib.d{left:${u(15)};top:${u(30)}}#ind .ib.l{left:0;top:${u(15)}}#ind .ib.r{left:${u(30)};top:${u(15)}}#ind .ib.c{left:${u(15)};top:${u(15)}}
+#ind .eb{transform:translate(-50%,-50%)}
+#pv{position:absolute;background:rgba(64,90,255,.42);border:${u(1.2)} solid #4a5cff;z-index:190;pointer-events:none;display:none;transition:all .08s}
+#addx{position:absolute;z-index:260;width:${u(9)};height:${u(9)};border-radius:50%;background:#e5322d;color:#fff;font-size:${u(5.5)};display:none;align-items:center;justify-content:center}
+/* 모달·팝업 */
+.ov{position:absolute;inset:0;z-index:100;display:none}
+.ov.on{display:block}
+.ov.dimbg{background:rgba(0,0,0,.35)}
+#preset{position:absolute;right:${u(14)};top:${u(CY - 2)};bottom:${u(3)};width:${u(158)};background:#000;color:#fff;padding:${u(6)};display:flex;flex-direction:column;gap:${u(4)};font-size:${u(6.2)}}
+#preset h4{margin:0 0 ${u(2)};font-size:${u(8)};display:flex;align-items:center}
+#preset h4 button{margin-left:auto;font-size:${u(9)}}
+#preset h5{margin:${u(3)} 0 0;font-size:${u(6.6)}}
+.pc{border:${u(.8)} solid #3e4f8a;background:#18284f;border-radius:${u(2.5)};padding:${u(4)} ${u(5)};display:flex;align-items:center;gap:${u(3)};cursor:pointer}
+.pc.gray{background:#2c2d31;border-color:#55575d;color:#bbb}
+.pc b{display:block;font-size:${u(6.6)}}.pc small{font-size:${u(5.6)};opacity:.85}
+.pc .pb{margin-left:auto;display:flex;gap:${u(2)}}
+.pc .pb button{width:${u(11)};height:${u(11)};background:#3a3c42;border-radius:${u(2)};font-size:${u(6)};display:flex;align-items:center;justify-content:center}
+.pc input{flex:1;min-width:0;background:#111;border:${u(.6)} solid #555;color:#fff;padding:${u(2.5)};font-size:${u(6)}}
+.pc .ok{color:#35c4ff}.pc .cn{color:#ff5050}
+#plist{flex:1;overflow:auto;display:flex;flex-direction:column;gap:${u(3)}}
+#pnew{border-top:${u(.6)} solid #444;padding-top:${u(4)};display:flex;flex-direction:column;gap:${u(3)}}
+#pnew input{background:#111;border:${u(.6)} solid #555;color:#fff;padding:${u(3)};font-size:${u(6)}}
+#pnew input:disabled{opacity:.4}
+#pnew .bb{display:flex;justify-content:space-between}
+#pnew .bb button{padding:${u(2.5)} ${u(10)};border-radius:${u(2)};font-weight:700}
+#pnew .bb .c{background:#888}#pnew .bb .s{background:#2c8cf4}
+#pnew .bb button:disabled{opacity:.4}
+#noti{position:absolute;right:${u(7)};top:${u(31)};width:${u(128)};max-height:${u(160)};background:var(--wb);border-radius:${u(4)};box-shadow:0 ${u(2)} ${u(12)} rgba(0,0,0,.35);display:flex;flex-direction:column;font-size:${u(5.2)}}
+#noti .h{display:flex;align-items:center;padding:${u(5)} ${u(6)};font-weight:700;font-size:${u(6)}}
+#noti .h button{margin-left:auto;font-weight:400}
+#noti .l{overflow:auto;padding:0 ${u(4)} ${u(4)}}
+#noti .it{display:flex;gap:${u(4)};padding:${u(4)} ${u(2)};cursor:pointer;border-radius:${u(2)}}
+#noti .it:hover{background:var(--chip)}
+#noti .it .ic{flex:none;width:${u(12)};height:${u(12)};border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:${u(6)}}
+#noti .it.read{opacity:.5}
+#noti .it .d{color:var(--sub);font-size:.9em;margin-top:${u(1.5)}}
+#noti .it .nw{width:${u(3.5)};height:${u(3.5)};border-radius:50%;background:#e5322d;flex:none;margin-top:${u(2)}}
+#set{position:absolute;left:11.8%;top:9%;width:71%;height:89%;background:var(--wb);display:flex;flex-direction:column;box-shadow:0 ${u(2)} ${u(14)} rgba(0,0,0,.4)}
+#set .h{flex:none;height:${u(19)};border-bottom:${u(.6)} solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${u(7.5)};position:relative}
+#set .h button{position:absolute;right:${u(7)};font-size:${u(9)}}
+#set .b{flex:1;display:flex;min-height:0}
+#set .nav{width:${u(60)};border-right:${u(.6)} solid var(--line);padding:${u(6)} ${u(3)};display:flex;flex-direction:column;gap:${u(4)}}
+#set .nav button{padding:${u(4)} 0;font-weight:700;font-size:${u(7)};border-radius:${u(2)}}
+#set .nav button.on{background:#7a7d85;color:#fff}
+#set .pg{flex:1;overflow:auto;padding:${u(8)} ${u(14)};font-size:${u(6.4)}}
+#set .sec{border-bottom:${u(.6)} solid var(--line);padding:${u(5)} 0 ${u(8)}}
+#set .sec h6{margin:0 0 ${u(6)};font-size:${u(7)}}
+#set .rd{display:flex;gap:${u(10)}}
+#set .rd label{flex:1;display:flex;align-items:center;gap:${u(3)};cursor:pointer}
+#set .rd input{margin:0;width:${u(6)};height:${u(6)};accent-color:#222}
+#set .tr{display:flex;align-items:center;margin:${u(4)} 0;gap:${u(4)}}
+#set .tr.hide{display:none}
+#set .lo{float:right;text-decoration:underline;margin-top:${u(8)};font-weight:700}
+#set select.sel{width:${u(80)};padding:${u(3)}}
+#set .note{color:var(--sub);margin:${u(4)} 0 ${u(8)};padding-left:${u(10)};line-height:1.6}
+#set .kr{display:flex;gap:${u(5)};align-items:center;margin-bottom:${u(4)}}
+#set .kr select{width:${u(78)}}
+#set .kr input{flex:1;border:${u(.6)} solid var(--line);background:var(--wb);padding:${u(3)};font-size:${u(6)}}
+#set .kr input.cap{border-color:var(--blue);box-shadow:0 0 0 ${u(1)} rgba(61,109,242,.3)}
+#set .kr .x{font-size:${u(8)};width:${u(10)}}
+#set .add{float:right;background:#777;color:#fff;border-radius:${u(2)};padding:${u(3)} ${u(6)};font-weight:700}
+#set .add:disabled{opacity:.4}
+#set .info{display:flex;gap:${u(10)}}
+#set .info p{margin:${u(4)} 0}
+#set .info a{color:#2a4ef0}
+.cf{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:${u(140)};background:var(--wb);box-shadow:0 ${u(3)} ${u(16)} rgba(0,0,0,.4);padding:${u(14)} ${u(10)} ${u(10)};text-align:center;font-size:${u(7)};font-weight:700;z-index:130}
+.cf .bb{display:flex;gap:${u(4)};justify-content:center;margin-top:${u(12)}}
+.cf .bb button{width:${u(46)};padding:${u(4)} 0;color:#fff;font-weight:700;border-radius:${u(1.5)}}
+.cf .bb .n{background:#8a8d95}.cf .bb .y{background:#111}
+#wall{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:${u(170)};background:var(--wb);box-shadow:0 ${u(3)} ${u(16)} rgba(0,0,0,.4);padding:${u(8)};font-size:${u(6)}}
+#wall .g{display:grid;grid-template-columns:repeat(4,1fr);gap:${u(4)};margin-top:${u(6)}}
+#wall .g button{height:${u(26)};border-radius:${u(2)};border:${u(1)} solid transparent}
+#wall .g button.on{border-color:var(--blue)}
+#toast{position:absolute;left:50%;bottom:${u(38)};transform:translateX(-50%);background:rgba(20,20,20,.9);color:#fff;font-size:${u(6.2)};padding:${u(3.5)} ${u(8)};border-radius:${u(4)};z-index:900;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;max-width:96%;overflow:hidden;text-overflow:ellipsis}
+#toast.show{opacity:1}
+[data-chg]{outline:${u(1.4)} dashed #e08a00!important;outline-offset:${u(-1)}}
+.spec-flash{outline:${u(2)} solid #f2c94c!important;outline-offset:${u(-1)};animation:flash 1s ease 3}
+@keyframes flash{50%{outline-color:transparent}}
+.inspect [data-spec]:hover{outline:${u(1)} dashed #4a55e0;outline-offset:${u(-1)}}
+#chip{position:absolute;z-index:950;background:#4a55e0;color:#fff;font-size:${u(5.5)};padding:${u(1.5)} ${u(4)};border-radius:${u(3)};pointer-events:none;display:none;white-space:nowrap}
+`;
+document.head.insertAdjacentHTML('beforeend', `<style>${CSS}</style>`);
+
+/* ---------------- 위젯 카탈로그 ---------------- */
+const WG = {
+  list: { name: '후원 리스트', min: [150, 80] },
+  quick: { name: '퀵 제어', dock: '퀵\n제어', min: [110, 44] },
+  wait: { name: '대기 중인 후원', dock: '대기 중\n후원', min: [92, 70] },
+  vol: { name: '볼륨 제어', dock: '볼륨\n제어', min: [90, 70] },
+  use: { name: '후원 사용', dock: '후원\n사용', min: [92, 80] },
+  alert: { name: '후원 알림', dock: '후원\n알림', min: [90, 50] },
+  video: { name: '영상 후원 제어', dock: '영상\n후원', min: [80, 44] },
+  gacha: { name: '뽑기 잔여 수량', dock: '뽑기\n잔여', min: [92, 70] },
+  vote: { name: '투표', dock: '투표', min: [90, 60] },
+  crew: { name: '크루 후원', dock: '크루\n후원', min: [90, 56] },
+  ad: { name: '투네애드', dock: '투네\n애드', min: [90, 44] },
+};
+const DOCK = ['quick', 'wait', 'vol', 'use', 'alert', 'video', 'gacha', 'vote', 'crew', 'ad'];
+const L = (id) => ({ t: 'w', id });
+const Sp = (dir, r, a, b) => ({ t: 's', dir, r, a, b });
+const LAYOUTS = {
+  default: () => Sp('h', .585, Sp('v', .78, L('list'), Sp('h', .62, L('quick'), L('video'))), Sp('h', .48, L('wait'), Sp('v', .62, L('use'), L('vol')))),
+  initial: () => Sp('v', .8, L('list'), L('quick')),
+  talk: () => Sp('h', .66, Sp('v', .78, L('list'), L('quick')), Sp('v', .55, L('wait'), L('vol'))),
+  excel: () => Sp('h', .5, Sp('v', .72, L('list'), Sp('h', .5, L('quick'), L('video'))), Sp('h', .5, Sp('v', .55, L('wait'), L('gacha')), Sp('v', .6, L('use'), L('vol')))),
+};
+const LIST = [
+  ['텍스트', '', '텍스트 내용 텍스트 내용...', '방금'], ['텍스트', '', '텍스트 내용 텍스트 내용...', '방금'], ['영상', 'v', '[Youtube] 유튜브 제목', '3분'],
+  ['미니', '', '텍스트 내용 텍스트 내용...', '10분'], ['룰렛', '', '룰렛 제목 – 꽝 or 당첨 항목', '3시간'], ['위시리스트', '', '후원한 상품명', '19시간'],
+  ['퀘스트', '', '퀘스트 제목 – 성공 or 실패', '29일'], ['그림', '', '그림 후원', '2달'], ['기프트', 't', '상품명 & 개수', '11달'], ['럭키박스', '', '럭키박스 – 시간초과 환불', '5년'],
+];
+const USE = ['텍스트', '미니', '음성', '영상', '룰렛', '퀘스트', '그림', '기프트', '럭키박스', '플레이', '뽑기', '시그니처', '게임', '크루'];
+const USE_OFF = ['미니', '그림', '게임', '크루'];
+const VOLS = ['TTS', '영상', '음성', '룰렛', '럭키박스', '플레이', '뽑기'];
+const NOTI = [
+  { k: 'n', t: '[안내] 2024년 2월 9일(금) ~ 2024년 2월 12일(월) 고객센터 휴무 안내', d: '2024-02-08' },
+  { k: 'c', t: '[정산] 정산 신청 마감 3일전 입니다.', d: '2024-02-08' },
+  { k: 'n', t: '[점검] 2024년 2월 2일(금) 긴급 점검 안내', d: '2024-02-02' },
+  { k: 'c', t: '[정산] 오늘부터 정산 신청이 가능합니다.', d: '2024-02-01' },
+];
+const KEYFN = ['알림 일시 정지', '스킵', '후원 기능 on/off', '영상 자동 재생 on/off', 'Dock 압정 on/off', '레이아웃 프리셋 열기'];
+
+const S = {};
+const F = document.getElementById('frame');
+F.innerHTML = `
+${DESK ? `<div id="deskL" class="abs">${MODE === 'window' ? '바탕화면 — 분리된 위젯 창' : '바탕화면 — 메인 창 밖으로 위젯을 끌어내면 독립 창으로 분리돼요'}</div>` : ''}
+<div id="win" ${MODE === 'window' || ST0 === 'magnet' ? 'style="display:none"' : ''}>
+  <div id="tb" class="abs">
+    <a id="bi" href="https://toon.at" target="_blank" rel="noopener" title="투네이션 BI — index 페이지 새 창"><i>+</i><i style="color:#9fc3ff">○</i><i>○</i>&nbsp;toonation</a>
+    <div id="tbb"><button id="wpin" title="압정 — 항상 맨 앞">📌</button><button data-act="wmin" title="최소화">▁</button><button data-act="wmax" title="최대화">▢</button><button data-act="wclose" title="닫기">✕</button></div>
+  </div>
+  <div id="nb" class="abs"><span>🔈</span><span class="tx" data-spec="13:1" title="투네이션 관리자 배너시스템 연동 — 클릭 시 링크 이동">[이벤트 수상] 2025 투네이션 어워드 수상자 발표</span>
+    <div id="nbr"><button id="bell" title="알림" data-spec="13:2">🔔<span class="bd"></span></button><button id="gear" title="설정" data-spec="14:1">⚙</button></div></div>
+  <div id="cv" class="abs"><div id="ind" class="abs"></div><div id="pv"></div></div>
+  <div id="strip" class="abs"><button id="layers" title="레이아웃 프리셋" data-spec="12:1">≋</button></div>
+  <div id="dockHot" class="abs"></div>
+  <div id="dock" class="abs" data-spec="10:3"></div>
+  <div class="ov" id="ov-preset" data-spec="12:1"><div id="preset" data-spec="12:2"></div></div>
+  <div class="ov" id="ov-noti"><div id="noti" data-spec="13:2"></div></div>
+  <div class="ov dimbg" id="ov-set"><div id="set" data-spec="14:1"></div></div>
+  <div class="ov dimbg" id="ov-wall"><div id="wall" data-spec="10:2"></div></div>
+</div>
+<button id="addx" title="닫기 — 위젯 추가 취소" data-spec="21:1">✕</button>
+<div class="ov" id="ov-cf" style="z-index:600"></div>
+<div id="toast"></div><div id="chip"></div>`;
+const $ = (s) => F.querySelector(s);
+const $$ = (s) => [...F.querySelectorAll(s)];
+const WIN = $('#win'), CV = $('#cv'), IND = $('#ind'), PV = $('#pv');
+let toastT;
+function toast(m, ms) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2400); }
+let K = 1;
+function fit() { K = EMBED ? Math.min(innerWidth / FW, innerHeight / FH) : Math.min(innerWidth / FW, (innerHeight - 8) / FH); document.documentElement.style.setProperty('--u', K + 'px'); }
+addEventListener('resize', () => { fit(); });
+fit();
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const won = (n) => n.toLocaleString('en-US');
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const pt = (e) => { const r = F.getBoundingClientRect(); return { x: (e.clientX - r.left) / K, y: (e.clientY - r.top) / K }; };
+
+/* ---------------- 트리 ---------------- */
+const leaves = (n, out = []) => { if (!n) return out; if (n.t === 'w') out.push(n.id); else { leaves(n.a, out); leaves(n.b, out); } return out; };
+function minSize(n) {
+  if (n.t === 'w') return WG[n.id].min;
+  const A = minSize(n.a), B = minSize(n.b);
+  return n.dir === 'h' ? [A[0] + B[0] + G, Math.max(A[1], B[1])] : [Math.max(A[0], B[0]), A[1] + B[1] + G];
+}
+function compute(n, R, out) {
+  if (!n) return out;
+  if (n.t === 'w') { out.leaves.push({ id: n.id, R }); return out; }
+  if (n.dir === 'h') {
+    const wa = (R.w - G) * n.r;
+    out.splits.push({ n, R, dir: 'h', pos: R.x + wa });
+    compute(n.a, { x: R.x, y: R.y, w: wa, h: R.h }, out); compute(n.b, { x: R.x + wa + G, y: R.y, w: R.w - wa - G, h: R.h }, out);
+  } else {
+    const ha = (R.h - G) * n.r;
+    out.splits.push({ n, R, dir: 'v', pos: R.y + ha });
+    compute(n.a, { x: R.x, y: R.y, w: R.w, h: ha }, out); compute(n.b, { x: R.x, y: R.y + ha + G, w: R.w, h: R.h - ha - G }, out);
+  }
+  return out;
+}
+function removeId(n, id) {
+  if (!n) return null;
+  if (n.t === 'w') return n.id === id ? null : n;
+  const a = removeId(n.a, id), b = removeId(n.b, id);
+  if (!a) return b; if (!b) return a;
+  n.a = a; n.b = b; return n;
+}
+const sideDir = (s) => (s === 'l' || s === 'r' ? 'h' : 'v');
+const first = (s) => s === 'l' || s === 'u';
+function insertAt(n, target, id, side) {
+  if (!n) return L(id);
+  if (n.t === 'w') return n.id === target ? (first(side) ? Sp(sideDir(side), .5, L(id), n) : Sp(sideDir(side), .5, n, L(id))) : n;
+  n.a = insertAt(n.a, target, id, side); n.b = insertAt(n.b, target, id, side); return n;
+}
+function insertEdge(n, id, side) {
+  if (!n) return L(id);
+  return first(side) ? Sp(sideDir(side), .3, L(id), n) : Sp(sideDir(side), .7, n, L(id));
+}
+function swapIds(n, a, b) { if (!n) return; if (n.t === 'w') { if (n.id === a) n.id = b; else if (n.id === b) n.id = a; return; } swapIds(n.a, a, b); swapIds(n.b, a, b); }
+const fits = (tree) => { if (!tree) return true; const m = minSize(tree); return m[0] <= CW + .01 && m[1] <= CH + .01; };
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const active = (id) => leaves(S.tree).includes(id) || S.float.some((f) => f.id === id) || (S.adding && S.adding.id === id);
+function setTree(t, why) { S.tree = t; if (why !== 'preset') S.dirty = true; render(); }
+
+/* ---------------- 위젯 DOM ---------------- */
+const EL = {};
+function wEl(id) {
+  if (EL[id]) return EL[id];
+  const e = document.createElement('section');
+  e.className = 'wg'; e.dataset.id = id;
+  e.innerHTML = `<header class="wh"></header><div class="wc"></div>`;
+  EL[id] = e; renderBody(id); return e;
+}
+function renderHead(id, ctx) {
+  const e = wEl(id), f = S.float.find((x) => x.id === id);
+  const bdg = id === 'wait' && S.wait.length ? `<span class="bdg">${S.wait.length}</span>` : '';
+  let btn = '';
+  if (ctx === 'float') {
+    if (id !== 'list') btn += `<button class="pin ${f && f.pin ? 'on' : ''}" data-act="fpin" title="압정 — 항상 맨 위 (분리된 창만)" data-spec="28:1">📌</button>`;
+    btn += `<button data-act="fmin" title="최소화">▁</button>`;
+    if (id !== 'list') btn += `<button data-act="wx" title="닫기" data-spec="22:1">✕</button>`;
+  } else if (ctx === 'add') btn = '';
+  else if (id !== 'list') btn = `<button data-act="wx" title="위젯 삭제 — 분할 상대가 자리를 채움" data-spec="22:1">✕</button>`;
+  const hh = `<span class="wt">${WG[id].name}</span>${bdg}<span class="wb">${btn}</span>`;
+  if (e._h !== hh) { e.querySelector('.wh').innerHTML = hh; e._h = hh; }   // 드래그 중 헤더(포인터 캡처 대상)를 다시 만들지 않도록
+  e.querySelector('.wh').dataset.spec = ctx === 'float' ? '26:1 27:1' : ctx === 'add' ? '21:1 21:2' : '24:1 23:1 26:1';
+}
+function tog(on, act, extra = '') { return `<span class="tg ${on ? 'on' : ''}" data-act="${act}" ${extra}></span>`; }
+function renderBody(id) {
+  const c = wEl(id).querySelector('.wc'); let h = '';
+  switch (id) {
+    case 'list':
+      h = `<div class="tabs">${['통합 알림', '게임', '뽑기'].map((t, i) => `<b class="${S.listTab === i ? 'on' : ''}" data-act="ltab" data-i="${i}">${t}</b>`).join('')}<span class="fl" title="필터">≡</span></div>
+      <table class="tb"><tr><th>후원</th><th>닉네임(ID)</th><th>후원 캐시</th><th>내용</th><th>일시</th>${S.blockBtn ? '<th data-spec="14:2">차단</th>' : ''}</tr>
+      ${LIST.map((r, i) => (S.listTab === 0 || (S.listTab === 1 && ['룰렛', '퀘스트', '럭키박스'].includes(r[0])) || (S.listTab === 2 && r[0] === '기프트')) ? `<tr class="${S.blocked.has(i) ? 'blocked' : ''}"><td>${r[0]}</td><td class="nk">후원닉네임후원닉...<small>(00loo***@gmail.com)</small></td><td><b>1,000</b></td><td class="ct">${r[1] ? '<span class="thumb">썸네일</span>' : ''}${r[1] === 'v' ? `<span class="yt">[Youtube]</span> 유튜브 제목` : esc(r[2])}</td><td>${r[3]}</td>${S.blockBtn ? `<td><button class="blk" data-act="block" data-i="${i}" data-spec="14:2 14:3">${S.blocked.has(i) ? '해제' : '차단'}</button></td>` : ''}</tr>` : '').join('')}</table>`;
+      break;
+    case 'quick':
+      h = `<div class="tabs">${['알림', '그림', '뽑기'].map((t, i) => `<b class="${S.quickTab === i ? 'on' : ''}" data-act="qtab" data-i="${i}">${t}</b>`).join('')}</div>
+      <div class="bigb"><button class="${S.paused ? 'on' : ''}" data-act="pause">${S.paused ? '▶ 알림 재개' : '⏸ 알림 일시 정지'}</button><button data-act="skip">⏭ 스킵</button></div>`;
+      break;
+    case 'wait':
+      h = S.wait.length ? S.wait.map((w) => `<div class="card"><div class="tp t-${w.t}">${{ quest: '퀘스트', lucky: '럭키박스', play: '플레이', video: '영상' }[w.t]}</div><div class="nm">${esc(w.nick)}</div><div class="in">[성공캐시] ${won(w.cash)}</div><div class="in">[남은 시간] 00:30</div><button class="ok" data-act="wok" data-w="${w.k}">수락</button><button class="no" data-act="wno" data-w="${w.k}">거절</button></div>`).join('') : '<div class="empty">대기 중인 후원이 없어요</div>';
+      break;
+    case 'vol':
+      h = VOLS.map((v, i) => `<div class="vr"><b>${v}</b><input type="range" min="0" max="100" value="${S.vols[i]}" data-vol="${i}"><em>${S.vols[i]}%</em></div>`).join('');
+      break;
+    case 'use': {
+      const n = USE.filter((x) => S.use[x]).length;
+      h = `<div class="master"><div><b>후원 기능 ${S.useAll ? '사용 중' : '중지'}</b><small>사용 중인 후원 : ${S.useAll ? n : 0}개</small></div>${tog(S.useAll, 'useall')}</div>
+      <div class="tgrid">${USE.map((x) => `<button class="${S.use[x] && S.useAll ? '' : 'off'}" data-act="use" data-k="${x}">${x}<i></i></button>`).join('')}</div>`;
+      break;
+    }
+    case 'alert':
+      h = `<div class="row2">알림 사운드 ${tog(S.al.sound, 'al', 'data-k="sound"')}</div><div class="row2">TTS 읽기 ${tog(S.al.tts, 'al', 'data-k="tts"')}</div><div class="row2">후원 알림 표시 ${tog(S.al.show, 'al', 'data-k="show"')}</div>`;
+      break;
+    case 'video':
+      h = `<div class="bigb"><button class="${S.vAuto ? 'on' : ''}" data-act="vauto" data-spec="14:3">자동 재생 ${S.vAuto ? 'ON' : 'OFF'}</button><button class="${S.vVoice ? 'on' : ''}" data-act="vvoice">음성만 재생 ${S.vVoice ? 'ON' : 'OFF'}</button></div>`;
+      break;
+    case 'gacha':
+      h = `<select class="sel" style="width:100%;margin-bottom:${'calc(3*var(--u))'}"><option>크리스마스 뽑기</option><option>새해 뽑기</option></select>
+      <table class="tb"><tr><th>상품</th><th>잔여 수량</th></tr>${['빼빼로', '초콜릿', '리액션', '꽝'].map((x) => `<tr><td>${x}</td><td>1/10</td></tr>`).join('')}<tr><td><b>총 수량</b></td><td><b>4 / 40</b></td></tr></table>`;
+      break;
+    case 'vote': {
+      const tot = S.vote.reduce((a, b) => a + b, 0);
+      h = `<b>점심 메뉴 투표</b>${['치킨', '피자', '국밥'].map((x, i) => `<div class="vbar" data-act="vote" data-i="${i}"><i style="width:${tot ? S.vote[i] / tot * 100 : 0}%"></i><span>${x}</span><em>${S.vote[i]}표</em></div>`).join('')}`;
+      break;
+    }
+    case 'crew':
+      h = `<table class="tb"><tr><th>크루</th><th>후원</th></tr>${[['팬텀크루', 32000], ['밤산책', 12000], ['라면왕', 5000]].map((r) => `<tr><td>${r[0]}</td><td>${won(r[1])}</td></tr>`).join('')}</table>`;
+      break;
+    case 'ad':
+      h = `<div class="bigb"><button class="${S.adOn ? 'on' : ''}" data-act="ad">${S.adOn ? '■ 광고 송출 중' : '▶ 광고 송출'}</button></div>`;
+      break;
+  }
+  c.innerHTML = h;
+}
+const refreshAll = () => Object.keys(EL).forEach(renderBody);
+
+/* ---------------- 렌더 ---------------- */
+let splitsCache = [];
+function render() {
+  const out = compute(S.tree, { x: 0, y: 0, w: CW, h: CH }, { leaves: [], splits: [] });
+  const inTree = new Set(out.leaves.map((l) => l.id));
+  for (const l of out.leaves) {
+    const e = wEl(l.id);
+    if (e.parentNode !== CV) CV.insertBefore(e, IND);
+    e.classList.remove('fw', 'mini', 'adding', 'dragging');
+    e.style.zIndex = ''; e.style.boxShadow = '';
+    Object.assign(e.style, { left: u(l.R.x), top: u(l.R.y), width: u(l.R.w), height: u(l.R.h) });
+    renderHead(l.id, 'tree'); e.querySelector('.rs') && e.querySelector('.rs').remove();
+  }
+  // 분리된 창
+  for (const f of S.float) {
+    const e = wEl(f.id);
+    if (e.parentNode !== F) F.insertBefore(e, $('#addx'));
+    e.classList.add('fw'); e.classList.toggle('mini', !!f.min); e.classList.remove('adding');
+    Object.assign(e.style, { left: u(f.x), top: u(f.y), width: u(f.w), height: f.min ? u(12) : u(f.h) });
+    renderHead(f.id, 'float');
+    if (!e.querySelector('.rs')) { const r = document.createElement('div'); r.className = 'rs'; r.dataset.spec = '28:1'; r.title = '창 크기 조절 (위젯별 최소 사이즈)'; e.append(r); }
+  }
+  zorder();
+  // 추가 중인 위젯
+  if (S.adding) {
+    const e = wEl(S.adding.id);
+    if (e.parentNode !== CV) CV.insertBefore(e, IND);
+    e.classList.add('adding'); e.classList.remove('fw', 'mini');
+    Object.assign(e.style, { left: u(S.adding.x), top: u(S.adding.y), width: u(S.adding.w), height: u(S.adding.h), zIndex: 150 });
+    renderHead(S.adding.id, 'add');
+  }
+  // 사용하지 않는 위젯은 떼어 둔다
+  for (const id in EL) if (!inTree.has(id) && !S.float.some((f) => f.id === id) && !(S.adding && S.adding.id === id)) EL[id].remove();
+  // 경계선
+  const old = $$('#cv > .sp');
+  old.slice(out.splits.length).forEach((x) => x.remove());
+  splitsCache = out.splits;
+  out.splits.forEach((s, i) => {
+    const d = old[i] || document.createElement('div'); d.className = 'sp ' + s.dir + (d.classList.contains('act') ? ' act' : ''); d.dataset.i = i; d.dataset.spec = '25:조인트 리사이징 25:최소 사이즈 보호'; d.title = '경계선을 드래그해 크기 조절';
+    if (s.dir === 'h') Object.assign(d.style, { left: u(s.pos - 1.5), top: u(s.R.y), width: u(G + 3), height: u(s.R.h) });
+    else Object.assign(d.style, { left: u(s.R.x), top: u(s.pos - 1.5), width: u(s.R.w), height: u(G + 3) });
+    CV.insertBefore(d, IND);
+  });
+  if (DESK) Object.assign(WIN.style, { left: u(S.main.x), top: u(S.main.y) });
+  else Object.assign(WIN.style, { left: 0, top: 0 });
+  renderDock(); renderBadges();
+}
+function zorder() {   // 압정 on 창은 항상 맨 위 (여러 개면 최근 순), 나머지는 마지막으로 잡은 순
+  const pins = S.float.filter((f) => f.pin).sort((a, b) => a.pinAt - b.pinAt);
+  const rest = [{ main: true, z: S.mainTop || 1 }, ...S.float.filter((f) => !f.pin)].sort((a, b) => a.z - b.z);
+  rest.forEach((f, i) => { (f.main ? WIN : EL[f.id]).style.zIndex = 10 + i; });
+  pins.forEach((f, i) => { EL[f.id].style.zIndex = 500 + i; });
+}
+function renderDock() {
+  const d = $('#dock');
+  d.innerHTML = `<button class="db ctl ${S.dockPin ? 'on' : 'off'}" data-act="dpin" title="압정 — ${S.dockPin ? 'on: Dock 고정' : 'off: 평소 숨김, 하단에 마우스를 올리면 노출'}" data-spec="10:1">📌</button>
+    <button class="db ctl" data-act="wall" title="벽지" data-spec="10:2">☰</button><span class="sep"></span>
+    ${DOCK.map((id) => `<button class="db ${active(id) ? 'on' : ''}" data-act="dock" data-id="${id}" title="${WG[id].name} — ${active(id) ? 'on (누르면 off)' : 'off (누르면 캔버스 중앙에 추가)'}" data-spec="10:3${id === 'wait' ? ' 10:4' : ''} 21:1">${WG[id].dock}${id === 'wait' && S.wait.length ? `<span class="bd">${S.wait.length}</span>` : ''}</button>`).join('')}`;
+  dockVis();
+}
+let dockT;
+function dockVis() {
+  const hide = !!S.adding || S.dragging || (!S.dockPin && !S.dockHover);
+  $('#dock').classList.toggle('hide', hide);
+}
+function renderBadges() {
+  const n = S.noti.filter((x) => !x.read).length;
+  const b = $('#bell .bd'); b.textContent = n; b.style.display = n ? '' : 'none';
+  $('#wpin').classList.toggle('on', S.winPin);
+}
+
+/* ---------------- 인디케이터 (도킹·엣지) ---------------- */
+// mode: 'add' | 'move' | 'in'   skip: 드래그 중인 위젯 id
+function showInd(mode, skip) {
+  S.indMode = mode;
+  const out = compute(S.tree, { x: 0, y: 0, w: CW, h: CH }, { leaves: [], splits: [] });
+  S.indLeaves = out.leaves;
+  let h = '';
+  for (const l of out.leaves) {
+    if (l.id === skip) continue;
+    const cx = l.R.x + l.R.w / 2, cy = l.R.y + l.R.h / 2;
+    h += `<div class="x" style="left:${u(cx)};top:${u(cy)}" data-spec="11:도킹 인디케이터 21:2">
+      <button class="ib u" data-t="${l.id}" data-s="u" title="위로 ½ 분할">▲</button><button class="ib l" data-t="${l.id}" data-s="l" title="왼쪽 ½ 분할">◀</button>
+      <button class="ib c ${mode === 'move' ? '' : 'dis'}" data-t="${l.id}" data-s="c" title="위치 교환" data-spec="23:1"></button>
+      <button class="ib r" data-t="${l.id}" data-s="r" title="오른쪽 ½ 분할">▶</button><button class="ib d" data-t="${l.id}" data-s="d" title="아래로 ½ 분할">▼</button></div>`;
+  }
+  const E = [['u', CW / 2, 9, '▭'], ['d', CW / 2, CH - 9, '▭'], ['l', 9, CH / 2, '▯'], ['r', CW - 9, CH / 2, '▯']];
+  h += E.map(([s, x, y, g]) => `<button class="ib eb" style="left:${u(x)};top:${u(y)}" data-t="@edge" data-s="${s}" title="캔버스 ${{ u: '위', d: '아래', l: '왼쪽', r: '오른쪽' }[s]}면에 삽입" data-spec="11:엣지 인디케이터 21:5">${g}</button>`).join('');
+  IND.innerHTML = h;
+  if (!S.tree) IND.querySelectorAll('.eb').forEach((b) => (b.title = '빈 캔버스에 배치'));
+}
+function hideInd() { IND.innerHTML = ''; PV.style.display = 'none'; S.indMode = null; }
+function previewRect(t, s) {
+  if (t === '@edge') {
+    if (!S.tree) return { x: 0, y: 0, w: CW, h: CH };
+    return { u: { x: 0, y: 0, w: CW, h: CH * .3 }, d: { x: 0, y: CH * .7, w: CW, h: CH * .3 }, l: { x: 0, y: 0, w: CW * .3, h: CH }, r: { x: CW * .7, y: 0, w: CW * .3, h: CH } }[s];
+  }
+  const l = S.indLeaves.find((x) => x.id === t); if (!l) return null; const R = l.R;
+  return { c: R, u: { x: R.x, y: R.y, w: R.w, h: R.h / 2 }, d: { x: R.x, y: R.y + R.h / 2, w: R.w, h: R.h / 2 }, l: { x: R.x, y: R.y, w: R.w / 2, h: R.h }, r: { x: R.x + R.w / 2, y: R.y, w: R.w / 2, h: R.h } }[s];
+}
+function hoverInd(b) {
+  IND.querySelectorAll('.hov').forEach((x) => x.classList.remove('hov'));
+  if (!b) { PV.style.display = 'none'; return; }
+  b.classList.add('hov');
+  const R = previewRect(b.dataset.t, b.dataset.s); if (!R) return;
+  Object.assign(PV.style, { display: 'block', left: u(R.x), top: u(R.y), width: u(R.w), height: u(R.h) });
+}
+const sideOf = (s) => ({ u: 'u', d: 'b', l: 'l', r: 'r' }[s]);
+// 배치 실행: id 를 (t, s) 위치에 놓는다. 기존 트리에서 빼는 것은 호출 전에 처리
+function place(id, t, s, base) {
+  const tree = base === undefined ? clone(S.tree) : base;
+  let nt;
+  const side = { u: 'u', d: 'b', l: 'l', r: 'r' }[s];
+  if (t === '@edge') nt = insertEdge(tree, id, side);
+  else nt = insertAt(tree, t, id, side);
+  if (!fits(nt)) { toast('공간이 부족해요 — 각 위젯의 최소 사이즈 아래로는 분할할 수 없어요'); return false; }
+  setTree(nt); flashW(id); return true;
+}
+function flashW(id) { const e = EL[id]; if (!e) return; e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); setTimeout(() => e.classList.remove('flash'), 1900); }
+
+/* ---------------- 위젯 추가 (14p) ---------------- */
+function startAdd(id) {
+  cancelAdd(true); closeAll();
+  const w = 128, h = 104;
+  S.adding = { id, w, h, x: (CW - w) / 2, y: (CH - h) / 2 };
+  render(); showInd('add');
+  const b = $('#addx'); b.style.display = 'flex';
+  posAddX();
+  toast(`${WG[id].name} — 원하는 도킹 인디케이터 방향으로 끌어다 놓거나 방향 버튼을 누르세요`, 3200);
+}
+function posAddX() {
+  if (!S.adding) return;
+  const b = $('#addx'), A = S.adding, ox = DESK ? S.main.x : 0, oy = DESK ? S.main.y : 0;
+  Object.assign(b.style, { left: u(ox + CX + A.x + A.w - 5), top: u(oy + CY + A.y - 4) });
+}
+function cancelAdd(silent) {
+  if (!S.adding) return;
+  const id = S.adding.id; S.adding = null; $('#addx').style.display = 'none'; hideInd();
+  if (EL[id] && !active(id)) EL[id].remove();
+  render(); if (!silent) toast('위젯 추가를 취소했어요');
+}
+function commitAdd(t, s) {
+  const id = S.adding.id;
+  if (s === 'c') return;
+  const ok = place(id, t, s);
+  if (ok) { S.adding = null; $('#addx').style.display = 'none'; hideInd(); render(); flashW(id); toast(`${WG[id].name} 추가 — ${t === '@edge' ? '캔버스 가장자리에 삽입' : '대상 영역을 ½로 분할'}`); }
+}
+
+/* ---------------- 이동·교환·드래그 아웃 (16·17·19p) ---------------- */
+function inWin(p) { const ox = DESK ? S.main.x : 0, oy = DESK ? S.main.y : 0; return WIN.style.display !== 'none' && p.x >= ox && p.x <= ox + WW && p.y >= oy && p.y <= oy + WH; }
+function inCanvas(p) { const ox = DESK ? S.main.x : 0, oy = DESK ? S.main.y : 0; return WIN.style.display !== 'none' && p.x >= ox + CX && p.x <= ox + CX + CW && p.y >= oy + CY && p.y <= oy + CY + CH; }
+function indAt(e) { const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.closest && el.closest('#ind .ib:not(.dis)'); }
+function dragTreeWidget(e, id) {
+  const e0 = pt(e), src = EL[id];
+  let ghost = null, off = null;
+  track(e, {
+    start() {
+      S.dragging = true; dockVis(); closeAll();
+      const r = src.getBoundingClientRect(), fr = F.getBoundingClientRect();
+      off = { x: e0.x - (r.left - fr.left) / K, y: e0.y - (r.top - fr.top) / K, w: r.width / K, h: r.height / K };
+      ghost = src.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('flash');
+      Object.assign(ghost.style, { width: u(Math.min(off.w, 150)), height: u(Math.min(off.h, 110)) });
+      off.x = Math.min(off.x, Math.min(off.w, 150) - 10);
+      F.append(ghost); src.classList.add('dim');
+      showInd('move', id);
+    },
+    move(ev) { const p = pt(ev); Object.assign(ghost.style, { left: u(p.x - off.x), top: u(p.y - off.y) }); hoverInd(indAt(ev)); },
+    end(ev, moved) {
+      if (!moved) return;
+      S.dragging = false; ghost.remove(); src.classList.remove('dim');
+      const b = indAt(ev), p = pt(ev);
+      hideInd();
+      if (b) {
+        const t = b.dataset.t, s = b.dataset.s;
+        if (s === 'c') { const tr = clone(S.tree); swapIds(tr, id, t); setTree(tr); flashW(id); flashW(t); toast(`${WG[id].name} ↔ ${WG[t].name} 위치 교환 — 서로의 자리·크기 그대로`); }
+        else { const base = removeId(clone(S.tree), id); if (place(id, t, s, base)) toast(`${WG[id].name} 이동 — 빈 자리는 분할 상대 위젯이 채워요`); }
+      } else if (!inWin(p)) {
+        if (DESK) detach(id, p.x - off.x, p.y - 6);
+        else toast('창 분리(드레그 아웃)는 26p 바탕화면 예시에서 해 볼 수 있어요');
+      }
+      render();
+    },
+  });
+}
+function detach(id, x, y) {
+  const r = compute(S.tree, { x: 0, y: 0, w: CW, h: CH }, { leaves: [], splits: [] }).leaves.find((l) => l.id === id);
+  const w = clamp(r ? r.R.w : 150, WG[id].min[0], 240), h = clamp(r ? r.R.h : 150, WG[id].min[1], 200);
+  S.tree = removeId(clone(S.tree), id);
+  S.float.push({ id, x: clamp(x, 0, FW - w), y: clamp(y, 0, FH - 14), w, h, pin: false, z: ++S.zc });
+  render(); flashW(id);
+  toast(`${WG[id].name} 독립 창으로 분리 — 빈 자리는 분할 상대가 채워요`);
+}
+function dockIn(f, t, s) {
+  const tree = clone(S.tree);
+  const nt = t === '@edge' ? insertEdge(tree, f.id, sideOf(s)) : insertAt(tree, t, f.id, sideOf(s));
+  if (!fits(nt)) { toast('공간이 부족해요 — 최소 사이즈 보호'); return false; }
+  S.float = S.float.filter((x) => x !== f); setTree(nt); flashW(f.id);
+  toast(`${WG[f.id].name} 드레그 인 — 대상 영역을 ½로 분할해 배치${f.id === 'list' ? ' (붙어 있던 창은 제자리 유지)' : ''}`);
+  return true;
+}
+
+/* ---------------- 자석 (20p) ---------------- */
+const RECT = (o) => ({ l: o.x, t: o.y, r: o.x + o.w, b: o.y + (o.min ? 12 : o.h) });
+const mainRect = () => (WIN.style.display === 'none' ? null : { l: S.main.x, t: S.main.y, r: S.main.x + WW, b: S.main.y + WH });
+const touch = (a, b) => {
+  const T = .8, oy = Math.min(a.b, b.b) - Math.max(a.t, b.t), ox = Math.min(a.r, b.r) - Math.max(a.l, b.l);
+  return ((Math.abs(a.l - b.r) < T || Math.abs(a.r - b.l) < T) && oy > 2) || ((Math.abs(a.t - b.b) < T || Math.abs(a.b - b.t) < T) && ox > 2);
+};
+function snap(f) {
+  const T = 7, others = S.float.filter((x) => x !== f).map(RECT); const m = mainRect(); if (m) others.push(m);
+  const a = RECT(f), hh = a.b - a.t;
+  let bx = null, by = null;
+  for (const o of others) {
+    const oy = Math.min(a.b, o.b) - Math.max(a.t, o.t) > -T, ox = Math.min(a.r, o.r) - Math.max(a.l, o.l) > -T;
+    if (oy) {
+      if (Math.abs(a.l - o.r) < T) bx = o.r; else if (Math.abs(a.r - o.l) < T) bx = o.l - f.w;
+      else if (Math.abs(a.l - o.l) < T && (Math.abs(a.t - o.b) < T || Math.abs(a.b - o.t) < T)) bx = o.l;
+    }
+    if (ox) {
+      if (Math.abs(a.t - o.b) < T) by = o.b; else if (Math.abs(a.b - o.t) < T) by = o.t - hh;
+      else if (Math.abs(a.t - o.t) < T && (Math.abs(a.l - o.r) < T || Math.abs(a.r - o.l) < T)) by = o.t;
+    }
+  }
+  if (bx !== null) f.x = bx; if (by !== null) f.y = by;
+  return bx !== null || by !== null;
+}
+// 함께 움직일 창: from(메인 or 후원 리스트)에 붙어 있는 창들 (연결된 묶음)
+function group(fromRect, exclude) {
+  const seen = new Set(), queue = [fromRect];
+  while (queue.length) {
+    const r = queue.shift();
+    for (const f of S.float) if (!seen.has(f) && f !== exclude && touch(r, RECT(f))) { seen.add(f); queue.push(RECT(f)); }
+  }
+  return [...seen];
+}
+
+/* ---------------- 포인터 유틸 ---------------- */
+function track(e, h) {
+  const sx = e.clientX, sy = e.clientY; let moved = false;
+  const tgt = e.target; try { tgt.setPointerCapture(e.pointerId); } catch (_) {}
+  const mv = (ev) => { if (!moved) { if (Math.hypot(ev.clientX - sx, ev.clientY - sy) < 4) return; moved = true; h.start && h.start(ev); } h.move && h.move(ev); };
+  const up = (ev) => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); h.end && h.end(ev, moved); };
+  addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+}
+F.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
+  const hd = e.target.closest('.wh'), sp = e.target.closest('.sp'), rs = e.target.closest('.rs');
+  if (e.target.closest('button,input,select,a,.tg,[data-act]') && !e.target.closest('#ind')) { if (!hd || e.target.closest('.wh button')) return; }
+  // 추가 중인 위젯 드래그
+  if (S.adding && e.target.closest('.wg.adding')) {
+    e.preventDefault();
+    const A = S.adding, p0 = pt(e), x0 = A.x, y0 = A.y, el = EL[A.id];
+    track(e, {
+      start() { el.classList.add('dragging'); el.style.pointerEvents = 'none'; },
+      move(ev) { const p = pt(ev); A.x = x0 + p.x - p0.x; A.y = y0 + p.y - p0.y; Object.assign(el.style, { left: u(A.x), top: u(A.y) }); posAddX(); hoverInd(indAt(ev)); },
+      end(ev, moved) {
+        el.classList.remove('dragging'); el.style.pointerEvents = '';
+        if (!moved) return;
+        const b = indAt(ev); hoverInd(null);
+        if (b) commitAdd(b.dataset.t, b.dataset.s); else toast('도킹 인디케이터의 방향 위에 놓아야 배치돼요 (가운데 버튼은 위치 교환 전용)');
+      },
+    });
+    return;
+  }
+  if (S.adding) return;
+  // 경계선 리사이즈 (조인트 리사이징)
+  if (sp) {
+    e.preventDefault();
+    const s = splitsCache[+sp.dataset.i]; if (!s) return;
+    const n = s.n, A = minSize(n.a), B = minSize(n.b);
+    const span = (s.dir === 'h' ? s.R.w : s.R.h) - G, mi = (s.dir === 'h' ? A[0] : A[1]) / span, ma = 1 - (s.dir === 'h' ? B[0] : B[1]) / span;
+    const ox = DESK ? S.main.x : 0, oy = DESK ? S.main.y : 0;
+    let hit = false;
+    track(e, {
+      start() { sp.classList.add('act'); S.dragging = true; dockVis(); },
+      move(ev) {
+        const p = pt(ev), v = s.dir === 'h' ? (p.x - ox - CX - s.R.x) / span : (p.y - oy - CY - s.R.y) / span;
+        const r = clamp(v, mi, ma); if (r !== v && !hit) { hit = true; toast('최소 사이즈 보호 — 이 이하로는 줄어들지 않아요'); }
+        if (mi <= ma) { n.r = r; S.dirty = true; render(); const ns = $$('.sp')[splitsCache.indexOf(splitsCache.find((x) => x.n === n))]; ns && ns.classList.add('act'); }
+      },
+      end() { S.dragging = false; $$('.sp.act').forEach((x) => x.classList.remove('act')); dockVis(); },
+    });
+    return;
+  }
+  // 분리 창 크기 조절
+  if (rs) {
+    e.preventDefault();
+    const f = S.float.find((x) => x.id === rs.parentNode.dataset.id); if (!f) return;
+    const p0 = pt(e), w0 = f.w, h0 = f.h;
+    track(e, { move(ev) { const p = pt(ev); f.w = clamp(w0 + p.x - p0.x, WG[f.id].min[0], FW - f.x); f.h = clamp(h0 + p.y - p0.y, WG[f.id].min[1], FH - f.y); render(); } });
+    return;
+  }
+  // 메인 창 이동 (바탕화면): 붙어 있는 창도 함께
+  if (DESK && e.target.closest('#tb') && !e.target.closest('button,a')) {
+    e.preventDefault();
+    const p0 = pt(e), m0 = { ...S.main }, grp = group(mainRect()).map((f) => [f, f.x, f.y]);
+    S.mainTop = ++S.zc; zorder();
+    track(e, {
+      move(ev) { const p = pt(ev); S.main.x = clamp(m0.x + p.x - p0.x, -WW + 40, FW - 40); S.main.y = clamp(m0.y + p.y - p0.y, 0, FH - 15); grp.forEach(([f, x, y]) => { f.x = x + S.main.x - m0.x; f.y = y + S.main.y - m0.y; }); render(); posAddX(); },
+      end(ev, moved) { if (moved && grp.length) toast(`메인 창에 붙어 있는 ${grp.length}개 창이 함께 이동했어요 (자석)`); },
+    });
+    return;
+  }
+  if (!hd) return;
+  const w = hd.parentNode, id = w.dataset.id;
+  e.preventDefault();
+  if (w.classList.contains('fw')) dragFloat(e, S.float.find((x) => x.id === id));
+  else dragTreeWidget(e, id);
+});
+function dragFloat(e, f) {
+  if (!f) return;
+  f.z = ++S.zc; S.mainTop = 0; zorder();
+  const p0 = pt(e), x0 = f.x, y0 = f.y;
+  const grp = f.id === 'list' ? group(RECT(f), null).filter((x) => x !== f).map((g) => [g, g.x, g.y]) : [];
+  let snapped = false;
+  track(e, {
+    start() { S.dragging = true; dockVis(); },
+    move(ev) {
+      const p = pt(ev);
+      f.x = clamp(x0 + p.x - p0.x, -f.w + 30, FW - 30); f.y = clamp(y0 + p.y - p0.y, 0, FH - 12);
+      snapped = grp.length ? false : snap(f);
+      grp.forEach(([g, x, y]) => { g.x = x + f.x - x0; g.y = y + f.y - y0; });
+      render();
+      if (inCanvas(p)) { if (S.indMode !== 'in') showInd('in'); EL[f.id].style.opacity = .6; EL[f.id].style.pointerEvents = 'none'; hoverInd(indAt(ev)); }
+      else if (S.indMode === 'in') { hideInd(); EL[f.id].style.opacity = ''; EL[f.id].style.pointerEvents = ''; }
+    },
+    end(ev, moved) {
+      S.dragging = false; dockVis();
+      const b = moved && S.indMode === 'in' ? indAt(ev) : null;
+      const el = EL[f.id]; el.style.opacity = ''; el.style.pointerEvents = '';
+      if (!moved) return;
+      hideInd();
+      if (b && b.dataset.s !== 'c') { dockIn(f, b.dataset.t, b.dataset.s); return; }
+      if (grp.length) toast(`후원 리스트에 붙어 있던 ${grp.length}개 창이 함께 이동했어요 (자석)`);
+      else if (snapped) toast('자석 — 가까운 창 가장자리에 붙었어요');
+      render();
+    },
+  });
+}
+
+/* ---------------- 프리셋 (12p) ---------------- */
+function renderPreset() {
+  const cur = S.presets.find((p) => p.id === S.preset);
+  const n = leaves(S.tree).length + S.float.length;
+  const full = S.presets.length >= 10;
+  $('#preset').innerHTML = `<h4><span data-spec="12:2">레이아웃 프리셋</span><button data-act="pclose" title="닫기" data-spec="12:1">✕</button></h4>
+    <h5 data-spec="12:3">현재 상태</h5>
+    <div class="pc" data-spec="12:3"><div><b>${cur ? esc(cur.name) : '사용자 설정'}${cur && S.dirty ? ' <small>(변경됨)</small>' : ''}</b><small>위젯 ${n}개</small></div></div>
+    <h5 data-spec="12:4">저장된 프리셋 <small style="opacity:.6;font-weight:400">${S.presets.length}/10</small></h5>
+    <div id="plist" data-spec="12:4">${S.presets.map((p) => S.editing === p.id
+      ? `<div class="pc gray"><input id="pedit" value="${esc(p.name)}" maxlength="20"><span class="pb"><button class="cn" data-act="pecancel" title="취소">✕</button><button class="ok" data-act="pesave" data-p="${p.id}" title="수정 완료">✓</button></span></div>`
+      : `<div class="pc ${p.id === S.preset ? '' : 'gray'}" data-act="papply" data-p="${p.id}" title="이 프리셋 적용"><div><b>${esc(p.name)}</b><small>위젯 ${leaves(p.tree).length}개</small></div><span class="pb"><button data-act="pedit" data-p="${p.id}" title="이름 수정" data-spec="12:4">✎</button><button data-act="pdel" data-p="${p.id}" title="삭제" data-spec="12:4">🗑</button></span></div>`).join('') || '<div style="opacity:.6">저장된 프리셋이 없어요</div>'}</div>
+    <div id="pnew" data-spec="12:4"><input id="pname" placeholder="${full ? '최대 10개까지 저장할 수 있어요' : '프리셋 이름'}" maxlength="20" ${full ? 'disabled' : ''}>
+      <div class="bb"><button class="c" data-act="pclose">취소</button><button class="s" data-act="psave" ${full ? 'disabled' : ''}>저장</button></div></div>`;
+}
+function openOv(name) {
+  closeAll(name);
+  if (name === 'preset') renderPreset();
+  if (name === 'noti') renderNoti();
+  if (name === 'set') renderSet();
+  $('#ov-' + name).classList.add('on');
+}
+function closeAll(except) { ['preset', 'noti', 'set', 'wall'].forEach((n) => n !== except && $('#ov-' + n).classList.remove('on')); if (except !== 'cf') closeCf(); S.capture = null; }
+function confirmBox(msg, yes) {
+  const o = $('#ov-cf');
+  o.innerHTML = `<div class="cf">${esc(msg)}<div class="bb"><button class="n" data-act="cfno">취소</button><button class="y" data-act="cfyes">확인</button></div></div>`;
+  o.classList.add('on'); S.cfYes = yes;
+}
+function closeCf() { $('#ov-cf').classList.remove('on'); S.cfYes = null; }
+
+/* ---------------- 알림 (13p) ---------------- */
+function renderNoti() {
+  $('#noti').innerHTML = `<div class="h">알림<button data-act="nall" title="모두 읽음 — 알림 숫자 사라짐">✓ 모두 읽음</button></div>
+  <div class="l">${S.noti.map((n, i) => `<div class="it ${n.read ? 'read' : ''}" data-act="nread" data-i="${i}" title="고객센터의 해당 링크로 새 창 이동"><span class="ic" style="background:${n.k === 'c' ? '#e5483d' : '#3d7ff0'}">${n.k === 'c' ? 'Ⓒ' : '📢'}</span><div style="flex:1"><div>${esc(n.t)}</div><div class="d">${n.d}</div></div>${n.read ? '' : '<span class="nw"></span>'}</div>`).join('')}</div>`;
+}
+
+/* ---------------- 설정 (14·15·16p) ---------------- */
+function renderSet() {
+  const t = S.setTab;
+  let pg = '';
+  if (t === 0) pg = `
+    <div class="sec"><h6>테마</h6><div class="rd"><label><input type="radio" name="th" value="dark" ${S.dark ? 'checked' : ''}>다크 모드</label><label><input type="radio" name="th" value="light" ${S.dark ? '' : 'checked'}>라이트 모드</label><label></label></div></div>
+    <div class="sec"><h6>텍스트 크기</h6><div class="rd">${[100, 125, 150].map((v) => `<label><input type="radio" name="fs" value="${v}" ${S.fs === v ? 'checked' : ''}>${v}%</label>`).join('')}</div></div>
+    <div class="sec"><h6>후원 차단 설정</h6>
+      <div class="tr" data-spec="14:2"><span style="flex:1">차단 버튼 표시</span>${tog(S.blockBtn, 'sblock')}</div>
+      <div class="tr ${S.blockBtn ? '' : 'hide'}" data-spec="14:3"><span style="flex:1">후원 차단 시 허용/거절하지 않은 영상후원 상태 유지</span>${tog(S.keepVideo, 'skeep')}</div></div>
+    <div class="sec" style="border:0"><h6>언어</h6><select class="sel" id="lang"><option value="ko" ${S.lang === 'ko' ? 'selected' : ''}>한국어</option><option value="en" ${S.lang === 'en' ? 'selected' : ''}>English</option></select>
+      <button class="lo" data-act="logout">로그아웃</button></div>`;
+  else if (t === 1) pg = `
+    <div style="overflow:hidden"><b style="font-size:${u(7)}">단축키 설정</b><button class="add" data-act="kadd" ${S.keys.length >= 20 ? 'disabled' : ''} data-spec="15:1">+ 단축키 추가</button></div>
+    <ul class="note"><li>리모컨이 실행되는 동안에는 설정 되어있는 단축키가 우선으로 작동하여 기존 기능이 동작하지 않습니다.<br>ex) ctrl+c로 설정 시 기존 복사하기 기능이 동작하지 않음.</li><li>타 프로그램과 단축키가 중첩 될 경우 정상적으로 작동되지 않을 수 있습니다.</li></ul>
+    ${S.keys.map((k, i) => `<div class="kr" data-spec="15:3"><select class="sel" data-kf="${i}"><option value="">기능 선택</option>${KEYFN.map((f) => `<option ${k.fn === f ? 'selected' : ''}>${f}</option>`).join('')}</select>
+      <input readonly data-kk="${i}" class="${S.capture === i ? 'cap' : ''}" value="${esc(S.capture === i ? '' : k.key)}" placeholder="${S.capture === i ? '키보드의 키를 누르세요 (Esc 취소)' : '단축키를 입력하세요.'}"><button class="x" data-act="kdel" data-i="${i}" title="항목 삭제" data-spec="15:2">✕</button></div>`).join('')}
+    <div style="color:var(--sub);margin-top:${u(6)}">${S.keys.length}/20 · 설정한 단축키를 누르면 이 화면에서 바로 동작해요</div>`;
+  else pg = `<div class="info" data-spec="16:1"><div style="flex:1"><b style="font-size:${u(7.5)}">투네이션 크리에이터 리모컨</b>
+      <p data-spec="16:2"><b>리모컨 버전</b> : 0.0.0</p><p data-spec="16:3"><b>로그인 방법</b> : 통합 로그인</p><p data-spec="16:4"><b>공식 홈페이지 :</b> <a href="https://toon.at" target="_blank" rel="noopener">https://toon.at</a></p></div>
+      <div style="font-size:${u(22)};font-weight:900;color:#3d7ff0;letter-spacing:-.05em">+<span style="color:#9fc3ff">○</span>○</div></div>`;
+  $('#set').innerHTML = `<div class="h">설정<button data-act="sclose" title="닫기">✕</button></div>
+    <div class="b"><div class="nav">${['기본', '단축키', '정보'].map((x, i) => `<button class="${t === i ? 'on' : ''}" data-act="stab" data-i="${i}" data-spec="${[14, 15, 16][i]}:1">${x}</button>`).join('')}</div><div class="pg">${pg}</div></div>`;
+}
+function applyTheme() { F.classList.toggle('dark', S.dark); F.style.setProperty('--fs', S.fs / 100); }
+const comboOf = (e) => { const k = e.key.length === 1 ? e.key.toUpperCase() : e.key; if (['Control', 'Shift', 'Alt', 'Meta'].includes(k)) return null; return [e.ctrlKey && 'Ctrl', e.altKey && 'Alt', e.shiftKey && 'Shift', e.metaKey && 'Cmd', k === ' ' ? 'Space' : k].filter(Boolean).join(' + '); };
+addEventListener('keydown', (e) => {
+  if (S.capture !== null && S.capture !== undefined) {
+    e.preventDefault();
+    if (e.key === 'Escape') { S.capture = null; renderSet(); return; }
+    const c = comboOf(e); if (!c) return;
+    if (S.keys.some((k, i) => i !== S.capture && k.key === c)) { toast(`'${c}' 는 이미 다른 기능에 설정돼 있어요`); return; }
+    S.keys[S.capture].key = c; const k = S.keys[S.capture]; S.capture = null; renderSet();
+    toast(k.fn ? `단축키 설정 완료 — ${c} → ${k.fn}` : `${c} 입력됨 — 기능을 선택하면 완료돼요`);
+    return;
+  }
+  if (e.key === 'Escape') { if (S.adding) cancelAdd(); else closeAll(); return; }
+  if (e.target.closest && e.target.closest('input,select')) return;
+  const c = comboOf(e); const k = c && S.keys.find((x) => x.key === c && x.fn);
+  if (k) { e.preventDefault(); runKey(k.fn, c); }
+});
+function runKey(fn, c) {
+  const say = (m) => toast(`단축키 ${c} → ${m}`);
+  switch (fn) {
+    case '알림 일시 정지': S.paused = !S.paused; renderBody('quick'); say(S.paused ? '알림 일시 정지' : '알림 재개'); break;
+    case '스킵': say('현재 알림 스킵'); break;
+    case '후원 기능 on/off': S.useAll = !S.useAll; renderBody('use'); say(`후원 기능 ${S.useAll ? 'on' : 'off'}`); break;
+    case '영상 자동 재생 on/off': S.vAuto = !S.vAuto; renderBody('video'); say(`영상 자동 재생 ${S.vAuto ? 'on' : 'off'}`); break;
+    case 'Dock 압정 on/off': S.dockPin = !S.dockPin; renderDock(); say(`Dock 압정 ${S.dockPin ? 'on' : 'off'}`); break;
+    case '레이아웃 프리셋 열기': openOv('preset'); say('레이아웃 프리셋'); break;
+  }
+}
+
+/* ---------------- 클릭 동작 ---------------- */
+F.addEventListener('click', (e) => {
+  const a = e.target.closest('[data-act]');
+  // 바깥 클릭 시 팝업 닫기
+  if (!a || !a.closest('.ov')) {
+    if (e.target.closest('#ov-preset') && !e.target.closest('#preset')) { closeAll(); return; }
+    if (e.target.closest('#ov-noti') && !e.target.closest('#noti')) { closeAll(); return; }
+  }
+  if (e.target.id === 'ov-set' || e.target.id === 'ov-wall') { closeAll(); return; }
+  if (e.target.closest('#ind .ib')) {
+    const b = e.target.closest('#ind .ib'); if (b.classList.contains('dis')) return;
+    if (S.adding) commitAdd(b.dataset.t, b.dataset.s);
+    return;
+  }
+  if (e.target.closest('#bell')) { $('#ov-noti').classList.contains('on') ? closeAll() : openOv('noti'); return; }
+  if (e.target.closest('#gear')) { S.setTab = 0; openOv('set'); return; }
+  if (e.target.closest('#layers')) { openOv('preset'); return; }
+  if (e.target.closest('#wpin')) { S.winPin = !S.winPin; renderBadges(); toast(S.winPin ? '압정 on — 리모컨 창이 항상 맨 앞에 위치' : '압정 off'); return; }
+  if (e.target.closest('#nb .tx')) { toast('배너 링크로 새 창 이동 (관리자 배너시스템에서 텍스트·링크 설정)'); return; }
+  if (e.target.closest('#addx')) { cancelAdd(); return; }
+  if (e.target.closest('#bi')) { e.preventDefault(); toast('투네이션 BI — index 페이지를 새 창으로 열어요'); return; }
+  if (!a) return;
+  const act = a.dataset.act, wid = a.closest('.wg') && a.closest('.wg').dataset.id;
+  const fl = wid && S.float.find((x) => x.id === wid);
+  switch (act) {
+    case 'wmin': toast('리모컨 창 최소화'); break;
+    case 'wmax': toast('리모컨 창 최대화 — 위젯들은 비율(%)을 유지하며 함께 확대'); break;
+    case 'wclose': toast('리모컨 종료 — 위젯 위치·크기를 저장해 재접속 시 그대로 복구'); break;
+    case 'dpin': S.dockPin = !S.dockPin; S.dockHover = false; renderDock(); toast(S.dockPin ? 'Dock 압정 on — 해당 영역에 고정' : 'Dock 압정 off — 평소 숨김, 하단에 마우스를 올리면 노출 (벗어나면 2.5초 후 숨김)', 3000); break;
+    case 'wall': $('#ov-wall').classList.add('on'); renderWall(); break;
+    case 'wallpick': S.wall = +a.dataset.i; renderWall(); F.style.setProperty('--cv', ['#2a2c31', '#1b2a4a', '#3a2433', '#21382c'][S.wall]); break;
+    case 'dock': {
+      const id = a.dataset.id;
+      if (S.adding && S.adding.id === id) { cancelAdd(); break; }
+      if (active(id)) removeW(id); else startAdd(id);
+      break;
+    }
+    case 'wx': if (fl) { S.float = S.float.filter((x) => x !== fl); render(); toast(`${WG[wid].name} 닫힘`); } else removeW(wid); break;
+    case 'fpin': fl.pin = !fl.pin; fl.pinAt = ++S.zc; render(); toast(fl.pin ? `${WG[wid].name} 압정 on — 다른 창보다 항상 위 (여러 개면 최근 순)` : '압정 off'); break;
+    case 'fmin': fl.min = !fl.min; render(); break;
+    case 'ltab': S.listTab = +a.dataset.i; renderBody('list'); break;
+    case 'qtab': S.quickTab = +a.dataset.i; renderBody('quick'); break;
+    case 'pause': S.paused = !S.paused; renderBody('quick'); toast(S.paused ? '알림 일시 정지' : '알림 재개'); break;
+    case 'skip': toast('현재 알림 스킵'); break;
+    case 'wok': case 'wno': { const k = +a.dataset.w; const w = S.wait.find((x) => x.k === k); S.wait = S.wait.filter((x) => x.k !== k); renderBody('wait'); render(); toast(`${{ quest: '퀘스트', lucky: '럭키박스', play: '플레이', video: '영상' }[w.t]} 후원 ${act === 'wok' ? '수락' : '거절'} — 대기 ${S.wait.length}건`); break; }
+    case 'useall': S.useAll = !S.useAll; renderBody('use'); break;
+    case 'use': if (!S.useAll) { toast('후원 기능이 꺼져 있어요'); break; } S.use[a.dataset.k] = !S.use[a.dataset.k]; renderBody('use'); break;
+    case 'al': S.al[a.dataset.k] = !S.al[a.dataset.k]; renderBody('alert'); break;
+    case 'vauto': S.vAuto = !S.vAuto; renderBody('video'); toast(S.vAuto ? '영상 자동 재생 ON' : '영상 자동 재생 OFF — 영상 후원은 대기 중인 후원으로'); break;
+    case 'vvoice': S.vVoice = !S.vVoice; renderBody('video'); break;
+    case 'vote': S.vote[+a.dataset.i]++; renderBody('vote'); break;
+    case 'ad': S.adOn = !S.adOn; renderBody('ad'); break;
+    case 'block': {
+      const i = +a.dataset.i;
+      if (S.blocked.has(i)) { S.blocked.delete(i); renderBody('list'); toast('차단 해제'); break; }
+      S.blocked.add(i);
+      const vid = S.wait.find((w) => w.t === 'video');
+      if (LIST[i][1] === 'v' && vid) {
+        if (S.keepVideo) toast('차단 — 허용/거절하지 않은 영상후원은 대기 중인 후원에 그대로 유지');
+        else { S.wait = S.wait.filter((w) => w !== vid); renderBody('wait'); render(); toast('차단 — 대기 중이던 영상후원은 자동 거절, 리스트에만 노출'); }
+      } else toast('해당 도네이터를 차단했어요');
+      renderBody('list'); break;
+    }
+    // 프리셋
+    case 'pclose': closeAll(); break;
+    case 'papply': { const p = S.presets.find((x) => x.id === +a.dataset.p); if (e.target.closest('.pb')) break; cancelAdd(true); S.float = []; S.tree = clone(p.tree); S.preset = p.id; S.dirty = false; render(); renderPreset(); toast(`프리셋 '${p.name}' 적용`); break; }
+    case 'pedit': e.stopPropagation(); S.editing = +a.dataset.p; renderPreset(); setTimeout(() => { const i = $('#pedit'); i && (i.focus(), i.select()); }, 0); break;
+    case 'pecancel': S.editing = null; renderPreset(); break;
+    case 'pesave': { const p = S.presets.find((x) => x.id === +a.dataset.p), v = $('#pedit').value.trim(); if (!v) { toast('이름을 입력하세요'); break; } p.name = v; S.editing = null; renderPreset(); toast('프리셋 이름 수정 완료'); break; }
+    case 'pdel': { e.stopPropagation(); const id = +a.dataset.p; confirmBox('프리셋을 삭제하시겠습니까?', () => { S.presets = S.presets.filter((x) => x.id !== id); if (S.preset === id) S.preset = null; renderPreset(); toast('프리셋 삭제'); }); break; }
+    case 'psave': {
+      const v = $('#pname').value.trim(); if (!v) { toast('프리셋 이름을 입력하세요'); $('#pname').focus(); break; }
+      if (S.presets.length >= 10) break;
+      const id = ++S.pid; S.presets.push({ id, name: v, tree: clone(S.tree) }); S.preset = id; S.dirty = false; renderPreset(); toast(`현재 상태를 '${v}'(으)로 저장 — ${S.presets.length}/10`);
+      break;
+    }
+    case 'cfno': closeCf(); break;
+    case 'cfyes': { const f = S.cfYes; closeCf(); f && f(); break; }
+    // 알림
+    case 'nread': { const n = S.noti[+a.dataset.i]; if (!n.read) n.read = true; renderNoti(); renderBadges(); toast('고객센터의 해당 링크로 새 창 이동'); break; }
+    case 'nall': S.noti.forEach((n) => (n.read = true)); renderNoti(); renderBadges(); toast('모두 읽음 — 알림 숫자가 사라져요'); break;
+    // 설정
+    case 'sclose': closeAll(); break;
+    case 'stab': S.setTab = +a.dataset.i; S.capture = null; renderSet(); break;
+    case 'sblock': S.blockBtn = !S.blockBtn; renderSet(); renderBody('list'); toast(S.blockBtn ? '차단 버튼 표시 on — 리스트에 [차단] 버튼, 하단 ③ 항목 노출' : '차단 버튼 표시 off'); break;
+    case 'skeep': S.keepVideo = !S.keepVideo; renderSet(); break;
+    case 'logout': confirmBox('로그아웃 하시겠습니까?', () => toast('로그아웃 (프로토타입)')); break;
+    case 'kadd': if (S.keys.length < 20) { S.keys.push({ fn: '', key: '' }); renderSet(); } break;
+    case 'kdel': S.keys.splice(+a.dataset.i, 1); S.capture = null; renderSet(); break;
+  }
+});
+F.addEventListener('click', (e) => { const k = e.target.closest('[data-kk]'); if (k) { S.capture = +k.dataset.kk; renderSet(); } });
+F.addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.name === 'th') { S.dark = t.value === 'dark'; applyTheme(); toast(S.dark ? '다크 모드 — 분리된 창에도 실시간 적용' : '라이트 모드'); }
+  else if (t.name === 'fs') { S.fs = +t.value; applyTheme(); toast(`텍스트 크기 ${S.fs}%`); }
+  else if (t.id === 'lang') { S.lang = t.value; toast(t.value === 'en' ? 'Language: English (프로토타입은 한국어 문구 유지)' : '언어: 한국어'); }
+  else if (t.dataset.kf !== undefined) { const k = S.keys[+t.dataset.kf]; k.fn = t.value; if (k.fn && !k.key) { S.capture = +t.dataset.kf; renderSet(); toast('이제 키보드의 키를 누르세요'); } else if (k.fn) toast(`단축키 설정 완료 — ${k.key} → ${k.fn}`); }
+});
+F.addEventListener('input', (e) => { const v = e.target.dataset.vol; if (v !== undefined) { S.vols[+v] = +e.target.value; e.target.nextElementSibling.textContent = e.target.value + '%'; } });
+// Dock 자동 숨김 (압정 off)
+const hot = (on) => { if (S.dockPin) return; clearTimeout(dockT); if (on) { S.dockHover = true; dockVis(); } else dockT = setTimeout(() => { S.dockHover = false; dockVis(); }, 2500); };
+$('#dockHot').addEventListener('pointerenter', () => hot(true));
+$('#dock').addEventListener('pointerenter', () => hot(true));
+$('#dock').addEventListener('pointerleave', () => hot(false));
+$('#dockHot').addEventListener('pointerleave', (e) => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('#dock')) hot(false); });
+function renderWall() {
+  $('#wall').innerHTML = `<b>벽지</b> <span style="color:var(--sub)">— 캔버스 배경</span><div class="g">${['#2a2c31', '#1b2a4a', '#3a2433', '#21382c'].map((c, i) => `<button style="background:${c}" class="${(S.wall || 0) === i ? 'on' : ''}" data-act="wallpick" data-i="${i}"></button>`).join('')}</div>`;
+}
+function removeW(id) {
+  const leavesNow = leaves(S.tree);
+  if (S.float.some((f) => f.id === id)) { S.float = S.float.filter((f) => f.id !== id); render(); toast(`${WG[id].name} off`); return; }
+  if (!leavesNow.includes(id)) return;
+  setTree(removeId(clone(S.tree), id));
+  toast(`${WG[id].name} 삭제 — 추가 당시 분할 상대였던 위젯이 그 자리를 채워요`);
+}
+
+/* ---------------- 기획서 연결 ---------------- */
+const post = (m) => { try { parent.postMessage(Object.assign({ d2p: true }, m), '*'); } catch (_) {} };
+const refsOf = (x) => x.dataset.spec.split(/\s+(?=\d+:)/);
+F.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-spec]'); if (!el) return;
+  post({ type: 'spec', refs: refsOf(el), label: (el.title || el.textContent || '').trim().slice(0, 30) });
+}, true);
+F.addEventListener('mouseover', (e) => {
+  if (!F.classList.contains('inspect')) return;
+  const el = e.target.closest('[data-spec]'), chip = $('#chip');
+  if (!el) { chip.style.display = 'none'; return; }
+  const r = el.getBoundingClientRect(), fr = F.getBoundingClientRect();
+  chip.textContent = refsOf(el).map((x) => x.replace(':', 'p ')).join(' · ');
+  chip.style.display = 'block'; chip.style.left = Math.max(0, Math.min(r.left - fr.left, fr.width - chip.offsetWidth)) + 'px'; chip.style.top = Math.max(0, r.top - fr.top - 12) + 'px';
+});
+addEventListener('message', (e) => {
+  const m = e.data; if (!m || !m.d2p) return;
+  if (m.type === 'focus') {
+    const pg = m.ref.split(':')[0];
+    const open = { 12: () => openOv('preset'), 13: () => openOv('noti'), 14: () => { S.setTab = 0; openOv('set'); }, 15: () => { S.setTab = 1; openOv('set'); }, 16: () => { S.setTab = 2; openOv('set'); }, 11: () => startAdd('gacha'), 21: () => startAdd('gacha'), 25: () => { CV.classList.add('hl-sp'); setTimeout(() => CV.classList.remove('hl-sp'), 2600); } };
+    let els = $$('[data-spec]').filter((x) => refsOf(x).includes(m.ref) && x.offsetParent !== null);
+    if (!els.length && open[pg]) { open[pg](); els = $$('[data-spec]').filter((x) => refsOf(x).includes(m.ref) && x.offsetParent !== null); }
+    els = els.slice(0, 6);
+    els.forEach((x) => { x.classList.remove('spec-flash'); void x.offsetWidth; x.classList.add('spec-flash'); setTimeout(() => x.classList.remove('spec-flash'), 3200); });
+    post({ type: 'focused', ref: m.ref, count: els.length });
+  } else if (m.type === 'inspect') F.classList.toggle('inspect', !!m.on);
+  else if (m.type === 'event') runEvent(m.name, m.value);
+  else if (m.type === 'state') applyState(m.state);
+  else if (m.type === 'changed') {
+    $$('[data-chg]').forEach((x) => x.removeAttribute('data-chg'));
+    const set = new Set(m.refs || []);
+    $$('[data-spec]').forEach((x) => { if (refsOf(x).some((r) => set.has(r))) x.setAttribute('data-chg', '변경'); });
+  }
+});
+function runEvent(name, value) {
+  switch (name) {
+    case 'layout': cancelAdd(true); closeAll(); S.float = []; S.tree = LAYOUTS[value](); S.preset = null; if (WIN.style.display === 'none' && MODE === 'desktop') { WIN.style.display = ''; S.main = { x: 0, y: 0 }; } render(); toast(value === 'initial' ? '초기 셋팅 — 후원 리스트·퀵 제어만 노출, 라이트 모드, Dock 압정 on' : '기본 구성'); if (value === 'initial') { S.dark = false; S.dockPin = true; applyTheme(); renderDock(); } break;
+    case 'preset': { const p = S.presets.find((x) => x.name === value) || S.presets[0]; if (p) { cancelAdd(true); S.float = []; S.tree = clone(p.tree); S.preset = p.id; S.dirty = false; render(); openOv('preset'); toast(`프리셋 '${p.name}' 적용`); } break; }
+    case 'add': if (active(value)) removeW(value); startAdd(value); break;
+    case 'remove': if (!active(value)) { const t = clone(S.tree); S.tree = insertAt(t, 'use', value, 'b'); render(); } setTimeout(() => removeW(value), 350); break;
+    case 'swap': {
+      const [a, b] = value.split(','); if (!leaves(S.tree).includes(a) || !leaves(S.tree).includes(b)) { toast('두 위젯이 캔버스에 있어야 해요'); break; }
+      const t = clone(S.tree); swapIds(t, a, b); setTree(t); flashW(a); flashW(b); toast(`${WG[a].name} ↔ ${WG[b].name} 위치 교환 — 서로의 자리·크기 그대로`); break;
+    }
+    case 'move': {
+      const [id, t, s] = value.split(',');
+      if (!leaves(S.tree).includes(t)) { toast(`${WG[t].name} 이 캔버스에 없어요`); break; }
+      const base = removeId(clone(S.tree), id); if (place(id, t, s, base)) toast(`${WG[id].name} → ${WG[t].name} ${{ u: '위', d: '아래', l: '왼쪽', r: '오른쪽' }[s]} — 빈 자리는 분할 상대가 채워요`); break;
+    }
+    case 'detach':
+      if (!DESK) { toast('창 분리는 26p 바탕화면 예시에서 동작해요'); break; }
+      if (!leaves(S.tree).includes(value)) { toast(`${WG[value].name} 이 캔버스에 없어요`); break; }
+      detach(value, S.main.x + WW + 4, S.main.y + 4); break;
+    case 'dockall': {
+      if (!S.float.length) { toast('분리된 창이 없어요'); break; }
+      let t = clone(S.tree); for (const f of S.float) { const nt = insertEdge(t, f.id, 'r'); if (fits(nt)) t = nt; }
+      S.float = []; setTree(t); toast('분리된 창을 모두 캔버스 오른쪽에 드레그 인'); break;
+    }
+    case 'waitadd': { const t = ['quest', 'lucky', 'play', 'video'][S.wk % 4]; S.wait.push({ k: ++S.wk, t, nick: '침착맨', cash: 3000 }); renderBody('wait'); render(); toast(`대기 중인 후원 +1 — Dock 아이콘에 숫자 뱃지 ${S.wait.length}`); break; }
+    case 'notify': S.noti.unshift({ k: 'n', t: '[이벤트] 새 알림이 도착했어요', d: '2026-02-20' }); renderBadges(); if ($('#ov-noti').classList.contains('on')) renderNoti(); toast('새 알림 — 종 아이콘 숫자 +1'); break;
+    case 'theme': S.dark = !S.dark; applyTheme(); toast(S.dark ? '다크 모드' : '라이트 모드'); break;
+    case 'dockpin': S.dockPin = !S.dockPin; S.dockHover = false; renderDock(); toast(S.dockPin ? 'Dock 압정 on — 고정' : 'Dock 압정 off — 하단에 마우스를 올리면 나타나요', 3000); break;
+  }
+}
+
+/* ---------------- 초기 상태 ---------------- */
+function applyState(st) {
+  Object.keys(EL).forEach((k) => { EL[k].remove(); delete EL[k]; });
+  Object.assign(S, {
+    tree: LAYOUTS.default(), float: [], adding: null, main: { x: 0, y: 0 }, zc: 1, mainTop: 0, dragging: false, indMode: null,
+    dockPin: true, dockHover: false, winPin: false, dark: false, fs: 100, lang: 'ko', blockBtn: true, keepVideo: true, blocked: new Set(),
+    listTab: 0, quickTab: 0, paused: false, useAll: true, use: Object.fromEntries(USE.map((x) => [x, !USE_OFF.includes(x)])), al: { sound: true, tts: true, show: true },
+    vAuto: true, vVoice: false, vols: [75, 40, 85, 70, 35, 85, 40], vote: [4, 2, 3], adOn: false, wall: 0,
+    wait: [{ k: 1, t: 'quest', nick: '침착맨', cash: 3000 }, { k: 2, t: 'lucky', nick: '침착맨', cash: 3000 }, { k: 3, t: 'play', nick: '침착맨', cash: 3000 }, { k: 4, t: 'video', nick: '침착맨', cash: 3000 }], wk: 4,
+    noti: NOTI.map((n, i) => ({ ...n, read: i >= 2 })), setTab: 0, capture: null, keys: [{ fn: '알림 일시 정지', key: 'Ctrl + Shift + P' }, { fn: '', key: '' }],
+    presets: [{ id: 1, name: '토크 방송', tree: LAYOUTS.talk() }, { id: 2, name: '엑셀 방송', tree: LAYOUTS.excel() }], pid: 2, preset: null, dirty: false, editing: null,
+  });
+  F.style.setProperty('--cv', '');
+  closeAll(); hideInd(); $('#addx').style.display = 'none';
+  WIN.style.display = MODE === 'window' || st === 'magnet' ? 'none' : '';
+  switch (st) {
+    case 'initial': S.tree = LAYOUTS.initial(); break;
+    case 'preset': S.preset = null; break;
+    case 'dockoff': S.dockPin = false; break;
+    case 'desktop': S.tree = removeId(S.tree, 'vol'); S.float = [{ id: 'vol', x: WW + 8, y: 6, w: 142, h: 150, pin: false, z: 2 }]; break;
+    case 'magnet': S.tree = null; S.float = [
+      { id: 'list', x: 8, y: 8, w: 330, h: 300, z: 2 }, { id: 'use', x: 338, y: 8, w: 140, h: 300, z: 3 },
+      { id: 'wait', x: 478, y: 8, w: 132, h: 170, z: 4 }, { id: 'vol', x: 478, y: 178, w: 132, h: 130, z: 5 }, { id: 'quick', x: 620, y: 230, w: 116, h: 70, z: 6 }]; break;
+    case 'window': S.tree = null; S.float = [{ id: 'vol', x: 18, y: 16, w: 200, h: 220, z: 2 }, { id: 'wait', x: 140, y: 110, w: 170, h: 210, z: 3 }]; break;
+  }
+  applyTheme(); render();
+  switch (st) {
+    case 'preset': openOv('preset'); break;
+    case 'notice': openOv('noti'); break;
+    case 'settings': S.setTab = 0; openOv('set'); break;
+    case 'keys': S.setTab = 1; openOv('set'); break;
+    case 'info': S.setTab = 2; openOv('set'); break;
+    case 'add': startAdd('gacha'); break;
+    case 'indicator': startAdd('gacha'); break;
+    case 'resize': CV.classList.add('hl-sp'); setTimeout(() => CV.classList.remove('hl-sp'), 2600); break;
+  }
+}
+applyState(ST0);
+if (q.has('inspect')) F.classList.add('inspect');
+post({ type: 'ready' });
+})();
+</script>
+</body>
+</html>

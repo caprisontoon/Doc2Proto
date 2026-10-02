@@ -1,0 +1,291 @@
+{
+ "apps": {
+  "remote": {
+   "title": "클라이언트 리모컨",
+   "src": "live/remote/index.html",
+   "size": [
+    585.3,
+    356
+   ],
+   "events": [
+    {
+     "group": "레이아웃",
+     "items": [
+      {
+       "label": "기본 구성",
+       "name": "layout",
+       "value": "default",
+       "page": 9
+      },
+      {
+       "label": "초기 셋팅 위젯",
+       "name": "layout",
+       "value": "initial",
+       "page": 20
+      },
+      {
+       "label": "프리셋 · 엑셀 방송",
+       "name": "preset",
+       "value": "엑셀 방송",
+       "page": 12
+      }
+     ]
+    },
+    {
+     "group": "위젯 동작",
+     "items": [
+      {
+       "label": "추가 · 뽑기 잔여 수량",
+       "name": "add",
+       "value": "gacha",
+       "page": 21
+      },
+      {
+       "label": "삭제 · 볼륨 제어",
+       "name": "remove",
+       "value": "vol",
+       "page": 22
+      },
+      {
+       "label": "교환 · 대기↔후원 사용",
+       "name": "swap",
+       "value": "wait,use",
+       "page": 23
+      },
+      {
+       "label": "이동 · 볼륨 → 대기 아래",
+       "name": "move",
+       "value": "vol,wait,d",
+       "page": 24
+      },
+      {
+       "label": "창 분리 · 후원 사용",
+       "name": "detach",
+       "value": "use",
+       "page": 26
+      },
+      {
+       "label": "분리 창 모두 붙이기",
+       "name": "dockall",
+       "page": 26
+      }
+     ]
+    },
+    {
+     "group": "상태",
+     "items": [
+      {
+       "label": "대기 중인 후원 +1",
+       "name": "waitadd",
+       "page": 10
+      },
+      {
+       "label": "Dock 압정 on/off",
+       "name": "dockpin",
+       "page": 10
+      },
+      {
+       "label": "새 알림 도착",
+       "name": "notify",
+       "page": 13
+      },
+      {
+       "label": "다크 / 라이트 모드",
+       "name": "theme",
+       "page": 14
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "frames": [
+  {
+   "page": 9,
+   "rect": {
+    "l": 15.2,
+    "t": 26.05,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 10,
+   "rect": {
+    "l": 5.47,
+    "t": 20.19,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 11,
+   "rect": {
+    "l": 2.7,
+    "t": 19.55,
+    "w": 61.05,
+    "h": 66.14
+   },
+   "state": "indicator",
+   "app": "remote"
+  },
+  {
+   "page": 12,
+   "rect": {
+    "l": 5.96,
+    "t": 20.49,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "preset",
+   "app": "remote"
+  },
+  {
+   "page": 13,
+   "rect": {
+    "l": 4.7,
+    "t": 23.26,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "notice",
+   "app": "remote"
+  },
+  {
+   "page": 14,
+   "rect": {
+    "l": 7.49,
+    "t": 19.17,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "settings",
+   "app": "remote"
+  },
+  {
+   "page": 15,
+   "rect": {
+    "l": 7.49,
+    "t": 19.17,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "keys",
+   "app": "remote"
+  },
+  {
+   "page": 16,
+   "rect": {
+    "l": 7.49,
+    "t": 19.17,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "info",
+   "app": "remote"
+  },
+  {
+   "page": 20,
+   "rect": {
+    "l": 6.59,
+    "t": 21.65,
+    "w": 56.12,
+    "h": 61.42
+   },
+   "state": "initial",
+   "app": "remote"
+  },
+  {
+   "page": 21,
+   "rect": {
+    "l": 7.4,
+    "t": 20.11,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "add",
+   "app": "remote"
+  },
+  {
+   "page": 22,
+   "rect": {
+    "l": 6.61,
+    "t": 20.49,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 23,
+   "rect": {
+    "l": 5.43,
+    "t": 23.37,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 24,
+   "rect": {
+    "l": 0.89,
+    "t": 21.24,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 25,
+   "rect": {
+    "l": 2.65,
+    "t": 18.37,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "resize",
+   "app": "remote"
+  },
+  {
+   "page": 26,
+   "rect": {
+    "l": 1.16,
+    "t": 18.68,
+    "w": 77.5,
+    "h": 67.04
+   },
+   "state": "desktop",
+   "app": "remote"
+  },
+  {
+   "page": 27,
+   "rect": {
+    "l": 1.2,
+    "t": 24.5,
+    "w": 77.5,
+    "h": 67.04
+   },
+   "state": "magnet",
+   "app": "remote"
+  },
+  {
+   "page": 28,
+   "rect": {
+    "l": 22.4,
+    "t": 25.3,
+    "w": 34.1,
+    "h": 62.0
+   },
+   "state": "window",
+   "app": "remote"
+  }
+ ]
+}
