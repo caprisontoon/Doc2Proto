@@ -26,6 +26,8 @@ async function firebaseBackend(cfg, doc, version) {
   const ts = (v) => (v && v.toMillis ? v.toMillis() : Date.now());
   const thread = (d) => { const x = d.data(); return { id: d.id, ...x, createdAt: ts(x.createdAt), updatedAt: ts(x.updatedAt), lastAt: ts(x.lastAt) }; };
   const col = F.collection(db, 'threads');
+  // Slack 알림: 같은 사이트의 /api/notify 에 무엇이 생겼는지만 알린다 (웹훅 주소는 서버에만, 실패해도 코멘트에는 영향 없음)
+  const notify = (kind, id, rid) => { try { fetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind, id, rid }), keepalive: true }).catch(() => {}); } catch (_) {} };
   return {
     mode: 'cloud', domain: '', open: true,
     onAuth(cb) { authCbs.push(cb); cb(user); },
@@ -50,14 +52,16 @@ async function firebaseBackend(cfg, doc, version) {
     async create(t) {
       const now = F.serverTimestamp();
       const ref = await F.addDoc(col, { ...t, doc, version, author: user, status: 'open', replies: 0, createdAt: now, updatedAt: now, lastAt: now });
+      notify('thread', ref.id);
       return ref.id;
     },
     async reply(id, body, role) {
       const now = F.serverTimestamp();
-      await F.addDoc(F.collection(db, 'threads', id, 'replies'), { body, role, author: user, createdAt: now });
+      const ref = await F.addDoc(F.collection(db, 'threads', id, 'replies'), { body, role, author: user, createdAt: now });
       await F.updateDoc(F.doc(db, 'threads', id), { replies: F.increment(1), lastAt: now, updatedAt: now });
+      notify('reply', id, ref.id);
     },
-    setStatus: (id, status) => F.updateDoc(F.doc(db, 'threads', id), { status, updatedAt: F.serverTimestamp(), resolvedBy: status === 'resolved' ? user : null }),
+    setStatus: async (id, status) => { await F.updateDoc(F.doc(db, 'threads', id), { status, updatedAt: F.serverTimestamp(), resolvedBy: status === 'resolved' ? user : null }); notify('status', id); },
     edit: (id, body) => F.updateDoc(F.doc(db, 'threads', id), { body, updatedAt: F.serverTimestamp(), edited: true }),
     remove: (id) => F.deleteDoc(F.doc(db, 'threads', id)),
   };
