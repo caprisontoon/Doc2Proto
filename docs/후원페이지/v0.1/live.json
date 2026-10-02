@@ -182,27 +182,33 @@
    "items": [
     {
      "label": "라이브",
-     "name": "live"
+     "name": "live",
+     "page": 8
     },
     {
      "label": "버퍼링",
-     "name": "buffer"
+     "name": "buffer",
+     "page": 17
     },
     {
      "label": "송출 끊김",
-     "name": "cut"
+     "name": "cut",
+     "page": 18
     },
     {
      "label": "재송출",
-     "name": "resume"
+     "name": "resume",
+     "page": 18
     },
     {
      "label": "방송 종료",
-     "name": "end"
+     "name": "end",
+     "page": 19
     },
     {
      "label": "오프라인",
-     "name": "offline"
+     "name": "offline",
+     "page": 7
     }
    ]
   },
@@ -212,22 +218,26 @@
     {
      "label": "999",
      "name": "viewers",
-     "value": 999
+     "value": 999,
+     "page": 20
     },
     {
      "label": "1,434",
      "name": "viewers",
-     "value": 1434
+     "value": 1434,
+     "page": 20
     },
     {
      "label": "12,345",
      "name": "viewers",
-     "value": 12345
+     "value": 12345,
+     "page": 20
     },
     {
      "label": "집계 실패",
      "name": "viewers",
-     "value": "fail"
+     "value": "fail",
+     "page": 20
     }
    ]
   },
@@ -236,11 +246,13 @@
    "items": [
     {
      "label": "운영자 제재",
-     "name": "sanction"
+     "name": "sanction",
+     "page": 22
     },
     {
      "label": "탈퇴 계정",
-     "name": "withdrawn"
+     "name": "withdrawn",
+     "page": 23
     }
    ]
   }

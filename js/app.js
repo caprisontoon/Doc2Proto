@@ -53,6 +53,19 @@
   .d2p .evs button{font-size:12px;padding:3px 8px;border-radius:7px}
   .d2p .ctl button.reset{display:none;width:100%;margin-top:10px;font-size:12.5px;padding:5px 6px;color:var(--brand);border-color:var(--brand);background:var(--brand-soft)}
   .d2p.has-live .ctl button.reset{display:block}
+  .d2p .evapp{margin-top:4px}
+  .d2p .evh{display:flex;width:100%;align-items:center;gap:6px;margin-top:8px;padding:5px 8px;border-radius:7px;font-size:12px;font-weight:800;background:var(--side);text-align:left}
+  .d2p .evh::before{content:'▾';color:var(--muted);font-size:10px}
+  .d2p .evapp.closed .evh::before{content:'▸'}
+  .d2p .evapp.cur .evh{border-color:var(--brand);color:var(--brand)}
+  .d2p .evh em{margin-left:auto;font-style:normal;font-weight:400;color:var(--muted);font-size:11px}
+  .d2p .evapp.closed .evb{display:none}
+  .d2p .evnav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:41;display:none;align-items:center;gap:6px;flex-wrap:wrap;max-width:calc(100vw - 32px);background:var(--ink);color:var(--bg);padding:8px 10px 8px 14px;border-radius:10px;box-shadow:var(--shadow);font-size:12.5px}
+  .d2p .evnav.show{display:flex}
+  .d2p .evnav .o{opacity:.7;margin-left:6px}
+  .d2p .evnav button{font-size:11.5px;padding:1px 8px;border-radius:6px;background:transparent;color:var(--bg);border-color:rgba(255,255,255,.35)}
+  .d2p .evnav button:hover{border-color:#fff}
+  .d2p .evnav .x{border:0;opacity:.7}
   .d2p .evlabel{font-size:11.5px;color:var(--muted);margin:8px 0 2px;font-weight:700}
   .d2p .ctl .live-only{display:none} .d2p.has-live .ctl .live-only{display:block}
   .d2p .toc a.sec{display:flex;gap:6px;text-decoration:none;color:var(--ink2);font-size:13.5px;padding:6px 10px;border-radius:7px;line-height:1.4}
@@ -395,17 +408,29 @@
       insp.onclick = () => { insp.classList.toggle('on'); const on = insp.classList.contains('on'); root.classList.toggle('nums', on); broadcast({ type: 'inspect', on }); };
       ctl.append(r3);
       const anyEvents = Object.values(LIVE.apps).some((a) => (a.events || []).length);
+      const multi = Object.keys(LIVE.apps).length > 1;
       for (const [name, a] of Object.entries(LIVE.apps)) {
+        if (!(a.events || []).length) continue;
+        // 앱이 여럿이면 앱별 접이식 묶음 — 지금 페이지의 앱만 펼쳐 둔다 (다른 앱 버튼을 누르면 그 페이지로 이동)
+        const wrap = el('div', 'evapp live-only'); wrap.dataset.app = name;
+        if (multi) {
+          const pages = (LIVE.frames || []).filter((f) => appOf(f) === name).map((f) => f.page);
+          const h = el('button', 'evh'); h.append(el('span', null, a.title || name), el('em', null, pages.length ? `${Math.min(...pages)}~${Math.max(...pages)}p` : ''));
+          h.onclick = () => wrap.classList.toggle('closed');
+          wrap.append(h);
+        }
+        const body = el('div', 'evb');
         for (const g of a.events || []) {
-          const lab = el('div', 'evlabel live-only', g.group); lab.dataset.app = name;
-          const box = el('div', 'evs live-only'); box.dataset.app = name;
+          const box = el('div', 'evs');
           for (const ev of g.items) {
             const b = el('button', null, ev.label);
-            b.onclick = () => { const f = current(); if (f && appOf(f.frame) === name) send(f, { type: 'event', name: ev.name, value: ev.value }); else say('이 이벤트는 해당 동작 화면이 있는 페이지에서 눌러 주세요'); };
+            b.onclick = () => runEvent(name, ev);
             box.append(b);
           }
-          ctl.append(lab, box);
+          body.append(el('div', 'evlabel', g.group), box);
         }
+        wrap.append(body);
+        ctl.append(wrap);
       }
       if (anyEvents) {
         const rs = el('button', 'reset live-only', '기본 상태로 초기화');
@@ -743,7 +768,7 @@
       f.src = src.startsWith('blob:') ? `${src}#${qs}` : `${src}${src.includes('?') ? '&' : '?'}${qs}`;
       f.setAttribute('title', '동작 화면');
       f.setAttribute('allow', 'clipboard-write');
-      S.stage.append(f); S.iframe = f;
+      S.stage.append(f); S.iframe = f; S.ready = false;
     }
     function unmountLive(S) { if (S.iframe) { S.iframe.remove(); S.iframe = null; } }
     const lio = new IntersectionObserver((ents) => {
@@ -761,7 +786,11 @@
       const S = slides.find((s) => s.iframe && s.iframe.contentWindow === e.source); if (!S) return;
       const pi = slides.indexOf(S);
       if (m.type === 'spec') showRefs(pi, m.refs, m.label);
-      else if (m.type === 'ready' && D) sendChanged(S);
+      else if (m.type === 'ready') {
+        S.ready = true;
+        if (D) sendChanged(S);
+        if (S.pending) { const msg = S.pending; S.pending = null; setTimeout(() => send(S, msg), 150); }
+      }
     });
 
     /* ---------- 하이라이트 ---------- */
@@ -919,10 +948,40 @@
     function syncEvents() {
       if (!LIVE || Object.keys(LIVE.apps).length < 2) return;
       let k = currentIdx; while (k >= 0 && !liveByPage[k]) k--;   // 동작 화면 없는 페이지는 직전 앱 유지
-      const app = k >= 0 ? appOf(liveByPage[k]) : Object.keys(LIVE.apps)[0];
+      const first = [...(LIVE.frames || [])].sort((x, y) => x.page - y.page)[0];
+      const app = k >= 0 ? appOf(liveByPage[k]) : appOf(first);   // 앞쪽(동작 화면 전) 페이지는 처음 나오는 동작 화면의 앱
       if (app === lastApp) return; lastApp = app;
-      root.querySelectorAll('.ctl [data-app]').forEach((n) => { n.style.display = n.dataset.app === app ? '' : 'none'; });
-      const rs = root.querySelector('.ctl button.reset'); if (rs) rs.style.display = (LIVE.apps[app].events || []).length ? '' : 'none';
+      ctl.querySelectorAll('.evapp').forEach((n) => { n.classList.toggle('closed', n.dataset.app !== app); n.classList.toggle('cur', n.dataset.app === app); });
+    }
+    /* ---------- 이벤트 버튼: 지금 페이지에서 실행, 없으면 대표 페이지로 이동해서 실행 ---------- */
+    const evnav = el('div', 'evnav'); let evnavT;
+    function runAt(pi, msg) {
+      const S = slides[pi]; if (!S) return;
+      if (currentIdx !== pi || !isVisible(S.sec)) goto(pi);
+      if (S.iframe && S.ready) setTimeout(() => send(S, msg), 550); else { S.pending = msg; if (!S.iframe) setTimeout(() => mountLive(S), 450); }
+    }
+    function runEvent(app, ev) {
+      const msg = { type: 'event', name: ev.name, value: ev.value };
+      const f = current();
+      if (f && appOf(f.frame) === app && isVisible(f.sec)) { send(f, msg); return; }
+      const pages = (LIVE.frames || []).filter((x) => appOf(x) === app).map((x) => x.page).sort((a, b) => a - b);
+      if (!pages.length) return;
+      const target = ev.page && pages.includes(ev.page) ? ev.page : pages[0];
+      runAt(target - 1, msg);
+      // 다른 페이지 안내 (번호를 누르면 그 페이지에서 같은 이벤트)
+      const arm = () => { clearTimeout(evnavT); evnavT = setTimeout(() => evnav.classList.remove('show'), 7000); };
+      const show = (t) => {
+        evnav.innerHTML = '';
+        evnav.append(el('span', null, `${t}p로 이동했어요 · ${ev.label}`));
+        const others = pages.filter((p) => p !== t).sort((a, b) => Math.abs(a - t) - Math.abs(b - t)).slice(0, 8).sort((a, b) => a - b);
+        if (others.length) {
+          evnav.append(el('span', 'o', '다른 페이지'));
+          for (const p of others) { const b = el('button', null, String(p)); b.title = `${p}p ${P[p - 1].label || ''}에서 실행`; b.onclick = () => { runAt(p - 1, msg); show(p); arm(); }; evnav.append(b); }
+        }
+        const x = el('button', 'x', '✕'); x.onclick = () => evnav.classList.remove('show'); evnav.append(x);
+      };
+      show(target);
+      evnav.classList.add('show'); arm();
     }
 
     /* ---------- 이동 / 해시 / 목차 ---------- */
@@ -1209,7 +1268,7 @@
     mountGhosts();
     syncEvents();
     nav.append(navTop, refs);
-    root.append(nav, main, cside, toast, navOpen, copen);
+    root.append(nav, main, cside, toast, navOpen, copen, evnav);
     document.addEventListener('keydown', (e) => {
       if (e.key !== '[' || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''))) return;
       setNav(mobile() ? !root.classList.contains('nav-show') : root.classList.contains('nav-off'));
