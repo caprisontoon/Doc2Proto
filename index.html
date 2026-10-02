@@ -21,44 +21,44 @@
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:15px/1.6 'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo','Noto Sans KR',sans-serif}
 #landing{max-width:980px;margin:0 auto;padding:40px 16px 60px}
-button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:8px 14px}
-button:hover{border-color:var(--brand)}
-button:disabled{opacity:.55;cursor:progress}
-.primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
-.primary:hover{filter:brightness(1.08)}
-.danger{color:var(--danger)} .danger:hover{border-color:var(--danger)}
-.danger.fill{background:var(--danger);border-color:var(--danger);color:#fff;font-weight:700}
-.sm{font-size:13px;padding:5px 11px;border-radius:8px}
+:where(#landing,dialog) button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:8px 14px}
+:where(#landing,dialog) button:hover{border-color:var(--brand)}
+:where(#landing,dialog) button:disabled{opacity:.55;cursor:progress}
+:where(#landing,dialog) .primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+:where(#landing,dialog) .primary:hover{filter:brightness(1.08)}
+:where(#landing,dialog) .danger{color:var(--danger)} :where(#landing,dialog) .danger:hover{border-color:var(--danger)}
+:where(#landing,dialog) .danger.fill{background:var(--danger);border-color:var(--danger);color:#fff;font-weight:700}
+:where(#landing,dialog) .sm{font-size:13px;padding:5px 11px;border-radius:8px}
 /* 헤더 */
-.top{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
-.top .t{flex:1;min-width:260px}
-h1{margin:0;font-size:26px;letter-spacing:-.01em} h1 b{color:var(--brand)}
-.sub{margin:4px 0 0;color:var(--ink2);font-size:14px}
-.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.conn{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.conn i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
-.conn.on i{background:var(--ok)} .conn.on{color:var(--ink2)}
-.conn button{font-size:12px;padding:2px 8px}
+:where(#landing,dialog) .top{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+:where(#landing,dialog) .top .t{flex:1;min-width:260px}
+:where(#landing,dialog) h1{margin:0;font-size:26px;letter-spacing:-.01em} :where(#landing,dialog) h1 b{color:var(--brand)}
+:where(#landing,dialog) .sub{margin:4px 0 0;color:var(--ink2);font-size:14px}
+:where(#landing,dialog) .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+:where(#landing,dialog) .conn{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+:where(#landing,dialog) .conn i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+:where(#landing,dialog) .conn.on i{background:var(--ok)} :where(#landing,dialog) .conn.on{color:var(--ink2)}
+:where(#landing,dialog) .conn button{font-size:12px;padding:2px 8px}
 /* 목록 */
 #doclist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
-.doc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;min-width:0}
-.doc-title{font-weight:800;color:var(--ink);text-decoration:none;font-size:16px;line-height:1.4}
-.doc-title:hover{color:var(--brand)}
-.doc-meta{color:var(--muted);font-size:12.5px}
-.doc-vers{display:flex;gap:6px;flex-wrap:wrap}
-.doc-vers a{font-size:12px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:1px 10px;text-decoration:none;display:inline-flex;gap:4px;align-items:center}
-.doc-vers a:hover{border-color:var(--brand);color:var(--brand)}
-.doc-vers a.latest{border-color:var(--brand);color:var(--brand);font-weight:700}
-.livest{font-size:12px;color:var(--muted)} .livest.on{color:#0e7a8f;font-weight:700} .livest.off{color:var(--muted)}
-.doc-vers .pend{font-size:12px;border:1px dashed var(--warn);color:var(--warn);border-radius:999px;padding:1px 10px;font-weight:700}
-.doc-vers .pend.err{border-color:var(--danger);color:var(--danger)}
-.doc-acts{display:flex;gap:6px;margin-top:auto;padding-top:6px;border-top:1px solid var(--line)}
-.doc-acts .grow{flex:1}
-.empty{grid-column:1/-1;background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:30px;text-align:center;color:var(--muted)}
+:where(#landing,dialog) .doc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;min-width:0}
+:where(#landing,dialog) .doc-title{font-weight:800;color:var(--ink);text-decoration:none;font-size:16px;line-height:1.4}
+:where(#landing,dialog) .doc-title:hover{color:var(--brand)}
+:where(#landing,dialog) .doc-meta{color:var(--muted);font-size:12.5px}
+:where(#landing,dialog) .doc-vers{display:flex;gap:6px;flex-wrap:wrap}
+:where(#landing,dialog) .doc-vers a{font-size:12px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:1px 10px;text-decoration:none;display:inline-flex;gap:4px;align-items:center}
+:where(#landing,dialog) .doc-vers a:hover{border-color:var(--brand);color:var(--brand)}
+:where(#landing,dialog) .doc-vers a.latest{border-color:var(--brand);color:var(--brand);font-weight:700}
+:where(#landing,dialog) .livest{font-size:12px;color:var(--muted)} :where(#landing,dialog) .livest.on{color:#0e7a8f;font-weight:700} :where(#landing,dialog) .livest.off{color:var(--muted)}
+:where(#landing,dialog) .doc-vers .pend{font-size:12px;border:1px dashed var(--warn);color:var(--warn);border-radius:999px;padding:1px 10px;font-weight:700}
+:where(#landing,dialog) .doc-vers .pend.err{border-color:var(--danger);color:var(--danger)}
+:where(#landing,dialog) .doc-acts{display:flex;gap:6px;margin-top:auto;padding-top:6px;border-top:1px solid var(--line)}
+:where(#landing,dialog) .doc-acts .grow{flex:1}
+:where(#landing,dialog) .empty{grid-column:1/-1;background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:30px;text-align:center;color:var(--muted)}
 /* 하단 */
-.foot{margin-top:28px;color:var(--muted);font-size:13px}
-.foot summary{cursor:pointer;color:var(--ink2)}
-.foot ol{margin:8px 0 0;padding-left:20px;line-height:1.8}
+:where(#landing,dialog) .foot{margin-top:28px;color:var(--muted);font-size:13px}
+:where(#landing,dialog) .foot summary{cursor:pointer;color:var(--ink2)}
+:where(#landing,dialog) .foot ol{margin:8px 0 0;padding-left:20px;line-height:1.8}
 code{background:var(--brand-soft);padding:1px 5px;border-radius:4px;font-size:12.5px}
 #drop{margin-top:10px;border:2px dashed var(--line);border-radius:12px;padding:22px 16px;text-align:center;cursor:pointer;background:var(--card)}
 #drop:hover,#drop.over{border-color:var(--brand);background:var(--brand-soft)}
@@ -75,14 +75,14 @@ dialog input:focus{outline:2px solid var(--brand);outline-offset:1px}
 dialog .hint{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
 dialog .btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
 dialog .msg{min-height:1.4em;font-size:13px;margin-top:10px;color:var(--danger)} dialog .msg.wait{color:var(--brand)}
-.file{border:1.5px dashed var(--line);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px}
-.file:hover,.file.over{border-color:var(--brand);background:var(--brand-soft)}
-.file b{font-weight:700} .file .nm{color:var(--ink2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.file.has{border-style:solid;border-color:var(--ok)} .file.has .nm{color:var(--ink)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.note{background:var(--brand-soft);border-radius:9px;padding:9px 11px;font-size:12.5px;color:var(--ink2);margin-top:14px;line-height:1.55}
-.radio{display:flex;flex-direction:column;gap:6px;margin-top:6px}
-.radio label{display:flex;gap:8px;align-items:center;font-weight:400;font-size:14px;margin:0;cursor:pointer}
+:where(#landing,dialog) .file{border:1.5px dashed var(--line);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px}
+:where(#landing,dialog) .file:hover,:where(#landing,dialog) .file.over{border-color:var(--brand);background:var(--brand-soft)}
+:where(#landing,dialog) .file b{font-weight:700} :where(#landing,dialog) .file .nm{color:var(--ink2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:where(#landing,dialog) .file.has{border-style:solid;border-color:var(--ok)} :where(#landing,dialog) .file.has .nm{color:var(--ink)}
+:where(#landing,dialog) .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+:where(#landing,dialog) .note{background:var(--brand-soft);border-radius:9px;padding:9px 11px;font-size:12.5px;color:var(--ink2);margin-top:14px;line-height:1.55}
+:where(#landing,dialog) .radio{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+:where(#landing,dialog) .radio label{display:flex;gap:8px;align-items:center;font-weight:400;font-size:14px;margin:0;cursor:pointer}
 @media (max-width:560px){ .two{grid-template-columns:1fr} }
 </style>
 </head>

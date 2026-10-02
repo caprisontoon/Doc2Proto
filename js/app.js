@@ -68,11 +68,15 @@
   .d2p .evnav .x{border:0;opacity:.7}
   .d2p .evlabel{font-size:11.5px;color:var(--muted);margin:8px 0 2px;font-weight:700}
   .d2p .ctl .live-only{display:none} .d2p.has-live .ctl .live-only{display:block}
-  .d2p .toc a.sec{display:flex;gap:6px;text-decoration:none;color:var(--ink2);font-size:13.5px;padding:6px 10px;border-radius:7px;line-height:1.4}
-  .d2p .toc a.sec em{font-style:normal;font-weight:700;color:var(--muted);min-width:28px;font-variant-numeric:tabular-nums}
-  .d2p .toc a.sub{padding-left:22px;font-size:13px} .d2p .toc a.sub em{min-width:30px}
-  .d2p .toc a.top{font-weight:700;color:var(--ink)}
-  .d2p .toc a.chapter{margin-top:12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .d2p .toc .tochead{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);padding:4px 10px 6px}
+  .d2p .toc a.sec{display:flex;align-items:flex-start;gap:8px;text-decoration:none;color:var(--ink2);font-size:13px;padding:5px 10px;border-radius:7px;line-height:1.45}
+  .d2p .toc a.sec > span{flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .d2p .toc a.sec em{flex:none;font-style:normal;font-weight:600;color:var(--muted);min-width:24px;font-variant-numeric:tabular-nums;font-size:12px;line-height:1.6}
+  .d2p .toc a.sub{padding-left:20px;font-size:12.5px} .d2p .toc a.sub em{min-width:30px;font-weight:400}
+  .d2p .toc a.top{font-weight:600;color:var(--ink)}
+  .d2p .toc a.sec > .lv,.d2p .toc a.sec > .tag,.d2p .toc a.sec > .cb{flex:none;margin-top:2px}
+  .d2p .toc a.chapter{margin:14px 0 2px;padding-top:12px;border-top:1px solid var(--line);border-radius:0;font-size:12px;color:var(--ink);font-weight:800}
+  .d2p .toc a.chapter:hover{border-radius:7px}
   .d2p .toc a.plain{color:var(--muted)}
   .d2p .toc a .lv{margin-left:auto;font-size:10px;font-weight:800;color:#fff;background:var(--link);border-radius:4px;padding:0 5px;align-self:center;font-style:normal}
   .d2p .toc a:hover,.d2p .toc a.on{background:var(--brand-soft);color:var(--brand)}
@@ -483,6 +487,7 @@
       return box;
     };
 
+    navTop.append(el('div', 'tochead', '목차'));
     const tocLinks = P.map((p, i) => {
       const a = el('a');
       const kind = p.kind || 'page';
