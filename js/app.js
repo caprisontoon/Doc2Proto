@@ -80,6 +80,7 @@
   .d2p .toc a.chapter:hover{border-radius:7px}
   .d2p .toc a.plain{color:var(--muted)}
   .d2p .toc .tocgrp.closed{display:none}
+  .d2p .ctl .nolive{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:8px}
   .d2p .toc a.chapter .cfold{flex:none;width:16px;height:18px;padding:0;margin:0 -2px 0 -4px;border:0;background:none;color:var(--muted);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
   .d2p .toc a.chapter .cfold::before{content:'▸'}
   .d2p .toc a.chapter.open .cfold::before{content:'▾'}
@@ -335,7 +336,7 @@
     const [WPT, HPT] = model.size || [960, 540];
     // 동작 화면: 한 문서에 여러 앱(예: 후원페이지·스튜디오·채팅)을 둘 수 있다.
     // live.json = { apps:{이름:{src,events}}, frames:[{page,rect,state,app}] }  (예전 형식 { src, events, frames } 도 지원)
-    const LIVE = model.live ? (model.live.apps ? model.live : { ...model.live, apps: { main: { src: model.live.src, events: model.live.events || [] } } }) : null;
+    const LIVE = model.live ? (model.live.apps ? model.live : { ...model.live, apps: { main: { title: model.live.title || '동작 화면', src: model.live.src, events: model.live.events || [] } } }) : null;
     const appOf = (f) => (LIVE && LIVE.apps[f && f.app] ? f.app : LIVE ? Object.keys(LIVE.apps)[0] : null);
     const liveByPage = {};
     if (LIVE) for (const f of LIVE.frames || []) liveByPage[f.page - 1] = f;
@@ -419,7 +420,7 @@
       insp.onclick = () => { insp.classList.toggle('on'); const on = insp.classList.contains('on'); root.classList.toggle('nums', on); broadcast({ type: 'inspect', on }); };
       ctl.append(r3);
       const anyEvents = Object.values(LIVE.apps).some((a) => (a.events || []).length);
-      const multi = Object.keys(LIVE.apps).length > 1;
+      const multi = true;   // 모든 기획서 같은 모양: 동작 화면(앱)마다 접이식 묶음
       // 기획서 페이지 순서(각 앱이 처음 나오는 페이지)대로 위에서부터
       const firstPage = (n) => Math.min(...(LIVE.frames || []).filter((f) => appOf(f) === n).map((f) => f.page), 1e9);
       const appOrder = Object.entries(LIVE.apps).sort((x, y) => firstPage(x[0]) - firstPage(y[0]));
@@ -453,6 +454,7 @@
         ctl.append(rs);
       }
     }
+    if (!LIVE) ctl.append(el('div', 'nolive', '아직 동작 화면이 없는 기획서예요. 번호 마커와 Description 연결, 코멘트는 그대로 쓸 수 있어요.'));
     const r2 = el('div', 'row btns'); r2.style.marginTop = '10px';
     const bShare = el('button', null, '링크 복사');
     r2.append(bShare);
@@ -981,7 +983,7 @@
     // 지금 보는 페이지의 동작 화면 앱에 맞는 이벤트 버튼만 보이게 (앱이 하나면 항상 보임)
     let lastApp;
     function syncEvents() {
-      if (!LIVE || Object.keys(LIVE.apps).length < 2) return;
+      if (!LIVE) return;
       let k = currentIdx; while (k >= 0 && !liveByPage[k]) k--;   // 동작 화면 없는 페이지는 직전 앱 유지
       const first = [...(LIVE.frames || [])].sort((x, y) => x.page - y.page)[0];
       const app = k >= 0 ? appOf(liveByPage[k]) : appOf(first);   // 앞쪽(동작 화면 전) 페이지는 처음 나오는 동작 화면의 앱
