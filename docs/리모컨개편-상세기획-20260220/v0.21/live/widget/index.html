@@ -19,6 +19,7 @@ const EMBED = q.has('embed');
 const [ST0, W0] = (q.get('state') || 'wait|165').split('|');
 const FW = +W0 || 165;
 const WIDE = FW >= 300;
+const BARE = q.has('bare');   // 모바일 웹 리모컨 안에 들어갈 때: 창 제목 없이 내용만
 const u = (n) => `calc(${n}*var(--u))`;
 
 const CSS = `
@@ -27,6 +28,8 @@ const CSS = `
 body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo','Noto Sans KR',sans-serif;-webkit-font-smoothing:antialiased}
 #frame{position:relative;width:100%;height:100%;overflow:hidden;font-size:${u(6.4)};color:var(--ink);user-select:none;-webkit-user-select:none}
 ${EMBED ? '' : 'body{background:#e9ebef}#frame{margin:0 auto;max-width:900px}'}
+${BARE ? '#win{border:0!important;background:#fff!important}#tb{display:none!important}#body{margin:0!important}' : ''}
+.adbar{background:#7b7d83;color:#fff;display:flex;align-items:center;justify-content:flex-end;gap:${u(4)};padding:${u(4)} ${u(6)};font-size:${u(6.4)}}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 input,select{font:inherit;color:inherit}
 #win{position:absolute;inset:0;background:var(--bar);border:${u(.8)} solid #5d5f65;display:flex;flex-direction:column}
@@ -349,7 +352,7 @@ function rCrew() {
 /* ---------------- 투네애드 (81~84p) ---------------- */
 function rAd() {
   const tip = `<div class="qtip"><b>광고비 지원 캐시조건</b><br>* 수수료 포함 캐시 금액입니다.<br>* 동영상 광고가 정상적으로 PLAY 완료 시 캐시가 지급됩니다</div>`;
-  if (!WIDE) return S.ads.map((a) => `<div class="acard ${a.done ? 'done' : ''}" data-act="aopen" data-id="${a.id}" data-spec="84:1">
+  if (!WIDE) return (BARE ? `<div class="adbar">광고 자동 재생 ${tg(S.adAuto, 'adauto')}</div>` : '') + S.ads.map((a) => `<div class="acard ${a.done ? 'done' : ''}" data-act="aopen" data-id="${a.id}" data-spec="84:1">
       <div class="h"><span>${esc(a.who)}</span><span style="color:var(--blue)">${won(a.cash)}</span></div><div class="c"><span><span class="th" style="display:inline-block;background:#8b8e96;color:#fff;font-size:.8em;padding:0 ${u(3)};margin-right:${u(3)}">썸네일</span>${esc(a.title)}</span><span>${a.done ? '완료' : a.play ? `재생 중 ${mmss(a.left)}` : mmss(a.len)} ${S.aopen === a.id ? '▲' : '⋮'}</span></div>
       ${S.aopen === a.id ? `<table class="det" style="width:100%;margin-top:${u(4)};border-collapse:collapse"><tr><td>타이틀</td><td>${esc(a.title)}</td></tr><tr><td>재생 시간</td><td>${a.done ? a.at : mmss(a.len)}</td></tr><tr><td>캐시</td><td>${won(a.cash)} 캐시 (수수료 포함)</td></tr></table>
         ${a.done ? '' : `<div class="bar"><button class="b-bl" data-act="aplay" data-id="${a.id}">▶ 재생</button><button class="b-rd" data-act="askip" data-id="${a.id}">⊘ SKIP</button></div>`}` : ''}</div>`).join('');
@@ -423,7 +426,7 @@ F.addEventListener('click', (e) => {
     case 'cok': S.crew.st = 'none'; render(); break;
     case 'cfy': { const f = S.cf; OV.classList.remove('on'); f && f(); break; }
     // 투네애드
-    case 'adauto': S.adAuto = !S.adAuto; renderTitle(); toast(S.adAuto ? '광고 자동 재생 ON' : '광고 자동 재생 OFF'); break;
+    case 'adauto': S.adAuto = !S.adAuto; renderTitle(); if (BARE) render(); toast(S.adAuto ? '광고 자동 재생 ON' : '광고 자동 재생 OFF'); break;
     case 'adet': if (e.target.closest('.ops')) break; adDetail(ad); break;
     case 'aopen': if (e.target.closest('.bar')) break; S.aopen = S.aopen === ad.id ? null : ad.id; render(); break;
     case 'aplay': e.stopPropagation(); OV.classList.remove('on'); playAd(ad); break;

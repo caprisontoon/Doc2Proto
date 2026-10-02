@@ -297,6 +297,132 @@
      ]
     }
    ]
+  },
+  "mobile": {
+   "title": "모바일 웹 리모컨",
+   "src": "live/mobile/index.html",
+   "size": [
+    195,
+    373
+   ],
+   "events": [
+    {
+     "group": "실행 화면",
+     "items": [
+      {
+       "label": "스플래시",
+       "name": "boot",
+       "value": "splash",
+       "page": 90
+      },
+      {
+       "label": "로그인",
+       "name": "boot",
+       "value": "login",
+       "page": 90
+      },
+      {
+       "label": "광고 팝업",
+       "name": "boot",
+       "value": "adpop",
+       "page": 91
+      },
+      {
+       "label": "점검",
+       "name": "boot",
+       "value": "maint",
+       "page": 91
+      },
+      {
+       "label": "업데이트",
+       "name": "boot",
+       "value": "update",
+       "page": 91
+      },
+      {
+       "label": "로그인 만료",
+       "name": "boot",
+       "value": "expired",
+       "page": 92
+      }
+     ]
+    },
+    {
+     "group": "리모컨 위젯 열기",
+     "items": [
+      {
+       "label": "대기 중인 후원",
+       "name": "widget",
+       "value": "wait",
+       "page": 108
+      },
+      {
+       "label": "볼륨 제어",
+       "name": "widget",
+       "value": "vol",
+       "page": 108
+      },
+      {
+       "label": "후원 사용",
+       "name": "widget",
+       "value": "use",
+       "page": 108
+      },
+      {
+       "label": "후원 알림",
+       "name": "widget",
+       "value": "alert",
+       "page": 109
+      },
+      {
+       "label": "영상 후원 제어",
+       "name": "widget",
+       "value": "video",
+       "page": 109
+      },
+      {
+       "label": "뽑기 잔여 수량",
+       "name": "widget",
+       "value": "gqty",
+       "page": 109
+      },
+      {
+       "label": "투표",
+       "name": "widget",
+       "value": "vote",
+       "page": 110
+      },
+      {
+       "label": "크루 후원",
+       "name": "widget",
+       "value": "crew",
+       "page": 111
+      },
+      {
+       "label": "투네애드",
+       "name": "widget",
+       "value": "ad",
+       "page": 112
+      }
+     ]
+    },
+    {
+     "group": "상태",
+     "items": [
+      {
+       "label": "새 후원 도착",
+       "name": "list",
+       "value": "new:all",
+       "page": 96
+      },
+      {
+       "label": "새 알림 도착",
+       "name": "notify",
+       "page": 106
+      }
+     ]
+    }
+   ]
   }
  },
  "frames": [
@@ -1036,6 +1162,292 @@
    },
    "state": "n-ad|203",
    "app": "widget"
+  },
+  {
+   "page": 86,
+   "rect": {
+    "l": 42.0,
+    "t": 22.2,
+    "w": 50.9,
+    "h": 56.0
+   },
+   "state": "web",
+   "app": "remote"
+  },
+  {
+   "page": 87,
+   "rect": {
+    "l": 16.4,
+    "t": 27.5,
+    "w": 62.2,
+    "h": 69.1
+   },
+   "state": "web-keys",
+   "app": "remote"
+  },
+  {
+   "page": 89,
+   "rect": {
+    "l": 47.1,
+    "t": 26.9,
+    "w": 19.7,
+    "h": 57.9
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 90,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "splash",
+   "app": "mobile"
+  },
+  {
+   "page": 91,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "adpop",
+   "app": "mobile"
+  },
+  {
+   "page": 92,
+   "rect": {
+    "l": 4.6,
+    "t": 21.5,
+    "w": 20.5,
+    "h": 69.3
+   },
+   "state": "expired",
+   "app": "mobile"
+  },
+  {
+   "page": 93,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 94,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 95,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "block",
+   "app": "mobile"
+  },
+  {
+   "page": 96,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "badge",
+   "app": "mobile"
+  },
+  {
+   "page": 97,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "game",
+   "app": "mobile"
+  },
+  {
+   "page": 98,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "gacha",
+   "app": "mobile"
+  },
+  {
+   "page": 99,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "gacha-check",
+   "app": "mobile"
+  },
+  {
+   "page": 100,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "gacha-qty",
+   "app": "mobile"
+  },
+  {
+   "page": 101,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "search",
+   "app": "mobile"
+  },
+  {
+   "page": 102,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "search",
+   "app": "mobile"
+  },
+  {
+   "page": 103,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "search-result",
+   "app": "mobile"
+  },
+  {
+   "page": 104,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 105,
+   "rect": {
+    "l": 4.6,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 77.7
+   },
+   "state": "set-basic",
+   "app": "mobile"
+  },
+  {
+   "page": 106,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 107,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 108,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "w-wait",
+   "app": "mobile"
+  },
+  {
+   "page": 109,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 73.4
+   },
+   "state": "w-alert",
+   "app": "mobile"
+  },
+  {
+   "page": 110,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "w-vote",
+   "app": "mobile"
+  },
+  {
+   "page": 111,
+   "rect": {
+    "l": 2.6,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 73.4
+   },
+   "state": "w-crew",
+   "app": "mobile"
+  },
+  {
+   "page": 112,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "w-ad",
+   "app": "mobile"
   }
  ]
 }

@@ -18,6 +18,7 @@ const q = new URLSearchParams(location.search || location.hash.slice(1));
 const EMBED = q.has('embed');
 const ST0 = q.get('state') || 'live';
 const MODES = { normal: [585.3, 356], desktop: [744, 362], window: [327.4, 334.8] };
+const WEB = /^web/.test(ST0);   // PC 웹 리모컨 (86·87p): 브라우저 안 — 창 분리·압정·단축키 없음
 const MODE = /^desk|^magnet/.test(ST0) ? 'desktop' : ST0 === 'window' ? 'window' : 'normal';
 const [FW, FH] = MODES[MODE];
 const DESK = MODE !== 'normal';
@@ -40,6 +41,7 @@ input,select{font:inherit;color:inherit}
 /* 메인 창 */
 #win{position:absolute;width:${u(WW)};height:${u(WH)};background:var(--cv);border:${u(.8)} solid #5c5e64;box-shadow:${DESK ? `0 ${u(2)} ${u(10)} rgba(0,0,0,.25)` : 'none'}}
 #tb{left:0;top:0;width:100%;height:${u(15)};background:var(--bar);display:flex;align-items:center;padding:0 ${u(5)};color:#fff;cursor:${DESK ? 'move' : 'default'}}
+${WEB ? `#tb{background:#dfe3ea;color:#333}#tb #bi{display:none}#tb #tbb button{color:#333}#url{flex:1;background:#fff;border-radius:${u(7)};height:${u(10)};display:flex;align-items:center;padding:0 ${u(6)};font-size:${u(5.6)};color:#444;margin-right:${u(6)}}` : ''}
 #bi{text-decoration:none;display:flex;align-items:center;gap:${u(2)};font-size:${u(7)};font-weight:700;letter-spacing:-.02em;color:#eef}
 #bi i{font-style:normal;color:#4b8bff;font-size:${u(9)};font-weight:900;line-height:1}
 #tbb{margin-left:auto;display:flex;gap:${u(5)}}
@@ -273,7 +275,8 @@ ${DESK ? `<div id="deskL" class="abs">${MODE === 'window' ? '바탕화면 — �
 <div id="win" ${MODE === 'window' || ST0 === 'magnet' ? 'style="display:none"' : ''}>
   <div id="tb" class="abs">
     <a id="bi" href="https://toon.at" target="_blank" rel="noopener" title="투네이션 BI — index 페이지 새 창"><i>+</i><i style="color:#9fc3ff">○</i><i>○</i>&nbsp;toonation</a>
-    <div id="tbb"><button id="wpin" title="압정 — 항상 맨 앞">📌</button><button data-act="wmin" title="최소화">▁</button><button data-act="wmax" title="최대화">▢</button><button data-act="wclose" title="닫기">✕</button></div>
+    ${WEB ? `<span id="url" data-spec="86:1">🔒 toon.at/widget/controller/6619cd0b79705f3dd0cdfad69355aa4c</span>` : ''}
+    <div id="tbb"><button id="wpin" title="압정 — 항상 맨 앞" ${WEB ? 'style="display:none"' : ''}>📌</button><button data-act="wmin" title="최소화">▁</button><button data-act="wmax" title="최대화">▢</button><button data-act="wclose" title="닫기">✕</button></div>
   </div>
   <div id="nb" class="abs"><span>🔈</span><span class="tx" data-spec="13:1" title="투네이션 관리자 배너시스템 연동 — 클릭 시 링크 이동">[이벤트 수상] 2025 투네이션 어워드 수상자 발표</span>
     <div id="nbr"><button id="bell" title="알림" data-spec="13:2">🔔<span class="bd"></span></button><button id="gear" title="설정" data-spec="14:1">⚙</button></div></div>
@@ -600,7 +603,7 @@ function dragTreeWidget(e, id) {
         else { const base = removeId(clone(S.tree), id); if (place(id, t, s, base)) toast(`${WG[id].name} 이동 — 빈 자리는 분할 상대 위젯이 채워요`); }
       } else if (!inWin(p)) {
         if (DESK) detach(id, p.x - off.x, p.y - 6);
-        else toast('창 분리(드레그 아웃)는 26p 바탕화면 예시에서 해 볼 수 있어요');
+        else toast(WEB ? '웹 리모컨은 창 분리가 불가능해요 — 위젯 창 분리 기능만 제외하고 클라이언트와 동일' : '창 분리(드레그 아웃)는 26p 바탕화면 예시에서 해 볼 수 있어요');
       }
       render();
     },
@@ -810,6 +813,7 @@ function renderSet() {
       <div class="tr ${S.blockBtn ? '' : 'hide'}" data-spec="14:3"><span style="flex:1">후원 차단 시 허용/거절하지 않은 영상후원 상태 유지</span>${tog(S.keepVideo, 'skeep')}</div></div>
     <div class="sec" style="border:0"><h6>언어</h6><select class="sel" id="lang"><option value="ko" ${S.lang === 'ko' ? 'selected' : ''}>한국어</option><option value="en" ${S.lang === 'en' ? 'selected' : ''}>English</option></select>
       <button class="lo" data-act="logout">로그아웃</button></div>`;
+  else if (t === 1 && WEB) pg = `<div style="font-weight:700;font-size:${u(7)}">단축키 설정</div><div data-spec="87:1" style="margin:${u(70)} auto 0;width:${u(140)};background:#f1f2f4;border-radius:${u(4)};padding:${u(14)} 0;text-align:center;color:#444">PC 버전에서만 이용할 수 있습니다.</div>`;
   else if (t === 1) pg = `
     <div style="overflow:hidden"><b style="font-size:${u(7)}">단축키 설정</b><button class="add" data-act="kadd" ${S.keys.length >= 20 ? 'disabled' : ''} data-spec="15:1">+ 단축키 추가</button></div>
     <ul class="note"><li>리모컨이 실행되는 동안에는 설정 되어있는 단축키가 우선으로 작동하여 기존 기능이 동작하지 않습니다.<br>ex) ctrl+c로 설정 시 기존 복사하기 기능이 동작하지 않음.</li><li>타 프로그램과 단축키가 중첩 될 경우 정상적으로 작동되지 않을 수 있습니다.</li></ul>
@@ -836,6 +840,7 @@ addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') { if (S.adding) cancelAdd(); else closeAll(); return; }
   if (e.target.closest && e.target.closest('input,select')) return;
+  if (WEB) return;
   const c = comboOf(e); const k = c && S.keys.find((x) => x.key === c && x.fn);
   if (k) { e.preventDefault(); runKey(k.fn, c); }
 });
@@ -1191,7 +1196,7 @@ function applyState(st) {
     case 'preset': openOv('preset'); break;
     case 'notice': openOv('noti'); break;
     case 'settings': S.setTab = 0; openOv('set'); break;
-    case 'keys': S.setTab = 1; openOv('set'); break;
+    case 'keys': case 'web-keys': S.setTab = 1; openOv('set'); break;
     case 'info': S.setTab = 2; openOv('set'); break;
     case 'add': startAdd('gacha'); break;
     case 'indicator': startAdd('gacha'); break;
