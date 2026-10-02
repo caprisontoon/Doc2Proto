@@ -1,38 +1,16 @@
 rules_version = '2';
-// Doc2Proto 코멘트 — 허용 목록(members)에 있는 Google 계정만 읽고 쓸 수 있다
+// Doc2Proto 코멘트 — 권한 없음: 로그인 없이 누구나 읽고 쓸 수 있다 (내용 길이만 확인)
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 허용 목록: members/{이메일} 문서가 있는 Google 계정만 (Firebase 콘솔에서 추가)
-    function staff() {
-      return request.auth != null
-        && request.auth.token.email_verified == true
-        && exists(/databases/$(database)/documents/members/$(request.auth.token.email));
-    }
-    function mine(d) { return d.author.uid == request.auth.uid; }
     function okBody(d) { return d.body is string && d.body.size() > 0 && d.body.size() <= 2000; }
-
-    // 내 이메일이 허용 목록에 있는지만 확인할 수 있다 (추가·삭제는 콘솔에서만)
-    match /members/{email} {
-      allow get: if request.auth != null && request.auth.token.email == email;
-    }
-
     match /threads/{id} {
-      allow read: if staff();
-      allow create: if staff() && mine(request.resource.data) && okBody(request.resource.data)
-        && request.resource.data.status == 'open' && request.resource.data.replies == 0;
-      allow update: if staff() && (
-        // 해결·다시 열기, 답글 수 갱신은 누구나
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'resolvedBy', 'replies', 'lastAt'])
-        // 본문 수정은 작성자만
-        || (mine(resource.data) && okBody(request.resource.data)
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['body', 'updatedAt', 'edited']))
-      );
-      allow delete: if staff() && mine(resource.data);
-
+      allow read: if true;
+      allow create: if okBody(request.resource.data);
+      allow update, delete: if true;
       match /replies/{rid} {
-        allow read: if staff();
-        allow create: if staff() && mine(request.resource.data) && okBody(request.resource.data);
-        allow delete: if staff() && mine(resource.data);
+        allow read: if true;
+        allow create: if okBody(request.resource.data);
+        allow delete: if true;
       }
     }
   }

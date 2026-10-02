@@ -950,14 +950,14 @@
       const firstToc = navTop.querySelector('a.sec'); navTop.insertBefore(cc, firstToc);
       function renderWho() {
         who.innerHTML = '';
-        if (!me) { const b = el('button', null, C.mode === 'demo' ? '이름 입력' : 'Google 로그인'); b.onclick = () => C.signIn().catch((e) => say('로그인하지 못했어요: ' + (e.code || e.message))); who.append(b); if (authErr) who.append(el('span', null, authErr)); return; }
+        if (!me) { const b = el('button', null, '이름 입력'); b.onclick = () => C.signIn().catch((e) => say('로그인하지 못했어요: ' + (e.code || e.message))); who.append(b); if (authErr) who.append(el('span', null, authErr)); return; }
         if (me.photo) { const im = el('img'); im.src = me.photo; im.alt = ''; who.append(im); }
         who.append(el('b', null, me.name)); who.title = me.email;
         if (noAccess) who.append(el('span', null, '· 권한 없음'));
         const sel = el('select'); sel.title = '내 역할';
         sel.append(...['역할 선택', ...ROLES].map((r, i) => { const o = el('option', null, r); o.value = i ? r : ''; o.selected = (i ? r : '') === role; return o; }));
         sel.onchange = () => { role = sel.value; try { localStorage.setItem('d2p.role', role); } catch {} };
-        const out = el('button', null, '로그아웃'); out.onclick = () => C.signOut();
+        const out = el('button', null, '이름 바꾸기'); out.title = '다른 이름으로'; out.onclick = () => C.signIn();
         who.append(sel, out);
       }
       C.onAuth((u, err) => { const was = me && me.uid; me = u; authErr = err || ''; if (err) say(err); renderWho(); if ((me && me.uid) !== was) startSub(); else { renderPins(); if (pop) refreshPop(); } });
@@ -1067,7 +1067,7 @@
         (pop.replies || []).forEach((r) => msgs.append(msg(r)));
         if (t.status === 'resolved' && t.resolvedBy) msgs.append(el('div', 'mode', `✔ ${t.resolvedBy.name} 님이 해결로 표시했어요`));
         box.append(h, msgs);
-        if (!me) { const lg = el('div', 'login'); const b = el('button', null, C.mode === 'demo' ? '이름 입력하고 답변하기' : 'Google 로그인하고 답변하기'); b.onclick = () => C.signIn(); lg.append(b); box.append(lg); return; }
+        if (!me) { const lg = el('div', 'login'); const b = el('button', null, '이름 입력하고 답변하기'); b.onclick = () => C.signIn(); lg.append(b); box.append(lg); return; }
         const rf = el('div', 'rf'); const ta = el('textarea'); ta.placeholder = '답변 남기기 (Ctrl+Enter)'; ta.value = keep; ta.maxLength = 2000;
         const bt = el('div', 'bt');
         const st = el('button', null, t.status === 'resolved' ? '다시 열기' : '✔ 해결');
@@ -1131,7 +1131,7 @@
       async function startSub() {
         if (unsub) { unsub(); unsub = null; }
         threads = []; closePop();
-        needLogin = C.mode === 'cloud' && !me; noAccess = false;
+        needLogin = false; noAccess = false;   // 로그인 없이 누구나 볼 수 있음
         renderPins();
         if (needLogin) return;
         access = C.allowed(); const ok = await access;

@@ -18,41 +18,27 @@ async function firebaseBackend(cfg, doc, version) {
   const M = await import(SDK_URL);
   const { initializeApp } = M, A = M, F = M;
   const app = initializeApp(cfg.firebase);
-  const auth = A.getAuth(app);
   const db = F.getFirestore(app);
-  const domain = cfg.domain || '';
-  let user = null;
+  // 권한 없음: 로그인 없이 이름만 입력하면 누구나 코멘트 (이름·임시 id는 이 브라우저에 기억)
+  const UKEY = 'd2p.cmt.user';
+  let user = null; try { user = JSON.parse(localStorage.getItem(UKEY) || 'null'); } catch {}
   const authCbs = [];
-  const toUser = (u) => (u ? { uid: u.uid, name: u.displayName || u.email.split('@')[0], email: u.email, photo: u.photoURL || '' } : null);
-  A.onAuthStateChanged(auth, async (u) => {
-    if (u && domain && !u.email.endsWith('@' + domain)) {   // 사내 계정만 (보안 규칙에서도 한 번 더 막는다)
-      await A.signOut(auth);
-      authCbs.forEach((cb) => cb(null, `@${domain} 계정으로 로그인해 주세요`));
-      return;
-    }
-    user = toUser(u);
-    authCbs.forEach((cb) => cb(user));
-  });
   const ts = (v) => (v && v.toMillis ? v.toMillis() : Date.now());
   const thread = (d) => { const x = d.data(); return { id: d.id, ...x, createdAt: ts(x.createdAt), updatedAt: ts(x.updatedAt), lastAt: ts(x.lastAt) }; };
   const col = F.collection(db, 'threads');
   return {
-    mode: 'cloud', domain,
+    mode: 'cloud', domain: '', open: true,
     onAuth(cb) { authCbs.push(cb); cb(user); },
     async signIn() {
-      const p = new A.GoogleAuthProvider();
-      if (domain) p.setCustomParameters({ hd: domain, prompt: 'select_account' });
-      await A.signInWithPopup(auth, p);
+      const name = (prompt('코멘트에 표시할 이름을 입력하세요', user ? user.name : '') || '').trim();
+      if (!name) return;
+      user = { uid: (user && user.uid) || 'u-' + Math.random().toString(36).slice(2, 12), name: name.slice(0, 30), email: '', photo: '' };
+      try { localStorage.setItem(UKEY, JSON.stringify(user)); } catch {}
+      authCbs.forEach((cb) => cb(user));
     },
-    signOut: () => A.signOut(auth),
+    async signOut() { user = null; try { localStorage.removeItem(UKEY); } catch {} authCbs.forEach((cb) => cb(null)); },
     me: () => user,
-    // 허용 목록에 있는지 (없으면 permission-denied)
-    // 허용 목록 확인 → true | 'missing'(목록에 이 이메일 문서가 없음) | 'rules'(보안 규칙이 예전 것이라 확인 자체가 막힘)
-    async allowed() {
-      if (!user) return false;
-      try { const d = await F.getDoc(F.doc(db, 'members', user.email)); return d.exists() ? true : 'missing'; }
-      catch (e) { console.warn('members 확인 실패', e); return e.code === 'permission-denied' ? 'rules' : 'error:' + (e.code || e.message); }
-    },
+    allowed: async () => true,
     subscribe(cb, onErr) {
       const qy = F.query(col, F.where('doc', '==', doc), F.where('version', '==', version));
       return F.onSnapshot(qy, (snap) => cb(snap.docs.map(thread)), (e) => onErr && onErr(e));
