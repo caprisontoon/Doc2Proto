@@ -36,6 +36,12 @@
   .d2p .ctl .row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
   .d2p .ctl .row:last-child{margin-bottom:0}
   .d2p .ctl b{font-size:13px}
+  .d2p .ctl .lab{display:flex;align-items:center;gap:6px}
+  .d2p .ctl{position:relative} .d2p .ctl .help{width:17px;height:17px;padding:0;border-radius:50%;font-size:11px;font-weight:800;line-height:15px;color:var(--muted);background:var(--side)}
+  .d2p .ctl .help:hover,.d2p .ctl .help.open{color:var(--brand);border-color:var(--brand)}
+  .d2p .ctl .helptip{display:none;position:absolute;left:8px;right:8px;top:42px;z-index:70;padding:10px 12px;border-radius:9px;background:var(--ink);color:var(--bg);font-size:12px;font-weight:400;line-height:1.5;text-align:left;box-shadow:var(--shadow);cursor:default}
+  .d2p .ctl .helptip p{margin:0} .d2p .ctl .helptip p + p{margin-top:6px;opacity:.85}
+  .d2p .ctl .help:hover .helptip,.d2p .ctl .help:focus-visible .helptip,.d2p .ctl .help.open .helptip{display:block}
   .d2p .ctl small{display:block;color:var(--muted);font-size:11.5px;line-height:1.45;margin:2px 0 8px}
   .d2p .sw{width:46px;height:24px;border-radius:999px;border:0;background:#b9bdc8;position:relative;padding:0;flex:none}
   .d2p .sw::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
@@ -369,14 +375,19 @@
     navTop.append(ver);
 
     const ctl = el('div', 'ctl');
-    const r1 = el('div', 'row'); r1.append(el('b', null, '인터랙션'));
+    const r1 = el('div', 'row'); const lab = el('div', 'lab'); lab.append(el('b', null, '인터랙션'));
+    const help = el('button', 'help', '?'); help.setAttribute('aria-label', '인터랙션 설명');
+    const tipBox = el('div', 'helptip'); help.append(tipBox); lab.append(help); r1.append(lab);
     const sw = el('button', 'sw on'); sw.setAttribute('aria-label', '인터랙션 모드'); r1.append(sw);
     ctl.append(r1);
-    const offHint = el('small', null, '인터랙션을 끄면 원본 기획서를 그대로 보면서 텍스트를 드래그해 복사할 수 있어요.');
-    const hint = el('small', null, LIVE
-      ? '목업 자리의 화면이 실제로 동작해요. 요소를 누르면 해당 Description이 노랗게 표시되고, 다른 페이지의 관련 기획은 오른쪽 아래에 떠요. 끄면 원본 기획서 그대로 보여요.'
-      : '번호 마커를 누르면 Description이 노랗게 표시돼요. Description을 누르면 화면 위치가 표시돼요.');
-    ctl.append(hint, offHint); offHint.style.display = 'none';
+    const HINT_ON = LIVE
+      ? '목업 자리의 화면이 실제로 동작해요. 요소를 누르면 해당 Description이 노랗게 표시되고, 다른 페이지의 관련 기획은 왼쪽 메뉴 아래에 떠요.'
+      : '번호 마커를 누르면 Description이 노랗게 표시돼요. Description을 누르면 화면 위치가 표시돼요.';
+    const HINT_OFF = '끄면 원본 기획서를 그대로 보면서 텍스트를 드래그해 복사할 수 있어요.';
+    const setHint = (on) => { tipBox.innerHTML = ''; tipBox.append(el('p', null, on ? HINT_ON : '지금은 원본 기획서 그대로 보여요. 켜면 화면이 실제로 동작해요.'), el('p', null, on ? HINT_OFF : '텍스트를 드래그해 복사할 수 있어요.')); };
+    setHint(true);
+    help.onclick = (e) => { e.stopPropagation(); help.classList.toggle('open'); };
+    document.addEventListener('click', () => help.classList.remove('open'));
     if (LIVE) {
       const r3 = el('div', 'row live-only'); r3.style.display = 'flex';
       r3.append(el('span', null, '기획 번호 표시'));
@@ -945,7 +956,7 @@
       sw.classList.toggle('on');
       const on = sw.classList.contains('on');
       root.classList.toggle('off', !on);
-      hint.style.display = on ? '' : 'none'; offHint.style.display = on ? 'none' : '';
+      setHint(on);
       if (LIVE) root.classList.toggle('live-on', on);
       if (!on) { closePanel(); clearLit(); clearActive(); }
     };
