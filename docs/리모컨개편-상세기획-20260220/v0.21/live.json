@@ -9,6 +9,47 @@
    ],
    "events": [
     {
+     "group": "실행 화면",
+     "items": [
+      {
+       "label": "스플래시",
+       "name": "boot",
+       "value": "splash",
+       "page": 30
+      },
+      {
+       "label": "로그인",
+       "name": "boot",
+       "value": "login",
+       "page": 31
+      },
+      {
+       "label": "광고 팝업",
+       "name": "boot",
+       "value": "adpop",
+       "page": 33
+      },
+      {
+       "label": "점검",
+       "name": "boot",
+       "value": "maint",
+       "page": 34
+      },
+      {
+       "label": "버전 업데이트",
+       "name": "boot",
+       "value": "update",
+       "page": 35
+      },
+      {
+       "label": "로그인 만료",
+       "name": "boot",
+       "value": "expired",
+       "page": 36
+      }
+     ]
+    },
+    {
      "group": "레이아웃",
      "items": [
       {
@@ -168,6 +209,90 @@
        "label": "검색 결과 1,000건 초과",
        "name": "bigsearch",
        "page": 49
+      }
+     ]
+    }
+   ]
+  },
+  "widget": {
+   "title": "기타 위젯",
+   "src": "live/widget/index.html",
+   "size": [
+    165,
+    450
+   ],
+   "events": [
+    {
+     "group": "대기 중인 후원",
+     "items": [
+      {
+       "label": "영상 후원 도착",
+       "name": "wadd",
+       "value": "video",
+       "page": 62
+      },
+      {
+       "label": "퀘스트 도착",
+       "name": "wadd",
+       "value": "quest",
+       "page": 65
+      },
+      {
+       "label": "럭키박스 도착",
+       "name": "wadd",
+       "value": "lucky",
+       "page": 66
+      },
+      {
+       "label": "플레이 도착",
+       "name": "wadd",
+       "value": "play",
+       "page": 67
+      },
+      {
+       "label": "남은 시간 초과",
+       "name": "timeout",
+       "page": 65
+      }
+     ]
+    },
+    {
+     "group": "뽑기 잔여 수량",
+     "items": [
+      {
+       "label": "소진형 뽑기 없음/있음",
+       "name": "nogacha",
+       "page": 73
+      }
+     ]
+    },
+    {
+     "group": "투표",
+     "items": [
+      {
+       "label": "프리셋 내용 채우기",
+       "name": "votefill",
+       "page": 77
+      }
+     ]
+    },
+    {
+     "group": "크루 후원",
+     "items": [
+      {
+       "label": "방송 설정 없음/있음",
+       "name": "crewset",
+       "page": 79
+      }
+     ]
+    },
+    {
+     "group": "투네애드",
+     "items": [
+      {
+       "label": "새 광고 도착",
+       "name": "adnew",
+       "page": 82
       }
      ]
     }
@@ -360,6 +485,83 @@
     "h": 62.0
    },
    "state": "window",
+   "app": "remote"
+  },
+  {
+   "page": 30,
+   "rect": {
+    "l": 7.8,
+    "t": 21.6,
+    "w": 61.0,
+    "h": 65.9
+   },
+   "state": "splash",
+   "app": "remote"
+  },
+  {
+   "page": 31,
+   "rect": {
+    "l": 7.8,
+    "t": 21.6,
+    "w": 61.0,
+    "h": 65.9
+   },
+   "state": "login",
+   "app": "remote"
+  },
+  {
+   "page": 32,
+   "rect": {
+    "l": 7.8,
+    "t": 21.6,
+    "w": 61.0,
+    "h": 65.9
+   },
+   "state": "account",
+   "app": "remote"
+  },
+  {
+   "page": 33,
+   "rect": {
+    "l": 7.7,
+    "t": 21.6,
+    "w": 61.1,
+    "h": 66.1
+   },
+   "state": "adpop",
+   "app": "remote"
+  },
+  {
+   "page": 34,
+   "rect": {
+    "l": 7.7,
+    "t": 21.6,
+    "w": 61.1,
+    "h": 66.1
+   },
+   "state": "maint",
+   "app": "remote"
+  },
+  {
+   "page": 35,
+   "rect": {
+    "l": 7.7,
+    "t": 21.6,
+    "w": 61.1,
+    "h": 66.1
+   },
+   "state": "update",
+   "app": "remote"
+  },
+  {
+   "page": 36,
+   "rect": {
+    "l": 7.7,
+    "t": 21.6,
+    "w": 61.1,
+    "h": 66.1
+   },
+   "state": "expired",
    "app": "remote"
   },
   {
@@ -581,6 +783,259 @@
    },
    "state": "n-search-result",
    "app": "list"
+  },
+  {
+   "page": 61,
+   "rect": {
+    "l": 38.7,
+    "t": 31.9,
+    "w": 37.9,
+    "h": 14.9
+   },
+   "state": "quick|364",
+   "app": "widget"
+  },
+  {
+   "page": 62,
+   "rect": {
+    "l": 13.6,
+    "t": 14.3,
+    "w": 17.2,
+    "h": 83.0
+   },
+   "state": "wait|165",
+   "app": "widget"
+  },
+  {
+   "page": 63,
+   "rect": {
+    "l": 13.6,
+    "t": 14.3,
+    "w": 17.2,
+    "h": 83.0
+   },
+   "state": "wait|165",
+   "app": "widget"
+  },
+  {
+   "page": 64,
+   "rect": {
+    "l": 2.2,
+    "t": 15.5,
+    "w": 17.2,
+    "h": 57.2
+   },
+   "state": "wvideo|165",
+   "app": "widget"
+  },
+  {
+   "page": 65,
+   "rect": {
+    "l": 2.2,
+    "t": 15.3,
+    "w": 17.2,
+    "h": 44.0
+   },
+   "state": "quest|165",
+   "app": "widget"
+  },
+  {
+   "page": 66,
+   "rect": {
+    "l": 2.2,
+    "t": 15.3,
+    "w": 17.2,
+    "h": 44.0
+   },
+   "state": "lucky|165",
+   "app": "widget"
+  },
+  {
+   "page": 67,
+   "rect": {
+    "l": 2.2,
+    "t": 15.3,
+    "w": 17.2,
+    "h": 44.0
+   },
+   "state": "play|165",
+   "app": "widget"
+  },
+  {
+   "page": 68,
+   "rect": {
+    "l": 50.0,
+    "t": 17.8,
+    "w": 17.2,
+    "h": 32.2
+   },
+   "state": "vol|165",
+   "app": "widget"
+  },
+  {
+   "page": 69,
+   "rect": {
+    "l": 17.3,
+    "t": 23.8,
+    "w": 17.2,
+    "h": 62.2
+   },
+   "state": "use|165",
+   "app": "widget"
+  },
+  {
+   "page": 70,
+   "rect": {
+    "l": 28.6,
+    "t": 30.0,
+    "w": 17.2,
+    "h": 62.2
+   },
+   "state": "use|165",
+   "app": "widget"
+  },
+  {
+   "page": 71,
+   "rect": {
+    "l": 27.0,
+    "t": 22.2,
+    "w": 16.9,
+    "h": 71.9
+   },
+   "state": "alert|162",
+   "app": "widget"
+  },
+  {
+   "page": 72,
+   "rect": {
+    "l": 46.6,
+    "t": 71.5,
+    "w": 11.9,
+    "h": 15.3
+   },
+   "state": "video|114",
+   "app": "widget"
+  },
+  {
+   "page": 73,
+   "rect": {
+    "l": 60.0,
+    "t": 56.3,
+    "w": 17.2,
+    "h": 36.6
+   },
+   "state": "gqty|165",
+   "app": "widget"
+  },
+  {
+   "page": 74,
+   "rect": {
+    "l": 16.8,
+    "t": 15.1,
+    "w": 17.3,
+    "h": 83.9
+   },
+   "state": "vote|166",
+   "app": "widget"
+  },
+  {
+   "page": 75,
+   "rect": {
+    "l": 29.1,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 75.1
+   },
+   "state": "vote|203",
+   "app": "widget"
+  },
+  {
+   "page": 76,
+   "rect": {
+    "l": 4.2,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 73.0
+   },
+   "state": "vote-toast|203",
+   "app": "widget"
+  },
+  {
+   "page": 77,
+   "rect": {
+    "l": 4.2,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 73.0
+   },
+   "state": "vote-filled|203",
+   "app": "widget"
+  },
+  {
+   "page": 79,
+   "rect": {
+    "l": 19.1,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 75.1
+   },
+   "state": "crew-none|203",
+   "app": "widget"
+  },
+  {
+   "page": 80,
+   "rect": {
+    "l": 10.1,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 75.1
+   },
+   "state": "crew-live|203",
+   "app": "widget"
+  },
+  {
+   "page": 81,
+   "rect": {
+    "l": 9.5,
+    "t": 24.7,
+    "w": 47.8,
+    "h": 62.1
+   },
+   "state": "ad|459",
+   "app": "widget"
+  },
+  {
+   "page": 82,
+   "rect": {
+    "l": 9.5,
+    "t": 24.7,
+    "w": 47.8,
+    "h": 62.1
+   },
+   "state": "ad|459",
+   "app": "widget"
+  },
+  {
+   "page": 83,
+   "rect": {
+    "l": 9.5,
+    "t": 24.7,
+    "w": 47.8,
+    "h": 62.1
+   },
+   "state": "ad-detail|459",
+   "app": "widget"
+  },
+  {
+   "page": 84,
+   "rect": {
+    "l": 10.4,
+    "t": 21.1,
+    "w": 21.1,
+    "h": 68.2
+   },
+   "state": "n-ad|203",
+   "app": "widget"
   }
  ]
 }

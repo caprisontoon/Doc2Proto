@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리모컨 기타 위젯 — 동작 프로토타입</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#fff}</style>
+</head>
+<body>
+<div id="frame"></div>
+<script>
+/* 투네이션 리모컨 > 기타 위젯 동작 프로토타입 (리모컨 개편 상세기획 v0.21 61~84p)
+   state = "위젯[|기획서상 창 폭 pt]" — 창 폭(pt)으로 화면을 맞추고 높이는 프레임을 채운다. 폭 300pt 이상이면 넓은 레이아웃.
+   data-spec="페이지:항목" 은 기획서 Description 항목 */
+(function () {
+'use strict';
+const q = new URLSearchParams(location.search || location.hash.slice(1));
+const EMBED = q.has('embed');
+const [ST0, W0] = (q.get('state') || 'wait|165').split('|');
+const FW = +W0 || 165;
+const WIDE = FW >= 300;
+const u = (n) => `calc(${n}*var(--u))`;
+
+const CSS = `
+:root{--u:1px;--ink:#1f2126;--sub:#7b7f8a;--line:#d9dbe0;--bar:#7b7d83;--blue:#3a8df5}
+*{box-sizing:border-box}
+body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo','Noto Sans KR',sans-serif;-webkit-font-smoothing:antialiased}
+#frame{position:relative;width:100%;height:100%;overflow:hidden;font-size:${u(6.4)};color:var(--ink);user-select:none;-webkit-user-select:none}
+${EMBED ? '' : 'body{background:#e9ebef}#frame{margin:0 auto;max-width:900px}'}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,select{font:inherit;color:inherit}
+#win{position:absolute;inset:0;background:var(--bar);border:${u(.8)} solid #5d5f65;display:flex;flex-direction:column}
+#tb{flex:none;height:${u(16)};display:flex;align-items:center;gap:${u(3)};padding:0 ${u(4)} 0 ${u(6)};color:#fff;font-weight:700;font-size:${u(7.4)}}
+#tb .bd{background:#d0141c;border-radius:${u(3)};font-size:${u(5.6)};min-width:${u(10)};height:${u(9)};display:inline-flex;align-items:center;justify-content:center;padding:0 ${u(2)}}
+#tb .st{font-size:${u(5.4)};padding:${u(1.5)} ${u(4)};border-radius:${u(2)};font-weight:700}
+#tb .r{margin-left:auto;display:flex;gap:${u(3)};align-items:center}
+#tb .r button{width:${u(10)};height:${u(10)};font-size:${u(6.5)};display:flex;align-items:center;justify-content:center;border-radius:${u(2)}}
+#tb .r button:hover{background:rgba(255,255,255,.2)}
+#tb .r .pin.on{color:#ffd23f}
+#tb .tg{width:${u(18)};height:${u(9)}}
+#tb .tg::after{width:${u(7)};height:${u(7)}}
+#tb .tg.on::after{left:${u(10)}}
+#body{flex:1;min-height:0;background:#fff;margin:0 ${u(3)} ${u(3)};overflow:auto;position:relative}
+#body::-webkit-scrollbar{width:${u(3)}}#body::-webkit-scrollbar-thumb{background:#bbb;border-radius:${u(2)}}
+#win.mini #body{display:none}#win.mini{bottom:auto;height:${u(17)}}
+.pad{padding:${u(5)}}
+/* 공통 */
+.tg{display:inline-block;width:${u(20)};height:${u(10)};border-radius:${u(5)};background:#c4c6cc;position:relative;cursor:pointer;flex:none;vertical-align:middle}
+.tg::after{content:'';position:absolute;left:${u(1.2)};top:${u(1.2)};width:${u(7.6)};height:${u(7.6)};border-radius:50%;background:#fff;transition:left .15s}
+.tg.on{background:#1b1c20}.tg.on::after{left:${u(11.2)}}
+.tg i{position:absolute;font-style:normal;font-size:${u(4.4)};font-weight:700;top:${u(2.4)}}
+.tg.on i{left:${u(2.5)};color:#fff}.tg:not(.on) i{right:${u(2)};color:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:${u(2)};font-weight:700;color:#fff;padding:${u(4)} ${u(6)}}
+.b-dk{background:#55585f}.b-gy{background:#b5b8bf}.b-bk{background:#111}.b-bl{background:var(--blue)}.b-rd{background:#c8141c}.b-gr{background:#6d9a3a}.b-tl{background:#2f8a9a}.b-ol{background:#5a5530}
+.btn:disabled{opacity:.45;cursor:default}
+.toast{position:absolute;left:50%;bottom:${u(30)};transform:translateX(-50%);background:#933;color:#fff;font-size:${u(6.4)};font-weight:700;padding:${u(4)} ${u(8)};border-radius:${u(4)};z-index:90;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
+.toast.show{opacity:1}
+.toast.info{background:rgba(20,20,20,.88);font-weight:400}
+.ov{position:absolute;inset:0;z-index:60;display:none;background:rgba(0,0,0,.35)}
+.ov.on{display:block}
+.modal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92%,${u(170)});background:#fff;padding:${u(10)};text-align:center;box-shadow:0 ${u(3)} ${u(14)} rgba(0,0,0,.35)}
+.modal h4{margin:0 0 ${u(6)};font-size:${u(8)}}.modal p{margin:0 0 ${u(10)};font-size:${u(6.4)};color:#444;line-height:1.5}
+.modal .bb{display:flex;gap:${u(4)};justify-content:center}.modal .bb .btn{flex:1;max-width:${u(60)}}
+.closed{position:absolute;inset:0;background:#f3f4f7;display:none;flex-direction:column;align-items:center;justify-content:center;gap:${u(6)};z-index:80;color:#666;text-align:center;padding:${u(10)}}
+.closed.on{display:flex}
+/* 퀵 제어 */
+.qt{display:flex;gap:${u(2)};padding:${u(3)} ${u(3)} 0;background:#e9eaed}
+.qt b{flex:1;text-align:center;padding:${u(3)} 0;background:#d4d6da;font-weight:400;color:#555;cursor:pointer;border-radius:${u(1.5)} ${u(1.5)} 0 0}
+.qt b.on{background:#fff;color:#111}
+.qb{display:flex;gap:${u(5)};padding:${u(5)}}
+.qb button{flex:1;background:#33363d;color:#fff;border-radius:${u(3)};font-weight:700;font-size:${u(7.6)};padding:${u(9)} ${u(3)};border:${u(1)} solid #222}
+.qb button.on{background:#c8141c}
+/* 대기 중인 후원 */
+.card{border:${u(1)} solid #c9cbd1;margin:${u(3)};display:grid;grid-template-columns:1fr 1fr;font-size:${u(6.2)};background:#f4f5f7}
+.card>*{border-bottom:${u(.5)} solid #d9dbe0;border-right:${u(.5)} solid #d9dbe0;padding:${u(2.5)};text-align:center;display:flex;align-items:center;justify-content:center;min-height:${u(14)};background:#fff}
+.card .full{grid-column:1/3}
+.card .tp{color:#fff;font-weight:700;margin:${u(2)};padding:${u(3)} 0;border:0}
+.t-quest{background:#2d57b8}.t-lucky{background:#7a2fc0}.t-play{background:#e06a0f}.t-video{background:#4e6b2a}
+.card .nk{flex-direction:column;line-height:1.25;font-weight:700}.card .nk small{font-weight:400;color:var(--sub);font-size:.85em}
+.card .tm{font-weight:700}.card .tm.warn{color:#d0141c}
+.card .mi{color:#d0141c;font-weight:700}
+.card .th{padding:${u(2)}}
+.thumb{width:100%;aspect-ratio:16/9;max-height:${u(110)};background:linear-gradient(135deg,#3a3550,#8a6a5a);color:#fff;font-weight:900;font-size:${u(9)};display:flex;align-items:flex-end;padding:${u(5)};line-height:1.15;border-radius:${u(2)};position:relative;text-shadow:0 1px 3px #000}
+.thumb .ae{position:absolute;left:${u(4)};top:${u(4)};background:#2a2a6a;color:#a9a9ff;font-size:${u(7)};padding:${u(1)} ${u(3)};border-radius:${u(2)}}
+.card .bt{padding:${u(2)}}.card .bt .btn{width:100%;padding:${u(3.5)} 0}
+.nums{grid-column:1/3;display:flex;gap:${u(2)};padding:${u(2)}}
+.nums button{flex:1;background:#7b7d83;color:#fff;font-weight:700;padding:${u(3)} 0;border-radius:${u(1.5)}}
+.nums button.on{background:#111}.nums .sel{background:#b5b8bf}.nums .sel.ok{background:#111}
+.sub{display:flex;align-items:center;justify-content:center;height:${u(18)};border-bottom:${u(.6)} solid var(--line);font-weight:700;font-size:${u(7)};position:relative}
+.sub button{position:absolute;left:${u(4)};font-size:${u(8)}}
+.player{margin:${u(5)};position:relative}
+.player .bar{position:absolute;left:0;right:0;bottom:0;height:${u(12)};background:rgba(0,0,0,.6);display:flex;align-items:center;gap:${u(4)};padding:0 ${u(4)};color:#fff;font-size:${u(5)}}
+.player .bar i{flex:1;height:${u(1.5)};background:#666;position:relative}.player .bar i::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4%;background:#e00}
+.msgv{margin:${u(3)} ${u(6)};font-size:${u(6)};line-height:1.5}
+.row2{display:flex;gap:${u(4)};margin:${u(5)}}.row2 .btn{flex:1}
+.qbox{margin:${u(5)};background:#e8e9ec;text-align:center;padding:${u(5)};font-weight:700;font-size:${u(7)}}
+.opt{display:flex;align-items:center;gap:${u(4)};margin:${u(3)} ${u(5)};cursor:pointer}
+.opt i{width:${u(11)};height:${u(11)};border-radius:50%;border:${u(1.4)} solid #777;flex:none}
+.opt.on i{border:${u(3.5)} solid #111}
+.opt span{flex:1;background:#e8e9ec;text-align:center;padding:${u(3)} 0}
+.hint{margin:${u(3)} ${u(5)};font-weight:700}
+.chos{display:flex;gap:${u(3)};justify-content:center;margin:${u(4)} 0}.chos span{width:${u(12)};height:${u(12)};background:#e8e9ec;display:flex;align-items:center;justify-content:center}
+.draw{margin:0 ${u(5)};height:${u(55)};background:#eef0f3;border:${u(.6)} solid #ccc;display:flex;align-items:center;justify-content:center;font-size:${u(30)};color:#7fa6e0}
+.ans{margin:${u(3)} ${u(5)}}.ans .c{text-align:right;font-weight:700;margin-bottom:${u(2)}}
+.ans input{width:100%;border:${u(.8)} solid #aaa;padding:${u(3)};font-size:${u(6.4)}}
+.left{margin:${u(6)} auto ${u(3)};text-align:center;background:#eef0f3;border-radius:${u(6)};padding:${u(2)} ${u(8)};width:max-content;font-weight:700}
+/* 볼륨 */
+.vr{display:grid;grid-template-columns:${u(30)} 1fr ${u(18)};gap:${u(4)};align-items:center;margin:${u(6)} ${u(6)};font-weight:700}
+.vr input{width:100%;accent-color:#5bc4ea}.vr em{font-style:normal;font-weight:400;color:#777;font-size:.85em;text-align:right}
+/* 후원 사용·알림 */
+.master{margin:${u(5)};background:#33363d;color:#fff;border-radius:${u(3)};padding:${u(6)};display:flex;align-items:center;gap:${u(4)}}
+.master.off{background:#c8141c}
+.master b{display:block;font-size:${u(7.6)}}.master small{font-size:${u(6)};opacity:.85}
+.master .tg{margin-left:auto}
+.master .tg.on{background:#111}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(${u(40)},1fr));gap:${u(4)};padding:${u(5)}}
+.tile{background:#33363d;color:#fff;border-radius:${u(3)};padding:${u(5)} ${u(2)};display:flex;flex-direction:column;align-items:center;gap:${u(4)};font-weight:700;text-align:center;line-height:1.2;cursor:pointer}
+.tile.off{background:#8f9299}
+.tile.dis{opacity:.4;cursor:default}
+.sec{margin:${u(6)} ${u(5)} 0;font-weight:700}
+/* 투표 */
+.vbox{margin:${u(4)};border:${u(.6)} solid #ddd;border-radius:${u(3)};padding:${u(5)}}
+.vbox h6{margin:0 0 ${u(3)};font-size:${u(7)};font-weight:400;color:#333}
+.vin{width:100%;background:#f0f1f3;border:${u(.6)} solid #ddd;padding:${u(4)};font-size:${u(6.4)};outline:none}
+.vin:focus,.vin.err{border-color:#c8141c;box-shadow:0 0 0 ${u(.8)} rgba(200,20,28,.25)}
+.tm3{display:flex;gap:${u(2)};align-items:center}.tm3 label{flex:1;display:flex;align-items:center;background:#f0f1f3;border:${u(.6)} solid #ddd;padding-right:${u(3)}}.tm3 label input{border:0;background:none;width:100%;padding:${u(4)};outline:none}
+.vnote{color:#888;font-size:${u(5.4)};margin-top:${u(2)}}
+.item{display:flex;align-items:center;gap:${u(3)};border:${u(.6)} solid #ddd;margin-bottom:${u(3)};padding-left:${u(4)}}
+.item b{color:var(--blue)}.item input{flex:1;border:0;padding:${u(4)};outline:none;min-width:0}.item button{width:${u(12)};font-size:${u(8)};color:#555}
+.add{display:block;margin:${u(3)} auto 0;color:var(--blue);font-weight:700}
+.vsel{width:100%;padding:${u(4)};font-size:${u(7)};font-weight:700;border:${u(.6)} solid #ddd;background:#fff}
+.vfoot{position:sticky;bottom:0;background:#fff;padding:${u(4)};border-top:${u(.6)} solid #eee;display:flex;gap:${u(3)}}
+.vfoot .btn{flex:1;padding:${u(6)} 0}
+.vred{color:#c8141c;font-size:${u(5.4)};margin:${u(3)} ${u(5)}}
+.vt{font-weight:700;font-size:${u(7)};margin:${u(2)} 0 ${u(5)}}
+/* 크루 */
+.crt{width:100%;border-collapse:collapse;font-size:${u(6)}}
+.crt th{background:#eceef1;padding:${u(4)} ${u(2)};border:${u(.5)} solid #ccc}
+.crt td{padding:${u(4)} ${u(2)};text-align:center;border:${u(.5)} solid #ddd}
+.crew-top{display:flex;align-items:center;gap:${u(4)}}
+.crew-top .t{flex:1;font-weight:700;font-size:${u(7)};line-height:1.4}
+.crew-top a{display:block;color:#2a4ef0;text-decoration:underline;font-weight:400;font-size:${u(6.4)};cursor:pointer}
+.live{background:#555;color:#fff;font-size:${u(5)};padding:0 ${u(2)};margin-right:${u(2)}}
+.live.on{background:#d0141c}
+.ebox{background:#f0f1f3;min-height:${u(18)};padding:${u(4)};font-weight:700}
+/* 투네애드 */
+table.ad{width:100%;border-collapse:collapse;table-layout:fixed}
+.ad th{background:#f1f2f4;height:${u(18)};font-size:${u(6.4)};border-bottom:${u(.6)} solid #ccc;position:sticky;top:0;z-index:2}
+.ad td{height:${u(24)};border-top:${u(.5)} dashed #d6d8dd;text-align:center;font-size:${u(6.2)};position:relative}
+.ad td.ct{text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ad tr.r{cursor:pointer}.ad tr.r:hover{box-shadow:0 ${u(1.5)} ${u(5)} rgba(0,0,0,.25);position:relative;z-index:1;background:#fff}
+.ad tr.done td{background:#cfd0d3}
+.ad tr.play td{background:#e6f0ff}
+.ad .th{display:inline-block;background:#8b8e96;color:#fff;font-size:${u(5.2)};padding:${u(2)} ${u(4)};margin-right:${u(4)};vertical-align:middle}
+.ad .ops{display:none;gap:${u(2)};justify-content:center}
+.ad tr.r:not(.done):hover .ops{display:flex}.ad tr.r:not(.done):hover .tt{display:none}
+.op{width:${u(13)};height:${u(13)};border-radius:${u(2)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:${u(6.5)}}
+.op.p{background:#4a90f0}.op.s{background:#c41e1e}
+.qm{display:inline-flex;width:${u(9)};height:${u(9)};border-radius:50%;background:#111;color:#fff;font-size:${u(6)};align-items:center;justify-content:center;margin-left:${u(2)};cursor:help;position:relative}
+.qtip{position:absolute;left:${u(40)};top:${u(26)};background:#ddd;border:${u(.8)} solid #aaa;padding:${u(5)};font-size:${u(6)};line-height:1.5;z-index:30;display:none;text-align:left;width:${u(140)}}
+.qm:hover+.qtip,.qtip:hover{display:block}
+.det td{padding:${u(4)};border:${u(.5)} solid #ddd;font-size:${u(6.4)}}.det td:first-child{background:#eceef1;font-weight:700;width:35%}
+.acard{border-bottom:${u(.6)} solid #ddd;padding:${u(5)};cursor:pointer}
+.acard.done{background:#cfd0d3}
+.acard .h{display:flex;justify-content:space-between;font-weight:700}
+.acard .c{color:#555;margin-top:${u(2)};display:flex;justify-content:space-between}
+.acard .bar{display:flex;margin:${u(5)} ${u(-5)} ${u(-5)}}.acard .bar button{flex:1;color:#fff;font-weight:700;padding:${u(4)} 0}
+[data-chg]{outline:${u(1.4)} dashed #e08a00!important;outline-offset:${u(-1)}}
+.spec-flash{outline:${u(2)} solid #f2c94c!important;outline-offset:${u(-1)};animation:flash 1s ease 3}
+@keyframes flash{50%{outline-color:transparent}}
+.inspect [data-spec]:hover{outline:${u(1)} dashed #4a55e0;outline-offset:${u(-1)}}
+#chip{position:absolute;z-index:95;background:#4a55e0;color:#fff;font-size:${u(5.5)};padding:${u(1.5)} ${u(4)};border-radius:${u(3)};pointer-events:none;display:none;white-space:nowrap}
+`;
+document.head.insertAdjacentHTML('beforeend', `<style>${CSS}</style>`);
+
+const F = document.getElementById('frame');
+F.innerHTML = `<div id="win"><div id="tb"></div><div id="body"></div></div><div class="ov" id="ov"></div><div class="toast" id="toast"></div>
+<div class="closed" id="closed"><b>위젯을 닫았어요</b><span>Dock의 아이콘을 눌러 다시 열 수 있어요</span><button class="btn b-bk" data-act="reopen">다시 열기</button></div><div id="chip"></div>`;
+const $ = (s) => F.querySelector(s);
+const $$ = (s) => [...F.querySelectorAll(s)];
+const BODY = $('#body'), OV = $('#ov');
+let K = 1;
+function fit() { K = innerWidth / FW; document.documentElement.style.setProperty('--u', K + 'px'); }
+addEventListener('resize', fit); fit();
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const won = (n) => (+n).toLocaleString('en-US');
+const mmss = (s) => `${String(Math.floor(Math.max(0, s) / 60)).padStart(2, '0')}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
+let toastT;
+function toast(m, err) { const t = $('#toast'); t.textContent = m; t.className = 'toast show' + (err ? '' : ' info'); clearTimeout(toastT); toastT = setTimeout(() => (t.className = 'toast'), err ? 2800 : 2400); }
+const tg = (on, act, extra = '') => `<span class="tg ${on ? 'on' : ''}" data-act="${act}" ${extra}><i>${on ? 'ON' : 'OFF'}</i></span>`;
+
+const S = {};
+const TITLE = { quick: '퀵 제어', wait: '대기 중인 후원', vol: '볼륨 제어', use: '후원 사용', alert: '후원 알림', video: '영상 후원 제어', gqty: '뽑기 잔여 수량', vote: '투표', crew: '크루 후원', ad: '투네애드' };
+const kindOf = (st) => ({ wvideo: 'wait', quest: 'wait', lucky: 'wait', play: 'wait', 'play-mc': 'wait', 'vote-toast': 'vote', 'vote-filled': 'vote', 'vote-run': 'vote', 'crew-none': 'crew', 'crew-live': 'crew', 'ad-detail': 'ad', 'n-ad': 'ad', 'gqty-none': 'gqty' }[st] || st);
+
+/* ---------------- 창 ---------------- */
+function renderTitle() {
+  const k = S.kind; let extra = '';
+  if (k === 'wait') extra = `<span class="bd" data-spec="63:2">${S.wait.length}</span>`;
+  if (k === 'ad') extra = `<span class="bd" data-spec="82:1" title="집행하지 않은 광고 수">${S.ads.filter((a) => !a.done).length}</span>`;
+  if (k === 'vote' && S.vote.status !== 'idle') {
+    const st = S.vote.status, left = S.vote.end - Date.now();
+    extra = st === 'run' ? `<span class="st b-rd" data-spec="75:1">투표 진행 중 · ${hms(left)}</span>` : st === 'pause' ? `<span class="st b-tl" data-spec="75:1">투표 정지 중</span>` : `<span class="st b-ol" data-spec="75:1">예약 대기 중 · ${hms(S.vote.start - Date.now())}</span>`;
+  }
+  const right = k === 'ad' ? `<span style="font-weight:400;font-size:${u(6)}">광고 자동 재생</span>${tg(S.adAuto, 'adauto')}` : '';
+  $('#tb').innerHTML = `<span>${TITLE[k]}</span>${extra}<span class="r">${right}<button class="pin ${S.pin ? 'on' : ''}" data-act="pin" title="압정 — 분리된 창은 항상 맨 위">📌</button><button data-act="mini" title="최소화">▁</button><button data-act="close" title="닫기">✕</button></span>`;
+}
+const hms = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+function render() {
+  renderTitle();
+  const y = BODY.scrollTop;
+  BODY.innerHTML = ({ quick: rQuick, wait: rWait, vol: rVol, use: rUse, alert: rAlert, video: rVideo, gqty: rGqty, vote: rVote, crew: rCrew, ad: rAd })[S.kind]();
+  BODY.scrollTop = y;
+}
+
+/* ---------------- 퀵 제어 (61p) ---------------- */
+function rQuick() {
+  const t = ['알림', '그림', '뽑기'][S.qtab], p = S.paused[S.qtab];
+  return `<div class="qt">${['알림', '그림', '뽑기'].map((x, i) => `<b class="${S.qtab === i ? 'on' : ''}" data-act="qtab" data-i="${i}">${x}${S.paused[i] ? ' ●' : ''}</b>`).join('')}</div>
+  <div class="qb"><button class="${p ? 'on' : ''}" data-act="pause" data-spec="61:1">${p ? `▶ ${t} 일시 정지 해제` : `⏸ ${t} 일시 정지`}</button><button data-act="skip" data-spec="61:2">⏭ ${t} 스킵</button></div>`;
+}
+
+/* ---------------- 대기 중인 후원 (62~67p) ---------------- */
+const TPN = { video: '영상', quest: '퀘스트', lucky: '럭키박스', play: '플레이' };
+function rWait() {
+  if (S.view) return rWaitView();
+  if (!S.wait.length) return `<div class="pad" style="text-align:center;color:#888;margin-top:${u(30)}" data-spec="63:1">대기 중인 후원이 없어요</div>`;
+  return S.wait.map((w) => {
+    const nk = `<div class="nk">${esc(w.nick)}<small>(00loo***@gmail.com)</small></div>`;
+    const tp = `<div class="tp t-${w.t}">${TPN[w.t]}</div>`;
+    const tm = (s) => `<div class="tm ${s <= 10 ? 'warn' : ''}" data-spec="${w.t === 'quest' ? (w.acc ? '65:5' : '65:1') : w.t === 'lucky' ? '66:1' : '67:1'}">[남은 시간] ${mmss(s)}</div>`;
+    if (w.t === 'video') return `<div class="card" data-k="${w.k}">${tp}${nk}<div>[후원캐시] ${won(w.cash)}</div><div class="bt"><button class="btn b-bk" data-act="preview" data-k="${w.k}" data-spec="64:1">미리보기 ▶</button></div>
+      <div class="full th" data-spec="64:3"><div class="thumb"><span class="ae">Ae</span>요즘 유행하는<br>셀카 AI영상 만들기</div></div>
+      <div class="bt"><button class="btn b-dk" data-act="vok" data-k="${w.k}" data-spec="64:2">수락</button></div><div class="bt"><button class="btn b-gy" data-act="vno" data-k="${w.k}" data-spec="64:2">거절</button></div></div>`;
+    if (w.t === 'quest') return `<div class="card" data-k="${w.k}">${tp}${nk}<div>[성공캐시] ${won(w.cash)}</div>${tm(w.left)}<div class="full mi" data-spec="65:2">${esc(w.title)}</div>
+      ${w.acc ? `<div class="bt"><button class="btn b-dk" data-act="qok" data-k="${w.k}" data-spec="65:6">성공</button></div><div class="bt"><button class="btn b-gy" data-act="qfail" data-k="${w.k}" data-spec="65:6">실패</button></div>`
+        : `<div class="bt"><button class="btn b-dk" data-act="qacc" data-k="${w.k}" data-spec="65:3">수락</button></div><div class="bt"><button class="btn b-gy" data-act="qrej" data-k="${w.k}" data-spec="65:4">거절</button></div>`}</div>`;
+    if (w.t === 'lucky') return `<div class="card" data-k="${w.k}">${tp}${nk}<div>[성공캐시] ${won(w.cash)}</div>${tm(w.left)}
+      <div class="nums" data-spec="66:2">${[1, 2, 3, 4, 5].map((n) => `<button class="${w.pick === n ? 'on' : ''}" data-act="lpick" data-k="${w.k}" data-n="${n}">${n}</button>`).join('')}<button class="sel ${w.pick ? 'ok' : ''}" data-act="lsel" data-k="${w.k}" ${w.pick ? '' : 'disabled'}>선택</button></div></div>`;
+    return `<div class="card" data-k="${w.k}">${tp}${nk}<div>[성공캐시] ${won(w.cash)}</div>${tm(w.left)}
+      <div class="full bt"><button class="btn ${w.ch ? 'b-gy' : 'b-dk'}" data-act="pgo" data-k="${w.k}" data-spec="67:2">${w.ch ? '도전 중' : '도전'}</button></div></div>`;
+  }).join('');
+}
+function rWaitView() {
+  const w = S.wait.find((x) => x.k === S.view.k); if (!w) { S.view = null; return rWait(); }
+  if (S.view.p === 'preview') return `<div class="sub"><button data-act="back" data-spec="64:1">◀</button>영상 후원 미리보기</div>
+    <div class="player" data-spec="64:3"><div class="thumb" style="max-height:none"><span class="ae">Ae</span>요즘 유행하는<br>셀카 AI영상 만들기</div><div class="bar">▶ 🔊 0:40 / 20:35 <i></i> YouTube ⛶</div></div>
+    <div class="msgv"><b>[twitch] 00loo***@gmail.com (김종윤)</b> 님이 ${won(w.cash)}원을 후원하셨습니다.</div>
+    <div class="row2"><button class="btn b-dk" data-act="vok" data-k="${w.k}" data-spec="64:2">수락</button><button class="btn b-gy" data-act="vno" data-k="${w.k}" data-spec="64:2">거절</button></div>`;
+  // 플레이 정답 입력
+  const kind = w.kind, a = S.view;
+  let mid = '';
+  if (kind === 'mc') mid = ['서울', '부산', '대구', '인천'].map((x, i) => `<div class="opt ${a.sel === i ? 'on' : ''}" data-act="popt" data-i="${i}"><i></i><span>${x}</span></div>`).join('');
+  else mid = `${kind === 'draw' ? `<div class="hint">[힌트]</div><div class="draw">✿</div>` : `<div class="hint">[힌트]</div><div class="chos">${'ㅅㅇㅌㅂㄱㅅ'.split('').map((c) => `<span>${c}</span>`).join('')}</div>`}
+    <div class="ans"><div class="c">[글자 수 : ${kind === 'draw' ? 3 : 6}]</div><input id="pans" placeholder="정답 입력 (한글만 가능)" value="${esc(a.txt || '')}" maxlength="10"></div>`;
+  const ok = kind === 'mc' ? a.sel !== undefined : !!(a.txt || '').trim();
+  return `<div class="sub"><button data-act="back" data-spec="67:2">◀</button>플레이 후원 정답 입력</div>
+    <div class="qbox">${kind === 'mc' ? '대한민국의 수도는?' : kind === 'draw' ? '그림이 뜻하는 것은?' : '초성을 보고 맞혀 보세요'}</div>${mid}
+    <div class="left" data-spec="67:1">남은 시간 ${String(Math.floor(a.left / 60)).padStart(2, '0')}분 ${String(a.left % 60).padStart(2, '0')}초</div>
+    <div class="row2"><button class="btn b-dk" data-act="pgive">포기</button><button class="btn b-bk" data-act="psub" ${ok ? '' : 'disabled'}>정답 제출</button></div>`;
+}
+function dropW(k, msg) { S.wait = S.wait.filter((x) => x.k !== k); if (S.view && S.view.k === k) S.view = null; render(); if (msg) toast(msg); }
+
+/* ---------------- 볼륨·사용·알림·영상·잔여 (68~73p) ---------------- */
+const VOLS = ['TTS', '영상', '음성', '룰렛', '럭키박스', '플레이', '뽑기'];
+const rVol = () => `<div data-spec="68:1" style="padding-top:${u(3)}">${VOLS.map((v, i) => `<div class="vr"><span>${v}</span><input type="range" min="0" max="100" value="${S.vols[i]}" data-vol="${i}"><em>${S.vols[i]}%</em></div>`).join('')}</div>`;
+const USE = ['텍스트', '미니', '음성', '영상', '룰렛', '퀘스트', '그림', '기프트', '럭키박스', '플레이', '뽑기', '시그니처', '게임', '크루'];
+function rUse() {
+  const n = USE.filter((x) => S.use[x]).length, on = S.useAll;
+  return `<div class="master ${on ? '' : 'off'}" data-spec="70:1"><div><b>후원 기능 사용 ${on ? '중' : '중지'}</b><small>사용 중인 후원 : ${on ? n : 0}개</small></div>${tg(on, 'useall')}</div>
+  <div class="tiles" data-spec="70:2">${USE.map((x) => `<div class="tile ${S.use[x] ? '' : 'off'} ${on ? '' : 'dis'}" data-act="use" data-k="${x}">${x}${tg(S.use[x] && on, 'use', `data-k="${x}"`)}</div>`).join('')}</div>`;
+}
+const ALERTS = [['투네이션 후원 알림', ['투네이션 후원']], ['유튜브 알림', ['슈퍼챗', '멤버십']], ['치지직 알림', ['치즈 후원', '치지직 구독']], ['트위치 알림', ['비트 후원', '트위치 구독', '구독 선물', '구독 선물 개수', '레이드']], ['투네 애드 알림', ['투네 애드']]];
+const rAlert = () => `<div data-spec="71:1">${ALERTS.map(([h, xs]) => `<div class="sec">• ${h}</div><div class="tiles">${xs.map((x) => `<div class="tile ${S.al[x] ? '' : 'off'}" data-act="al" data-k="${x}">${x}${tg(S.al[x], 'al', `data-k="${x}"`)}</div>`).join('')}</div>`).join('')}</div>`;
+const rVideo = () => `<div class="tiles" style="grid-template-columns:1fr 1fr"><div class="tile ${S.vAuto ? '' : 'off'}" data-act="vauto" data-spec="72:1">자동 재생${tg(S.vAuto, 'vauto')}</div><div class="tile ${S.vVoice ? '' : 'off'}" data-act="vvoice" data-spec="72:2">음성만<br>재생${tg(S.vVoice, 'vvoice')}</div></div>`;
+const GACHA = { '크리스마스 뽑기': [['빼빼로', 1, 10], ['초콜릿', 1, 10], ['리액션', 1, 10], ['꽝', 1, 10]], '설날 뽑기': [['세뱃돈 리액션', 3, 5], ['한복 인증', 1, 3], ['꽝', 8, 20]], '심심한 날 그냥': [['노래 한 곡', 2, 10], ['꽝', 5, 10]] };
+function rGqty() {
+  if (S.noGacha) return `<div style="height:100%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${u(7)};text-align:center;padding:${u(10)}" data-spec="73:2">등록된 소진형 뽑기가 없습니다.</div>`;
+  const g = GACHA[S.gname], a = g.reduce((s, x) => s + x[1], 0), b = g.reduce((s, x) => s + x[2], 0);
+  return `<div class="pad" data-spec="73:1"><select class="vsel" id="gsel">${Object.keys(GACHA).map((n) => `<option ${n === S.gname ? 'selected' : ''}>${n}</option>`).join('')}</select>
+    <table class="crt" style="margin-top:${u(4)}"><tr><th>상품</th><th>잔여 수량</th></tr>${g.map((x) => `<tr><td style="color:#666">${x[0]}</td><td>${x[1]}/${x[2]}</td></tr>`).join('')}<tr><td><b>총 수량</b></td><td><b>${a} / ${b}</b></td></tr></table></div>`;
+}
+
+/* ---------------- 투표 (74~78p) ---------------- */
+const PRESETS = { '프리미어리그 우승팀은?': { h: 0, m: 30, s: 0, cash: 1000, free: 0, items: ['맨시티', '아스날', '리버풀'] }, '오늘 점심 뭐 먹지?': { h: 0, m: 10, s: 0, cash: 1000, free: 1, items: ['치킨', '피자', '국밥'] }, '심심한 날 그냥': { h: 0, m: 5, s: 0, cash: 2000, free: 0, items: ['노래', '게임'] } };
+function rVote() {
+  const v = S.vote, run = v.status !== 'idle', d = (x) => (run ? 'disabled' : '');
+  const dt = (t) => new Date(t).toLocaleString('sv-SE').replace('T', ' ');
+  const foot = v.status === 'idle' ? `<button class="btn b-bl" data-act="vstart" data-spec="76:1 77:1">투표 시작</button>`
+    : `<button class="btn b-bl" data-act="vedit" data-spec="77:1">시간 수정</button>${v.status === 'run' ? `<button class="btn b-tl" data-act="vpause" data-spec="77:1">투표 정지</button>` : v.status === 'pause' ? `<button class="btn b-tl" data-act="vresume" data-spec="77:1">투표 재개</button>` : `<button class="btn b-ol" disabled data-spec="77:1">예약 대기 중</button>`}<button class="btn b-rd" data-act="vend" data-spec="77:1">투표 종료</button>`;
+  return `<div class="vbox" style="padding:0;border:0" data-spec="75:3"><select class="vsel" id="vpre" ${d()}><option value="">투표 프리셋 설정</option>${Object.keys(PRESETS).map((n) => `<option ${v.name === n && v.preset ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+  <div class="vbox"><h6>투표 이름</h6><input class="vin" id="vname" maxlength="120" placeholder="투표 이름을 입력해 주세요." value="${esc(v.name)}" ${d()} data-spec="78:1">
+    <h6 style="margin-top:${u(6)}" data-spec="75:6">투표 시간</h6><div class="tm3" data-spec="75:6 78:2">${[['h', '시간'], ['m', '분'], ['s', '초']].map(([k, t], i) => `${i ? ':' : ''}<label><input id="v${k}" inputmode="numeric" maxlength="2" value="${String(v[k]).padStart(2, '0')}" ${d()}>${t}</label>`).join('')}</div>
+    <h6 style="margin-top:${u(6)}" data-spec="75:7">투표 금액</h6><label class="tm3"><label><input id="vcash" inputmode="numeric" value="${v.cash}" ${d()} data-spec="78:3">캐시</label></label><div class="vnote">표 당 금액을 뜻합니다. (최소 금액 1,000 캐시)</div>
+    <h6 style="margin-top:${u(6)}">무료 투표권</h6><input class="vin" id="vfree" inputmode="numeric" value="${v.free}" ${d()} data-spec="78:4"><div class="vnote">도네이터에게 제공되는 무료 투표권의 개수를 뜻합니다.</div></div>
+  <div class="vbox" data-spec="75:4"><h6>투표 항목</h6>${v.items.map((it, i) => `<div class="item"><b>${i + 1}</b><input data-item="${i}" maxlength="10" placeholder="투표의 내용을 작성해 주세요. (10자 이내)" value="${esc(it)}" ${d()}>${i >= 2 && !run ? `<button data-act="vdel" data-i="${i}" title="항목 삭제">✕</button>` : '<span style="width:var(--u)"></span>'}</div>`).join('')}
+    ${run ? '' : `<button class="add" data-act="vadd" data-spec="75:4" ${v.items.length >= 20 ? 'disabled style="opacity:.4"' : ''}>✚ 항목 추가 ${v.items.length}/20</button>`}</div>
+  ${run ? `<div class="vbox"><h6>투표 시작 시간</h6><div class="vt">${dt(v.start)}</div><h6>예상 종료 시간</h6><div class="vt" data-spec="77:2">${v.status === 'pause' ? `<span style="color:#2f8a9a">투표 정지 중</span>` : dt(v.end)}</div></div>`
+    : `<div class="vbox" data-spec="75:5 76:2"><div style="display:flex;align-items:center"><h6 style="flex:1;margin:0">투표 시작 예약</h6>${tg(v.resv, 'vresv')}</div>
+      <input class="vin" type="datetime-local" id="vat" style="margin-top:${u(4)}" ${v.resv ? '' : 'disabled'} value="${v.at}" min="${new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}">
+      <div class="vnote">투표 시작 예약을 하지 않고 투표 시작 버튼을 누르면 바로 투표가 시작됩니다.</div></div>
+      <div class="vred">투표사용하기가 OFF인 경우 투표가 시작되지 않습니다. 크리에이터 페이지 > 위젯 > 투표 > 투표위젯 설정에서 투표 사용하기가 ON 상태이고, 하단의 [투표 시작] 버튼을 누르면 투표가 시작됩니다.</div>`}
+  <div class="vfoot">${foot}</div>`;
+}
+function readVote() {
+  const v = S.vote, g = (id) => $('#' + id);
+  if (!g('vname')) return;
+  v.name = g('vname').value; ['h', 'm', 's'].forEach((k) => (v[k] = g('v' + k).value.replace(/\D/g, '')));
+  v.cash = g('vcash').value.replace(/\D/g, ''); v.free = g('vfree').value.replace(/\D/g, '');
+  $$('[data-item]').forEach((x) => (v.items[+x.dataset.item] = x.value));
+  if (g('vat')) v.at = g('vat').value;
+}
+function vErr(msg, id) { toast(msg, true); const el = $('#' + id) || $('[data-item="0"]'); if (el) { el.focus(); el.classList.add('err'); el.scrollIntoView({ block: 'center' }); setTimeout(() => el.classList.remove('err'), 2500); } }
+function startVote() {
+  readVote(); const v = S.vote;
+  const name = v.name.trim(), h = +v.h, m = +v.m, s = +v.s, cash = +v.cash, free = +v.free;
+  if (!name || name.length > 100) return vErr('투표 이름은 1~100자까지 입력 가능합니다.', 'vname');
+  if ([v.h, v.m, v.s].some((x) => x === '') || m > 59 || s > 59 || h + m + s === 0) return vErr('투표 시간을 올바르게 입력해 주세요.', 'vh');
+  if (!(cash >= 1000 && cash <= 20000000)) return vErr('투표 금액은 1,000 ~ 20,000,000 캐시까지 설정 가능합니다.', 'vcash');
+  if (v.free === '' || free > 100000) return vErr('무료 투표권은 0 ~ 100,000까지 설정 가능합니다.', 'vfree');
+  if (v.items.filter((x) => x.trim()).length < 2) return vErr('투표 항목을 2개 이상 입력해 주세요.', 'x');
+  const dur = (h * 3600 + m * 60 + s) * 1000;
+  if (v.resv) {
+    const t = new Date(v.at).getTime();
+    if (!v.at || !(t > Date.now())) return vErr('투표 시작 예약 시간을 현재 시간보다 이 후로 설정해 주세요.', 'vat');
+    Object.assign(v, { status: 'resv', start: t, end: t + dur, dur }); toast('투표 예약 — 시작 시간이 되면 자동으로 진행 중으로 바뀌어요');
+  } else { Object.assign(v, { status: 'run', start: Date.now(), end: Date.now() + dur, dur }); toast('투표 시작'); }
+  render();
+}
+
+/* ---------------- 크루 후원 (79·80p) ---------------- */
+const CREW = [['대표', '팬텀하츠', 3120], ['부장', '밤산책', 2480], ['차장', '라면왕', 1990], ['대리', '초코칩', 1210], ['사원', '키위77', 860], ['사원', '열혈팬', 640], ['사원', '구독팬A', 420], ['사원', '새벽감성', 210]];
+function rCrew() {
+  const c = S.crew;
+  if (c.st === 'ended') return `<div class="pad" style="text-align:center;margin-top:${u(50)}" data-spec="80:3"><b style="font-size:${u(8)}">크루 방송이 종료되었습니다.</b><p style="color:#666">이번 방송의 기여도가 집계되었어요.</p><button class="btn b-bk" data-act="cok" data-spec="80:3">확인</button></div>`;
+  const set = c.st !== 'none', live = c.st === 'live';
+  const top = set ? `<div class="t"><span class="live ${live ? 'on' : ''}">LIVE</span>[오프오프 시즌]<br>마지막 직급대전<a data-act="clink" data-spec="79:2">방송 설정 페이지 ></a></div>`
+    : `<div class="t">방송 설정이 필요합니다.<a data-act="clink" data-spec="79:2">방송 설정 페이지 ></a></div>`;
+  const btn = live ? `<button class="btn b-rd" data-act="cend" data-spec="80:2">방송 종료</button>` : `<button class="btn ${set ? 'b-gr' : 'b-gy'}" data-act="cstart" ${set ? '' : 'disabled'} data-spec="79:4">방송 시작</button>`;
+  const rows = set ? [...CREW].map((r, i) => [...r, S.crew.score[i]]).sort((a, b) => b[3] - a[3]) : [];
+  const tot = rows.reduce((s, r) => s + r[3], 0) || 1;
+  const table = set ? `<table class="crt" data-spec="79:5 80:1"><tr>${live ? '<th>순위</th>' : ''}<th>직급</th><th>크루 명</th><th>후원점수</th><th>기여도</th></tr>${rows.map((r, i) => `<tr>${live ? `<td>${i + 1}</td>` : ''}<td>${r[0]}</td><td>${r[1]}</td><td>${won(r[3])}</td><td>${Math.round(r[3] / tot * 100)}%</td></tr>`).join('')}</table>`
+    : `<table class="crt"><tr><th>직급</th><th>크루 명</th><th>후원점수</th><th>기여도</th></tr><tr><td colspan="4" style="height:${u(120)};color:#666;line-height:1.6">등록된 크루원이 없습니다.<br>크루원 설정을 통해 크루원을 추가해 주세요.</td></tr></table>`;
+  return `<div class="vbox crew-top" data-spec="${set ? (live ? '80:1' : '79:3') : '79:1'}">${top}${btn}</div>
+    <div class="vbox"><h6>시즌 명</h6><div class="ebox">${set ? '오프오프 시즌' : ''}</div></div><div class="vbox"><h6>방송 제목</h6><div class="ebox">${set ? '마지막 직급 대전' : ''}</div></div>
+    <div class="vbox"><h6>방송 참여 크루</h6><div style="overflow-x:auto">${table}</div></div>`;
+}
+
+/* ---------------- 투네애드 (81~84p) ---------------- */
+function rAd() {
+  const tip = `<div class="qtip"><b>광고비 지원 캐시조건</b><br>* 수수료 포함 캐시 금액입니다.<br>* 동영상 광고가 정상적으로 PLAY 완료 시 캐시가 지급됩니다</div>`;
+  if (!WIDE) return S.ads.map((a) => `<div class="acard ${a.done ? 'done' : ''}" data-act="aopen" data-id="${a.id}" data-spec="84:1">
+      <div class="h"><span>${esc(a.who)}</span><span style="color:var(--blue)">${won(a.cash)}</span></div><div class="c"><span><span class="th" style="display:inline-block;background:#8b8e96;color:#fff;font-size:.8em;padding:0 ${u(3)};margin-right:${u(3)}">썸네일</span>${esc(a.title)}</span><span>${a.done ? '완료' : a.play ? `재생 중 ${mmss(a.left)}` : mmss(a.len)} ${S.aopen === a.id ? '▲' : '⋮'}</span></div>
+      ${S.aopen === a.id ? `<table class="det" style="width:100%;margin-top:${u(4)};border-collapse:collapse"><tr><td>타이틀</td><td>${esc(a.title)}</td></tr><tr><td>재생 시간</td><td>${a.done ? a.at : mmss(a.len)}</td></tr><tr><td>캐시</td><td>${won(a.cash)} 캐시 (수수료 포함)</td></tr></table>
+        ${a.done ? '' : `<div class="bar"><button class="b-bl" data-act="aplay" data-id="${a.id}">▶ 재생</button><button class="b-rd" data-act="askip" data-id="${a.id}">⊘ SKIP</button></div>`}` : ''}</div>`).join('');
+  return `<table class="ad"><thead><tr><th style="width:22%">광고주 명</th><th style="width:20%;position:relative" data-spec="82:2">후원 캐시<span class="qm">?</span>${tip}</th><th>내용</th><th style="width:18%">재생 시간</th></tr></thead><tbody>
+    ${[...S.ads.filter((a) => !a.done), ...S.ads.filter((a) => a.done)].map((a) => `<tr class="r ${a.done ? 'done' : ''} ${a.play ? 'play' : ''}" data-act="adet" data-id="${a.id}" data-spec="${a.done ? '82:4' : '82:3'}"><td><b>${esc(a.who)}</b></td><td><b>${won(a.cash)}</b></td><td class="ct"><span class="th">썸네일</span>${esc(a.title)}</td>
+      <td><span class="tt">${a.done ? '완료' : a.play ? `▶ ${mmss(a.left)}` : mmss(a.len)}</span><span class="ops"><button class="op p" data-act="aplay" data-id="${a.id}" title="재생" data-spec="82:3">▶</button><button class="op s" data-act="askip" data-id="${a.id}" title="SKIP" data-spec="82:3">⊘</button></span></td></tr>`).join('')}</tbody></table>`;
+}
+function adDetail(a) {
+  OV.innerHTML = `<div class="modal" data-spec="83:1" style="text-align:left;width:min(80%,${u(220)})"><div style="display:flex;font-weight:700;font-size:${u(7.6)};margin-bottom:${u(6)}">광고 자세히 보기<button style="margin-left:auto" data-act="ovx">✕</button></div>
+    <div class="thumb" style="max-height:${u(90)}">${esc(a.title)}</div>
+    <table class="det" style="width:100%;border-collapse:collapse;margin-top:${u(5)}"><tr><td>타이틀</td><td>${esc(a.title)}</td></tr><tr><td>재생 시간</td><td>${a.done ? `재생 완료 : ${a.at}` : mmss(a.len)}</td></tr><tr><td>캐시</td><td>${won(a.cash)} 캐시 (수수료 포함)</td></tr></table>
+    ${a.done ? '' : `<div class="row2" style="margin:${u(6)} 0 0"><button class="btn b-bl" data-act="aplay" data-id="${a.id}">▶ 재생</button><button class="btn b-rd" data-act="askip" data-id="${a.id}">⊘ SKIP</button></div>`}</div>`;
+  OV.classList.add('on');
+}
+function playAd(a) {
+  if (!a.ok) { toast('재생이 가능하지 않은 상태 입니다.', true); return; }
+  if (S.ads.some((x) => x.play)) { toast('다른 광고가 재생 중이에요'); return; }
+  a.play = true; a.left = Math.min(a.len, 8); toast('광고 재생 시작 — 데모라 8초 뒤 완료 처리돼요'); render();
+}
+
+/* ---------------- 이벤트 ---------------- */
+F.addEventListener('click', (e) => {
+  if (e.target === OV) { OV.classList.remove('on'); return; }
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  const act = a.dataset.act, k = +a.dataset.k, w = S.wait && S.wait.find((x) => x.k === k);
+  const ad = a.dataset.id && S.ads.find((x) => x.id === a.dataset.id);
+  switch (act) {
+    case 'pin': S.pin = !S.pin; renderTitle(); toast(S.pin ? '압정 on — 이 창은 항상 맨 위에 노출' : '압정 off'); break;
+    case 'mini': $('#win').classList.toggle('mini'); break;
+    case 'close': $('#closed').classList.add('on'); break;
+    case 'reopen': $('#closed').classList.remove('on'); break;
+    case 'ovx': OV.classList.remove('on'); break;
+    // 퀵 제어
+    case 'qtab': S.qtab = +a.dataset.i; render(); break;
+    case 'pause': S.paused[S.qtab] = !S.paused[S.qtab]; render(); toast(S.paused[S.qtab] ? `${['알림', '그림', '뽑기'][S.qtab]} 일시 정지 — 통합 알림창에 후원이 노출되지 않아요. Dock의 퀵 제어 아이콘도 붉게 바뀌어요` : '일시 정지 해제'); break;
+    case 'skip': toast(`통합 알림창에서 재생 중인 ${['알림', '그림', '뽑기'][S.qtab]}을(를) 스킵했어요`); break;
+    // 대기 중인 후원
+    case 'preview': S.view = { p: 'preview', k }; render(); break;
+    case 'back': S.view = null; render(); break;
+    case 'vok': dropW(k, '영상 후원 수락 — 재생 후 통합 알림 리스트에 노출'); break;
+    case 'vno': dropW(k, '영상 후원 거절 — 통합 알림 리스트에 노출'); break;
+    case 'qacc': w.acc = true; w.left = 300; render(); toast('퀘스트 수락 — 버튼이 성공/실패로 바뀌고 수행 시간이 시작돼요'); break;
+    case 'qrej': dropW(k, '퀘스트 거절 — 후원이 사라지고 통합 알림 리스트에 남지 않아요'); break;
+    case 'qok': dropW(k, `통합 알림 리스트에 '${w.title} – 성공'으로 노출`); break;
+    case 'qfail': dropW(k, `통합 알림 리스트에 '${w.title} – 실패'로 노출`); break;
+    case 'lpick': w.pick = +a.dataset.n; render(); break;
+    case 'lsel': dropW(k, `${w.pick}번 선택 — 결과(${Math.random() < .5 ? '당첨' : '꽝'})가 통합 알림 리스트에 노출`); break;
+    case 'pgo': w.ch = true; S.view = { p: 'play', k, left: w.limit }; render(); break;
+    case 'popt': S.view.sel = +a.dataset.i; render(); break;
+    case 'pgive': dropW(S.view.k, '포기 — 오답 처리되어 통합 알림 리스트에 노출'); break;
+    case 'psub': { const wv = S.wait.find((x) => x.k === S.view.k); const ok = wv.kind === 'mc' ? S.view.sel === 0 : /^(서울|사과|꽃)/.test((S.view.txt || '').trim()) || (S.view.txt || '').trim() === '소원티비공식'; dropW(S.view.k, `정답 제출 — ${ok ? '정답' : '오답'} 처리, 통합 알림 리스트에 노출`); break; }
+    // 사용·알림·영상
+    case 'useall': S.useAll = !S.useAll; render(); toast(S.useAll ? '후원 기능 사용 중' : '후원 기능 사용 중지 — 도네이터 페이지의 모든 후원 메뉴 비활성화'); break;
+    case 'use': if (!S.useAll) { toast('후원 기능 사용이 꺼져 있어요'); break; } S.use[a.dataset.k] = !S.use[a.dataset.k]; render(); toast(`${a.dataset.k} ${S.use[a.dataset.k] ? 'on — 후원페이지에 탭 노출' : 'off — 후원페이지 탭 비노출'}`); break;
+    case 'al': S.al[a.dataset.k] = !S.al[a.dataset.k]; render(); break;
+    case 'vauto': S.vAuto = !S.vAuto; render(); toast(S.vAuto ? '자동 재생 ON — 영상 후원을 바로 재생' : '자동 재생 OFF — 대기 중인 후원에서 확인 후 수락'); break;
+    case 'vvoice': S.vVoice = !S.vVoice; render(); toast(S.vVoice ? '음성만 재생 — 영상은 노출되지 않아요' : '영상과 음성 함께 재생'); break;
+    // 투표
+    case 'vadd': readVote(); if (S.vote.items.length < 20) S.vote.items.push(''); render(); { const l = $$('[data-item]').pop(); l && l.focus(); } break;
+    case 'vdel': readVote(); S.vote.items.splice(+a.dataset.i, 1); render(); break;
+    case 'vresv': readVote(); S.vote.resv = !S.vote.resv; render(); break;
+    case 'vstart': startVote(); break;
+    case 'vpause': S.vote.status = 'pause'; S.vote.rest = S.vote.end - Date.now(); render(); toast('투표 정지 — 예상 종료 시간이 "투표 정지 중"으로 바뀌어요'); break;
+    case 'vresume': S.vote.status = 'run'; S.vote.end = Date.now() + S.vote.rest; render(); toast('투표 재개'); break;
+    case 'vedit': S.vote.end += 5 * 60000; render(); toast('투표 시간 5분 연장 (데모)'); break;
+    case 'vend': S.vote.status = 'idle'; render(); toast('투표 종료'); break;
+    // 크루
+    case 'clink': toast('크리에이터 페이지의 [크루 후원 위젯 설정]으로 새 창 이동'); break;
+    case 'cstart': confirm('방송 시작', '크루 방송을 시작 하시겠습니까?', () => { S.crew.st = 'live'; render(); toast('크루 방송 시작 — 후원점수가 실시간 집계돼요'); }); break;
+    case 'cend': confirm('방송 종료', '크루 방송을 종료 하시겠습니까?', () => { S.crew.st = 'ended'; render(); }); break;
+    case 'cok': S.crew.st = 'none'; render(); break;
+    case 'cfy': { const f = S.cf; OV.classList.remove('on'); f && f(); break; }
+    // 투네애드
+    case 'adauto': S.adAuto = !S.adAuto; renderTitle(); toast(S.adAuto ? '광고 자동 재생 ON' : '광고 자동 재생 OFF'); break;
+    case 'adet': if (e.target.closest('.ops')) break; adDetail(ad); break;
+    case 'aopen': if (e.target.closest('.bar')) break; S.aopen = S.aopen === ad.id ? null : ad.id; render(); break;
+    case 'aplay': e.stopPropagation(); OV.classList.remove('on'); playAd(ad); break;
+    case 'askip': e.stopPropagation(); OV.classList.remove('on'); S.ads = S.ads.filter((x) => x !== ad); render(); toast('SKIP — 광고 재생 목록과 리스트에서 제외'); break;
+  }
+});
+function confirm(h, p, yes) { S.cf = yes; OV.innerHTML = `<div class="modal" data-spec="79:4"><h4>${h}</h4><p>${p}</p><div class="bb"><button class="btn b-gy" data-act="ovx">취소</button><button class="btn b-bk" data-act="cfy">확인</button></div></div>`; OV.classList.add('on'); }
+F.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.dataset.vol !== undefined) { S.vols[+t.dataset.vol] = +t.value; t.nextElementSibling.textContent = t.value + '%'; }
+  if (t.id === 'pans') { S.view.txt = t.value.replace(/[^ㄱ-ㅎ가-힣ㅏ-ㅣ]/g, ''); if (t.value !== S.view.txt) t.value = S.view.txt; const b = $('[data-act="psub"]'); b.disabled = !S.view.txt.trim(); }
+  if (/^v(h|m|s|cash|free)$/.test(t.id)) { const v = t.value.replace(/\D/g, ''); if (v !== t.value) { t.value = v; toast('숫자만 입력할 수 있어요'); } }
+  if (t.id === 'vname' && t.value.length > 100) toast('투표 이름은 1~100자까지 입력 가능합니다.', true);
+});
+F.addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.id === 'gsel') { S.gname = t.value; render(); }
+  if (t.id === 'vpre') { const p = PRESETS[t.value]; if (p) { Object.assign(S.vote, { name: t.value, preset: true, h: p.h, m: p.m, s: p.s, cash: p.cash, free: p.free, items: [...p.items] }); render(); toast('저장된 프리셋을 불러왔어요'); } }
+});
+// 1초 타이머: 남은 시간, 투표, 크루, 광고
+setInterval(() => {
+  let ch = false;
+  if (S.kind === 'wait') {
+    for (const w of [...S.wait]) {
+      w.left--;
+      if (w.left <= 0) {
+        if (w.t === 'quest' && w.acc) dropW(w.k, `수행 시간 초과 — '${w.title} – 실패'로 리스트에 노출`);
+        else dropW(w.k, w.t === 'lucky' ? '시간 초과 — 리스트에 \'럭키박스 – 시간초과 환불\'로 노출' : '시간 초과 — 자동 환불, 리스트에 남지 않아요');
+      }
+    }
+    if (S.view && S.view.p === 'play') { S.view.left--; if (S.view.left <= 0) dropW(S.view.k, '제한 시간 초과 — 오답 처리'); }
+    ch = !S.view || S.view.p === 'play';
+    if (ch) { // 입력 중엔 화면을 다시 그리지 않고 시간만 갱신
+      if (S.view) { const l = $('.left'); if (l) l.textContent = `남은 시간 ${String(Math.floor(S.view.left / 60)).padStart(2, '0')}분 ${String(S.view.left % 60).padStart(2, '0')}초`; }
+      else $$('.card').forEach((c) => { const w = S.wait.find((x) => x.k === +c.dataset.k); const t = c.querySelector('.tm'); if (w && t) { t.textContent = `[남은 시간] ${mmss(w.left)}`; t.classList.toggle('warn', w.left <= 10); } });
+    }
+    renderTitle();
+  }
+  if (S.kind === 'vote' && S.vote.status !== 'idle') {
+    const v = S.vote;
+    if (v.status === 'resv' && Date.now() >= v.start) { v.status = 'run'; render(); toast('예약 시간이 되어 투표가 시작됐어요'); }
+    if (v.status === 'run' && Date.now() >= v.end) { v.status = 'idle'; render(); toast('투표 시간이 끝났어요'); }
+    renderTitle();
+  }
+  if (S.kind === 'crew' && S.crew.st === 'live' && Math.random() < .5) { S.crew.score[Math.floor(Math.random() * CREW.length)] += [10, 50, 100][Math.floor(Math.random() * 3)]; if (!OV.classList.contains('on')) render(); }
+  if (S.kind === 'ad') { const a = S.ads.find((x) => x.play); if (a) { a.left--; if (a.left <= 0) { a.play = false; a.done = true; a.at = new Date().toLocaleString('sv-SE').slice(0, 16); toast('광고 집행 완료 — 행이 회색으로 바뀌어요'); } render(); } }
+}, 1000);
+
+/* ---------------- 기획서 연결 ---------------- */
+const post = (m) => { try { parent.postMessage(Object.assign({ d2p: true }, m), '*'); } catch (_) {} };
+const refsOf = (x) => x.dataset.spec.split(/\s+(?=\d+:)/);
+F.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-spec]'); if (!el) return;
+  post({ type: 'spec', refs: refsOf(el), label: (el.title || el.textContent || '').trim().slice(0, 30) });
+}, true);
+F.addEventListener('mouseover', (e) => {
+  if (!F.classList.contains('inspect')) return;
+  const el = e.target.closest('[data-spec]'), chip = $('#chip');
+  if (!el) { chip.style.display = 'none'; return; }
+  const r = el.getBoundingClientRect(), fr = F.getBoundingClientRect();
+  chip.textContent = refsOf(el).map((x) => x.replace(':', 'p ')).join(' · ');
+  chip.style.display = 'block'; chip.style.left = Math.max(0, Math.min(r.left - fr.left, fr.width - chip.offsetWidth)) + 'px'; chip.style.top = Math.max(0, r.top - fr.top - 12) + 'px';
+});
+addEventListener('message', (e) => {
+  const m = e.data; if (!m || !m.d2p) return;
+  if (m.type === 'focus') {
+    const els = $$('[data-spec]').filter((x) => refsOf(x).includes(m.ref) && x.offsetParent !== null).slice(0, 6);
+    els.forEach((x) => { x.classList.remove('spec-flash'); void x.offsetWidth; x.classList.add('spec-flash'); setTimeout(() => x.classList.remove('spec-flash'), 3200); });
+    if (els[0]) els[0].scrollIntoView({ block: 'nearest' });
+    post({ type: 'focused', ref: m.ref, count: els.length });
+  } else if (m.type === 'inspect') F.classList.toggle('inspect', !!m.on);
+  else if (m.type === 'event') runEvent(m.name, m.value);
+  else if (m.type === 'state') applyState(m.state.split('|')[0]);
+  else if (m.type === 'changed') {
+    $$('[data-chg]').forEach((x) => x.removeAttribute('data-chg'));
+    const set = new Set(m.refs || []);
+    $$('[data-spec]').forEach((x) => { if (refsOf(x).some((r) => set.has(r))) x.setAttribute('data-chg', '변경'); });
+  }
+});
+let seq = 50;
+function runEvent(name, value) {
+  switch (name) {
+    case 'wadd': if (S.kind !== 'wait') { toast('대기 중인 후원 위젯 예시에서 동작해요'); break; } S.view = null; S.wait.unshift(mkWait(value)); render(); toast(`${TPN[value]} 후원 도착 — 배지 ${S.wait.length}`); break;
+    case 'timeout': if (S.kind !== 'wait' || !S.wait.length) break; S.wait[0].left = 1; toast('첫 번째 후원의 남은 시간을 끝냈어요'); break;
+    case 'nogacha': if (S.kind !== 'gqty') break; S.noGacha = !S.noGacha; render(); break;
+    case 'votefill': if (S.kind !== 'vote') break; S.vote.status = 'idle'; Object.assign(S.vote, { name: '프리미어리그 우승팀은?', preset: true, h: '00', m: '30', s: '00', cash: '1000', free: '0', items: ['맨시티', '아스날', '리버풀'] }); render(); break;
+    case 'crewset': if (S.kind !== 'crew') break; S.crew.st = S.crew.st === 'none' ? 'set' : 'none'; render(); break;
+    case 'adnew': if (S.kind !== 'ad') break; S.ads.unshift({ id: 'a' + ++seq, who: '새 광고주', cash: 1500, title: '신규 광고 타이틀', len: 30, ok: true }); render(); toast('새 광고 도착 — 배지 +1'); break;
+  }
+}
+
+/* ---------------- 초기 상태 ---------------- */
+function mkWait(t, extra = {}) {
+  const base = { k: ++seq, t, nick: '후원닉네임후원닉…', cash: 3000, left: 120, title: '성공하면 한강 입수', limit: 60, kind: 'mc' };
+  return Object.assign(base, extra);
+}
+function applyState(st) {
+  S.kind = kindOf(st); S.view = null; S.pin = false; S.cf = null;
+  $('#win').classList.remove('mini'); $('#closed').classList.remove('on'); OV.classList.remove('on');
+  Object.assign(S, { qtab: 0, paused: [false, false, false], vols: [75, 40, 85, 70, 35, 85, 40], useAll: true, use: Object.fromEntries(USE.map((x) => [x, !['미니', '그림', '게임', '크루'].includes(x)])),
+    al: Object.fromEntries(ALERTS.flatMap((x) => x[1]).map((x) => [x, true])), vAuto: true, vVoice: false, gname: '크리스마스 뽑기', noGacha: st === 'gqty-none',
+    vote: { status: 'idle', name: '', preset: false, h: '00', m: '00', s: '00', cash: '1000', free: '0', items: ['', ''], resv: false, at: '' },
+    crew: { st: st === 'crew-none' ? 'none' : st === 'crew-live' ? 'live' : 'set', score: CREW.map((c) => c[2]) }, adAuto: true, aopen: null,
+    ads: Array.from({ length: 11 }, (_, i) => ({ id: 'a' + i, who: '광고주 명', cash: 1000, title: i === 2 ? '광고 타이틀 (집행 조건 미충족)' : '광고 타이틀', len: 30 + i * 5, ok: i !== 2, done: i >= 7, at: '2026-02-19 21:3' + (i % 10) })) });
+  const W = {
+    wait: () => [mkWait('video'), mkWait('quest'), mkWait('lucky'), mkWait('play'), mkWait('lucky', { nick: '침착맨' })],
+    wvideo: () => [mkWait('video'), mkWait('quest'), mkWait('lucky'), mkWait('play')],
+    quest: () => [mkWait('quest', { nick: '도네이터 닉네임' })],
+    lucky: () => [mkWait('lucky', { nick: '침착맨' })],
+    play: () => [mkWait('play', { nick: '도네이터닉네임', kind: 'mc' }), mkWait('play', { nick: '초성왕', kind: 'short' }), mkWait('play', { nick: '그림쟁이', kind: 'draw' })],
+  };
+  S.wait = (W[st] || W.wait)();
+  if (st === 'vote-filled' || st === 'vote-run') Object.assign(S.vote, { name: '프리미어리그 우승팀은?', preset: true, h: '00', m: '30', s: '00', cash: '1000', free: '0', items: ['맨시티', '아스날', '리버풀'] });
+  if (st === 'vote-run') Object.assign(S.vote, { status: 'run', start: Date.now(), end: Date.now() + 1800000 });
+  render();
+  if (st === 'vote-toast') setTimeout(() => startVote(), 300);
+  if (st === 'ad-detail') adDetail(S.ads[2]);
+}
+applyState(ST0);
+if (q.has('inspect')) F.classList.add('inspect');
+post({ type: 'ready' });
+})();
+</script>
+</body>
+</html>
