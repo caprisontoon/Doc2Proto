@@ -79,6 +79,12 @@
   .d2p .toc a.chapter{margin:14px 0 2px;padding-top:12px;border-top:1px solid var(--line);border-radius:0;font-size:12px;color:var(--ink);font-weight:800}
   .d2p .toc a.chapter:hover{border-radius:7px}
   .d2p .toc a.plain{color:var(--muted)}
+  .d2p .toc .tocgrp.closed{display:none}
+  .d2p .toc a.chapter .cfold{flex:none;width:16px;height:18px;padding:0;margin:0 -2px 0 -4px;border:0;background:none;color:var(--muted);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .d2p .toc a.chapter .cfold::before{content:'▸'}
+  .d2p .toc a.chapter.open .cfold::before{content:'▾'}
+  .d2p .toc a.chapter .cfold:hover{color:var(--brand)}
+  .d2p .toc a.chapter .cnt{flex:none;margin-left:auto;font-style:normal;font-weight:600;font-size:11px;color:var(--muted);align-self:center}
   .d2p .toc a .lv{margin-left:auto;font-size:10px;font-weight:800;color:#fff;background:var(--link);border-radius:4px;padding:0 5px;align-self:center;font-style:normal}
   .d2p .toc a:hover,.d2p .toc a.on{background:var(--brand-soft);color:var(--brand)}
   .d2p .toc a:hover em,.d2p .toc a.on em{color:var(--brand)}
@@ -505,6 +511,26 @@
       navTop.append(a);
       return a;
     });
+    // 간지(chapter)마다 접이식 묶음 — 처음엔 접고, 지금 보는 페이지의 묶음만 펼친다 (▸ 를 눌러 직접 열고 닫기)
+    const chapOf = [];   // 페이지 → 속한 간지 index
+    const groups = {};
+    let curChap = -1;
+    tocLinks.forEach((a, i) => {
+      if (a.classList.contains('chapter')) {
+        curChap = i;
+        const g = el('div', 'tocgrp closed'); a.after(g); groups[i] = g;
+        const n = (() => { let k = i + 1, c = 0; while (k < P.length && (P[k].kind || 'page') !== 'chapter') { c++; k++; } return c; })();
+        const t = el('button', 'cfold', ''); t.title = '펼치기 / 접기';
+        t.onclick = (e) => { e.preventDefault(); e.stopPropagation(); g.classList.toggle('closed'); a.classList.toggle('open', !g.classList.contains('closed')); };
+        a.prepend(t); if (n) a.append(el('i', 'cnt', String(n)));
+      } else if (curChap >= 0) groups[curChap].append(a);
+      chapOf[i] = curChap;
+    });
+    let openedChap = null;
+    function syncChapter(i) {
+      const c = chapOf[i]; if (c == null || c < 0 || c === openedChap) return;
+      openedChap = c; groups[c].classList.remove('closed'); tocLinks[c].classList.add('open');
+    }
 
     /* ---------- 본문 ---------- */
     const main = el('main');
@@ -997,7 +1023,7 @@
     let navLock = 0, gotoTarget = null;
     function goto(i, hsId) {
       const S = slides[i]; if (!S) return;
-      tocLinks.forEach((a, k) => a.classList.toggle('on', k === i)); currentIdx = i; syncEvents();
+      tocLinks.forEach((a, k) => a.classList.toggle('on', k === i)); currentIdx = i; syncEvents(); syncChapter(i);
       navLock = Date.now() + 900; gotoTarget = S;
       S.sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
       history.replaceState(null, '', '#s' + (i + 1));
@@ -1014,7 +1040,7 @@
       const vis = ents.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (!vis) return;
       const i = slides.findIndex((s) => s.sec === vis.target);
-      currentIdx = i; syncEvents();
+      currentIdx = i; syncEvents(); syncChapter(i);
       tocLinks.forEach((a, k) => a.classList.toggle('on', k === i));
     }, { root: main, threshold: [0.25, 0.5, 0.75] });
     slides.forEach((s) => io.observe(s.sec));
