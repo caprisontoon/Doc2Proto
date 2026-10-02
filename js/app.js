@@ -58,7 +58,8 @@
   .d2p .evh::before{content:'▾';color:var(--muted);font-size:10px}
   .d2p .evapp.closed .evh::before{content:'▸'}
   .d2p .evapp.cur .evh{border-color:var(--brand);color:var(--brand)}
-  .d2p .evh em{margin-left:auto;font-style:normal;font-weight:400;color:var(--muted);font-size:11px}
+  .d2p .evh span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .d2p .evh em{flex:none;margin-left:auto;font-style:normal;font-weight:400;color:var(--muted);font-size:11px}
   .d2p .evapp.closed .evb{display:none}
   .d2p .evnav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:41;display:none;align-items:center;gap:6px;flex-wrap:wrap;max-width:calc(100vw - 32px);background:var(--ink);color:var(--bg);padding:8px 10px 8px 14px;border-radius:10px;box-shadow:var(--shadow);font-size:12.5px}
   .d2p .evnav.show{display:flex}
@@ -413,7 +414,10 @@
       ctl.append(r3);
       const anyEvents = Object.values(LIVE.apps).some((a) => (a.events || []).length);
       const multi = Object.keys(LIVE.apps).length > 1;
-      for (const [name, a] of Object.entries(LIVE.apps)) {
+      // 기획서 페이지 순서(각 앱이 처음 나오는 페이지)대로 위에서부터
+      const firstPage = (n) => Math.min(...(LIVE.frames || []).filter((f) => appOf(f) === n).map((f) => f.page), 1e9);
+      const appOrder = Object.entries(LIVE.apps).sort((x, y) => firstPage(x[0]) - firstPage(y[0]));
+      for (const [name, a] of appOrder) {
         if (!(a.events || []).length) continue;
         // 앱이 여럿이면 앱별 접이식 묶음 — 지금 페이지의 앱만 펼쳐 둔다 (다른 앱 버튼을 누르면 그 페이지로 이동)
         const wrap = el('div', 'evapp live-only'); wrap.dataset.app = name;
