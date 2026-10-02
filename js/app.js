@@ -419,8 +419,8 @@
       const appOrder = Object.entries(LIVE.apps).sort((x, y) => firstPage(x[0]) - firstPage(y[0]));
       for (const [name, a] of appOrder) {
         if (!(a.events || []).length) continue;
-        // 앱이 여럿이면 앱별 접이식 묶음 — 지금 페이지의 앱만 펼쳐 둔다 (다른 앱 버튼을 누르면 그 페이지로 이동)
-        const wrap = el('div', 'evapp live-only'); wrap.dataset.app = name;
+        // 앱이 여럿이면 앱별 접이식 묶음 — 처음엔 모두 접어 두고, 지금 페이지의 앱은 테두리로만 표시 (다른 앱 버튼을 누르면 그 페이지로 이동)
+        const wrap = el('div', 'evapp live-only' + (multi ? ' closed' : '')); wrap.dataset.app = name;
         if (multi) {
           const pages = (LIVE.frames || []).filter((f) => appOf(f) === name).map((f) => f.page);
           const h = el('button', 'evh'); h.append(el('span', null, a.title || name), el('em', null, pages.length ? `${Math.min(...pages)}~${Math.max(...pages)}p` : ''));
@@ -960,7 +960,7 @@
       const first = [...(LIVE.frames || [])].sort((x, y) => x.page - y.page)[0];
       const app = k >= 0 ? appOf(liveByPage[k]) : appOf(first);   // 앞쪽(동작 화면 전) 페이지는 처음 나오는 동작 화면의 앱
       if (app === lastApp) return; lastApp = app;
-      ctl.querySelectorAll('.evapp').forEach((n) => { n.classList.toggle('closed', n.dataset.app !== app); n.classList.toggle('cur', n.dataset.app === app); });
+      ctl.querySelectorAll('.evapp').forEach((n) => n.classList.toggle('cur', n.dataset.app === app));   // 펼침은 사용자가 직접
     }
     /* ---------- 이벤트 버튼: 지금 페이지에서 실행, 없으면 대표 페이지로 이동해서 실행 ---------- */
     const evnav = el('div', 'evnav'); let evnavT;
