@@ -48,6 +48,7 @@
   .d2p .sw.on{background:var(--brand)} .d2p .sw.on::after{left:25px}
   .d2p .sw.sm{width:34px;height:18px} .d2p .sw.sm::after{width:12px;height:12px} .d2p .sw.sm.on::after{left:19px}
   .d2p .ctl .btns{display:flex;gap:6px}
+  .d2p .ctl.tctl{padding:10px 12px}
   .d2p .ctl .btns button{flex:1;font-size:12.5px;padding:5px 6px}
   .d2p .evs{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
   .d2p .evs button{font-size:12px;padding:3px 8px;border-radius:7px}
@@ -413,12 +414,14 @@
     setHint(true);
     help.onclick = (e) => { e.stopPropagation(); help.classList.toggle('open'); };
     document.addEventListener('click', () => help.classList.remove('open'));
+    // 인터랙션과 무관한 보기·공유 도구는 아래 별도 묶음(tools)으로
+    const tools = el('div', 'ctl tctl');
     if (LIVE) {
       const r3 = el('div', 'row live-only'); r3.style.display = 'flex';
       r3.append(el('span', null, '기획 번호 표시'));
       const insp = el('button', 'sw sm on'); r3.append(insp);
       insp.onclick = () => { insp.classList.toggle('on'); const on = insp.classList.contains('on'); root.classList.toggle('nums', on); broadcast({ type: 'inspect', on }); };
-      ctl.append(r3);
+      tools.append(r3);
       const anyEvents = Object.values(LIVE.apps).some((a) => (a.events || []).length);
       const multi = true;   // 모든 기획서 같은 모양: 동작 화면(앱)마다 접이식 묶음
       // 기획서 페이지 순서(각 앱이 처음 나오는 페이지)대로 위에서부터
@@ -455,11 +458,11 @@
       }
     }
     if (!LIVE) ctl.append(el('div', 'nolive', '아직 동작 화면이 없는 기획서예요. 번호 마커와 Description 연결, 코멘트는 그대로 쓸 수 있어요.'));
-    const r2 = el('div', 'row btns'); r2.style.marginTop = '10px';
+    const r2 = el('div', 'row btns');
     const bShare = el('button', null, '링크 복사');
     r2.append(bShare);
-    ctl.append(r2);
-    navTop.append(ctl);
+    tools.append(r2);
+    navTop.append(ctl, tools);
 
     /* ---------- 버전 비교 (diff.json) ---------- */
     const D = model.diff || null;
