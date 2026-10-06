@@ -1083,11 +1083,17 @@
       const bodyNode = (txt) => { const p = el('p'); String(txt).split(/(@[\w가-힣.]+)/).forEach((part) => p.append(part.startsWith('@') ? el('span', 'mn', part) : document.createTextNode(part))); return p; };
       // 사이드바: 로그인·역할·코멘트 달기
       const cc = el('div', 'ctl cctl');
-      const r1 = el('div', 'row'); r1.append(el('span', null, '코멘트 핀 표시'));
+      const r1 = el('div', 'row'); const clab = el('div', 'lab'); clab.append(el('span', null, '코멘트 핀 표시'));
+      // 사용법은 ? 툴팁으로 (인터랙션의 ? 와 같은 방식)
+      const chelp = el('button', 'help', '?'); chelp.setAttribute('aria-label', '코멘트 설명');
+      const ctip = el('div', 'helptip'); ctip.append(el('p', null, '기획서의 원하는 곳을 눌러 문의를 남기세요. 답변·해결은 모두가 볼 수 있어요.'), el('p', null, '핀 표시를 끄면 기획서 위의 코멘트 핀만 숨겨져요.'));
+      chelp.append(ctip); chelp.onclick = (e) => { e.stopPropagation(); chelp.classList.toggle('open'); };
+      document.addEventListener('click', () => chelp.classList.remove('open'));
+      clab.append(chelp); r1.append(clab);
       const cshow = el('button', 'sw sm on'); cshow.title = '코멘트 핀 표시'; r1.append(cshow); cc.append(r1);
       const who = el('div', 'who'); cc.append(who);
       const add = el('button', 'add', '+ 코멘트 달기'); cc.append(add);
-      const mode = el('div', 'mode', C.mode === 'demo' ? '데모 모드 — 이 브라우저에만 저장돼요 (Google Cloud 연결 전)' : '기획서의 원하는 곳을 눌러 문의를 남기세요. 답변·해결은 모두가 볼 수 있어요.'); cc.append(mode);
+      if (C.mode === 'demo') cc.append(el('div', 'mode', '데모 모드 — 이 브라우저에만 저장돼요 (Google Cloud 연결 전)'));
       // 오른쪽 사이드 메뉴 (접기 » / 펼치기 💬)
       const sh = el('div', 'sh'); sh.append(el('b', null, '💬 코멘트'));
       const cfold = el('button', null, '»'); cfold.title = '코멘트 메뉴 접기 ( ] )'; sh.append(cfold);
