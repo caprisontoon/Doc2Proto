@@ -1095,7 +1095,7 @@
       const add = el('button', 'add', '+ 코멘트 달기'); cc.append(add);
       if (C.mode === 'demo') cc.append(el('div', 'mode', '데모 모드 — 이 브라우저에만 저장돼요 (Google Cloud 연결 전)'));
       // 오른쪽 사이드 메뉴 (접기 » / 펼치기 💬)
-      const sh = el('div', 'sh'); sh.append(el('b', null, '💬 코멘트'));
+      const sh = el('div', 'sh'); sh.append(el('b', null, '코멘트'));
       const cfold = el('button', null, '»'); cfold.title = '코멘트 메뉴 접기 ( ] )'; sh.append(cfold);
       cside.append(sh, cc, clist);
       const narrow = () => matchMedia('(max-width:1180px)').matches;
