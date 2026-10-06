@@ -1069,7 +1069,7 @@
     /* ---------- 코멘트 (문의·답변) ---------- */
     const clist = el('section', 'clist');
     const cside = el('aside', 'cside');
-    const copen = el('button', 'copen', '💬 코멘트'); copen.append(el('b', null, '0')); copen.title = '코멘트 메뉴 펼치기 ( ] )';
+    const copen = el('button', 'copen', '코멘트'); copen.append(el('b', null, '0')); copen.title = '코멘트 메뉴 펼치기 ( ] )';
     async function mountComments(Cp) {
       let C; try { C = await Cp; } catch (e) { console.error(e); return; }
       if (!C) return;
@@ -1094,7 +1094,7 @@
       const who = el('div', 'who'); cc.append(who);
       const add = el('button', 'add', '+ 코멘트 달기'); cc.append(add);
       if (C.mode === 'demo') cc.append(el('div', 'mode', '데모 모드 — 이 브라우저에만 저장돼요 (Google Cloud 연결 전)'));
-      // 오른쪽 사이드 메뉴 (접기 » / 펼치기 💬)
+      // 오른쪽 사이드 메뉴 (접기 » / 펼치기 버튼)
       const sh = el('div', 'sh'); sh.append(el('b', null, '코멘트'));
       const cfold = el('button', null, '»'); cfold.title = '코멘트 메뉴 접기 ( ] )'; sh.append(cfold);
       cside.append(sh, cc, clist);
