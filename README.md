@@ -51,6 +51,15 @@
 - Slack: Slack Incoming Webhook 주소를 Vercel 환경 변수 `SLACK_WEBHOOK_URL`에 넣고 Redeploy. `api/notify.js`가 Firestore에서 방금 생긴 코멘트인지 확인한 뒤 💬 새 문의 / ↩️ 답변 / ✅ 해결 · 🔁 다시 열림을 보낸다. 알림은 웹훅을 만든 채널의 멤버가 본다
 - 사이트는 로그인 없이 공개 — 링크를 받은 사람은 누구나 보고 코멘트를 달 수 있다
 
+## claude.ai 아티팩트 버전 (Vercel 없이 사내 공유)
+
+```bash
+python3 tools/build_artifact.py <출력 폴더> --share https://claude.ai/artifact/<id>
+```
+- 출력 폴더의 `index.html`(본문)과 `d/<key>/…`, `js/…`를 Claude Code의 Artifact 도구로 올린다 (capabilities `db`, `user`(profile)). 기획서·버전 주소는 `#<key>` (claude.ai는 `#영문·숫자·-`만 넘겨줌 → `#<key>-s8`, `#<key>-p8-h3`, `#<key>-c<id>`)
+- 코멘트는 아티팩트 db(`threads`, `threads/{id}/replies`)에 claude.ai 계정 id로 저장 — 이름 입력 없음. 쓰려면 공유 권한이 **참여자(Contributor) 이상**
+- 없는 것: 웹에서 올리기·삭제·GitHub 연결, Slack 알림, PDF 빠른 미리보기 (`js/comments-artifact.mjs`, `js/main.mjs`의 `D2P_HOST==='artifact'` 분기)
+
 ## 준비물 (기획자 PC)
 
 ```bash
@@ -81,6 +90,7 @@ pip install python-pptx pymupdf
 | `js/landing.mjs`, `js/admin.mjs` | 메인 페이지 카드 + 올리기·삭제 (GitHub Git Data API) |
 | `js/app.js` | 뷰어 (스냅샷, 텍스트 층, 하이라이트, 동작 화면 iframe, 이벤트, 버전 비교, 코멘트, 딥링크) |
 | `js/comments.mjs`, `js/comments-config.js`, `vendor/firebase/` | 코멘트 저장소 어댑터 (Firestore / 데모), Firebase SDK 번들 |
+| `js/comments-artifact.mjs`, `tools/build_artifact.py` | claude.ai 아티팩트 버전: 코멘트(아티팩트 db) · 빌드 |
 | `api/notify.js` | Slack 알림 (Vercel 서버리스 함수) |
 | `firestore.rules`, `firebase.json`, `functions/` | Firestore 규칙, (대안) Firebase Functions 알림 |
 | `tools/doc2proto.py` | PPTX 분석(마커·Description 행·하위 항목·연결선·하이퍼링크·목차) + 스냅샷 + `docs/` 출력 + 자동 비교 |

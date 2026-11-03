@@ -251,6 +251,7 @@
   .d2p .cpop .m .a{display:flex;align-items:center;gap:6px;font-size:12px} .d2p .cpop .m .a b{font-size:12.5px}
   .d2p .cpop .m .a time{margin-left:auto;color:var(--muted);font-size:11px}
   .d2p .cpop .m .a .x{border:0;background:none;padding:0 2px;color:var(--muted);font-size:11px}
+  .d2p .cpop .m .a .x.sure{color:var(--hot);font-weight:700}
   .d2p .cpop .m p{margin:3px 0 0;white-space:pre-wrap;word-break:break-word}
   .d2p .cpop .m p .mn{color:var(--brand);font-weight:700}
   .d2p .rl{font-style:normal;font-size:10.5px;font-weight:800;border-radius:4px;padding:0 5px;color:#fff;background:#8a909c}
@@ -334,6 +335,23 @@
     root.innerHTML = '';
     root.className = 'd2p';
     const P = model.pages;
+    // 해시(딥링크) 형식: 웹 `#s8` `#p=8&h=3` `#c=id` / 아티팩트(opts.hashKey) `#<key>-s8` `#<key>-p8-h3` `#<key>-c<id>` (claude.ai는 #영문·숫자·- 만 넘겨준다)
+    const HK = opts.hashKey || '';
+    const H = {
+      s: (n) => (HK ? `#${HK}-s${n}` : `#s${n}`),
+      ph: (p, h) => (HK ? `#${HK}-p${p}-h${h}` : `#p=${p}&h=${h}`),
+      c: (id) => (HK ? `#${HK}-c${id}` : `#c=${id}`),
+      parse(hash) {
+        const m = HK ? new RegExp(`^#${HK}-(?:s(\\d+)|p(\\d+)-h(\\d+)|c([A-Za-z0-9]+))$`).exec(hash)
+          : /^#(?:s(\d+)|p=(\d+)(?:&h=(\d+))?|c=([\w-]+))$/.exec(hash);
+        if (!m) return null;
+        if (m[1]) return { s: +m[1] };
+        if (m[2]) return { p: +m[2], h: m[3] != null ? +m[3] : undefined };
+        return { c: m[4] };
+      },
+    };
+    const setHash = (h) => { try { history.replaceState(null, '', h); } catch (_) {} };
+    const linkOf = (h) => (opts.shareBase || location.href.split('#')[0]) + h;   // 복사할 링크 (아티팩트: claude.ai 아티팩트 주소 + #이름)
     const [WPT, HPT] = model.size || [960, 540];
     // 동작 화면: 한 문서에 여러 앱(예: 후원페이지·스튜디오·채팅)을 둘 수 있다.
     // live.json = { apps:{이름:{src,events}}, frames:[{page,rect,state,app}] }  (예전 형식 { src, events, frames } 도 지원)
@@ -507,7 +525,7 @@
       const a = el('a');
       const kind = p.kind || 'page';
       a.className = 'sec ' + (kind === 'chapter' ? 'chapter' : !p.num ? 'plain' : p.num.includes('.') ? 'sub' : 'top');
-      a.href = '#s' + (i + 1);
+      a.href = H.s(i + 1);
       if (p.num && kind !== 'chapter') a.append(el('em', null, p.num));
       a.append(el('span', null, p.label || p.title || `페이지 ${i + 1}`));
       if (liveByPage[i]) a.append(el('i', 'lv', 'LIVE'));
@@ -629,8 +647,8 @@
       const cap = el('div', 'cap');
       if (p.num) cap.append(el('b', null, p.num));
       cap.append(el('span', null, p.label || p.title || ''));
-      const lk = el('a', null, '#' + (i + 1)); lk.href = '#s' + (i + 1); lk.title = '이 페이지 링크 복사';
-      lk.onclick = (e) => { e.preventDefault(); history.replaceState(null, '', '#s' + (i + 1)); navigator.clipboard.writeText(location.href).then(() => say('페이지 링크를 복사했어요')); };
+      const lk = el('a', null, '#' + (i + 1)); lk.href = H.s(i + 1); lk.title = '이 페이지 링크 복사';
+      lk.onclick = (e) => { e.preventDefault(); setHash(H.s(i + 1)); navigator.clipboard.writeText(linkOf(H.s(i + 1))).then(() => say('페이지 링크를 복사했어요'), () => say('복사하지 못했어요')); };
       cap.append(lk);
       sec.append(cap);
       main.append(sec);
@@ -871,7 +889,7 @@
       }
       for (const b of P[pi].behaviors || []) if (b.source === 'connector' && b.rect && h.rect && Math.abs(b.rect.l - h.rect.l) < 0.5 && Math.abs(b.rect.t - h.rect.t) < 0.5) runBehavior(slides[pi], pi, b);
       if (key) focusLive(pi, `${pi + 1}:${key}`);
-      history.replaceState(null, '', `#p=${pi + 1}&h=${h.id}`);
+      setHash(H.ph(pi + 1, h.id));
     }
     // Description 클릭 → 마커 + 동작 화면 요소 표시
     function fromDescription(pi, key) {
@@ -1031,14 +1049,13 @@
       tocLinks.forEach((a, k) => a.classList.toggle('on', k === i)); currentIdx = i; syncEvents(); syncChapter(i);
       navLock = Date.now() + 900; gotoTarget = S;
       S.sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      history.replaceState(null, '', '#s' + (i + 1));
+      setHash(H.s(i + 1));
       if (hsId != null) { const h = (P[i].hotspots || []).find((x) => x.id === hsId); if (h) setTimeout(() => fromMarker(i, h), 450); }
     }
     function applyHash() {
-      let m = /#p=(\d+)(?:&h=(\d+))?/.exec(location.hash);
-      if (m) { goto(+m[1] - 1, m[2] != null ? +m[2] : undefined); return; }
-      m = /#s(\d+)/.exec(location.hash);
-      if (m) goto(+m[1] - 1);
+      const m = H.parse(location.hash);
+      if (m && m.p) goto(m.p - 1, m.h);
+      else if (m && m.s) goto(m.s - 1);
     }
     const io = new IntersectionObserver((ents) => {
       if (Date.now() < navLock) return;
@@ -1113,6 +1130,7 @@
       });
       function renderWho() {
         who.innerHTML = '';
+        if (!me && C.fixedName) { who.append(el('span', null, C.signedOutText || '로그인하면 코멘트를 남길 수 있어요')); return; }
         if (!me) { const b = el('button', null, '이름 입력'); b.onclick = () => C.signIn().catch((e) => say('로그인하지 못했어요: ' + (e.code || e.message))); who.append(b); if (authErr) who.append(el('span', null, authErr)); return; }
         if (me.photo) { const im = el('img'); im.src = me.photo; im.alt = ''; who.append(im); }
         who.append(el('b', null, me.name)); who.title = me.email;
@@ -1120,8 +1138,8 @@
         const sel = el('select'); sel.title = '내 역할';
         sel.append(...['역할 선택', ...ROLES].map((r, i) => { const o = el('option', null, r); o.value = i ? r : ''; o.selected = (i ? r : '') === role; return o; }));
         sel.onchange = () => { role = sel.value; try { localStorage.setItem('d2p.role', role); } catch {} };
-        const out = el('button', null, '이름 바꾸기'); out.title = '다른 이름으로'; out.onclick = () => C.signIn();
-        who.append(sel, out);
+        who.append(sel);
+        if (!C.fixedName) { const out = el('button', null, '이름 바꾸기'); out.title = '다른 이름으로'; out.onclick = () => C.signIn(); who.append(out); }   // 아티팩트: claude.ai 계정 이름을 그대로 씀
       }
       C.onAuth((u, err) => { const was = me && me.uid; me = u; authErr = err || ''; if (err) say(err); renderWho(); if ((me && me.uid) !== was) startSub(); else { renderPins(); if (pop) refreshPop(); } });
       cshow.onclick = () => { cshow.classList.toggle('on'); root.classList.toggle('c-show', cshow.classList.contains('on')); };
@@ -1203,7 +1221,7 @@
         if (!isVisible(slides[pi].sec)) goto(pi);
         const box = placePop(pi, t.x, t.y); pop.id = id;
         const pin = root.querySelector(`.cpin[data-id="${id}"]`); if (pin) pin.classList.add('on');
-        history.replaceState(null, '', '#c=' + id);
+        setHash(H.c(id));
         popUnsub = C.subscribeReplies(id, (replies) => { if (pop && pop.id === id) { pop.replies = replies; refreshPop(); } });
         refreshPop();
         return box;
@@ -1216,20 +1234,24 @@
         const h = el('div', 'ch'); h.append(el('b', null, `${t.page}p`), el('span', 'st ' + t.status, t.status === 'resolved' ? '해결됨' : '열림'));
         if (t.anchor) { const an = el('span', 'anc', '📎 ' + ancLabel(t.page - 1, t.anchor)); an.title = 'Description 항목 보기'; an.onclick = () => lightRef(t.anchor.ref); h.append(an); }
         h.append(el('span', 'sp'));
-        const lk = el('button', null, '링크'); lk.title = '이 코멘트 링크 복사'; lk.onclick = () => { history.replaceState(null, '', '#c=' + t.id); navigator.clipboard.writeText(location.href).then(() => say('코멘트 링크를 복사했어요')); };
+        const lk = el('button', null, '링크'); lk.title = '이 코멘트 링크 복사'; lk.onclick = () => { setHash(H.c(t.id)); navigator.clipboard.writeText(linkOf(H.c(t.id))).then(() => say('코멘트 링크를 복사했어요'), () => say('복사하지 못했어요')); };
         const x1 = el('button', null, '✕'); x1.onclick = closePop; h.append(lk, x1);
         const msgs = el('div', 'msgs');
         const msg = (m, first) => {
           const d = el('div', 'm'); const a = el('div', 'a');
           a.append(el('b', null, (m.author && m.author.name) || '?')); const rc = roleChip(m.role); if (rc) a.append(rc);
           a.append(el('time', null, fmtT(m.createdAt) + (first && t.edited ? ' · 수정됨' : '')));
-          if (first && me && t.author && me.uid === t.author.uid) { const del = el('button', 'x', '삭제'); del.title = '내 코멘트 삭제'; del.onclick = async () => { if (confirm('이 코멘트와 답글을 모두 지울까요?')) { await C.remove(t.id); closePop(); say('삭제했어요'); } }; a.append(del); }
+          if (first && me && t.author && me.uid === t.author.uid) { const del = el('button', 'x', '삭제'); del.title = '내 코멘트 삭제'; del.onclick = async () => {   // 두 번 눌러 확인 (브라우저 confirm 창은 아티팩트에서 열리지 않음)
+            if (!del.classList.contains('sure')) { del.classList.add('sure'); del.textContent = '정말 삭제?'; del.title = '한 번 더 누르면 코멘트와 답글을 모두 지워요'; setTimeout(() => { if (del.isConnected) { del.classList.remove('sure'); del.textContent = '삭제'; } }, 3000); return; }
+            try { await C.remove(t.id); closePop(); say('삭제했어요'); } catch (e) { say('삭제하지 못했어요: ' + (e.code || e.message)); }
+          }; a.append(del); }
           d.append(a, bodyNode(m.body)); return d;
         };
         msgs.append(msg(t, true));
         (pop.replies || []).forEach((r) => msgs.append(msg(r)));
         if (t.status === 'resolved' && t.resolvedBy) msgs.append(el('div', 'mode', `✔ ${t.resolvedBy.name} 님이 해결로 표시했어요`));
         box.append(h, msgs);
+        if (!me && C.fixedName) { box.append(el('div', 'mode', C.signedOutText || '로그인하면 답변할 수 있어요')); return; }
         if (!me) { const lg = el('div', 'login'); const b = el('button', null, '이름 입력하고 답변하기'); b.onclick = () => C.signIn(); lg.append(b); box.append(lg); return; }
         const rf = el('div', 'rf'); const ta = el('textarea'); ta.placeholder = '답변 남기기 (Ctrl+Enter)'; ta.value = keep; ta.maxLength = 2000;
         const bt = el('div', 'bt');
@@ -1302,7 +1324,7 @@
         if (ok !== true) { noAccess = ok || 'missing'; renderPins(); renderWho(); return; }   // 로그인했지만 허용 목록에 없음
         unsub = C.subscribe((list) => {
           threads = list; renderPins(); if (pop && pop.id) refreshPop();
-          if (first) { first = false; const m = /#c=([\w-]+)/.exec(location.hash); if (m) setTimeout(() => openThread(m[1]), 500); }
+          if (first) { first = false; const m = H.parse(location.hash); if (m && m.c) setTimeout(() => openThread(m.c), 500); }
         }, (e) => { say('코멘트를 불러오지 못했어요: ' + (e.code || e.message)); if (e.code === 'permission-denied') { needLogin = true; renderList(); } });
       }
       startSub();

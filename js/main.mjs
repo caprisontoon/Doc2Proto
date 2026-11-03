@@ -8,41 +8,53 @@ function status(msg) {
   statusEl.hidden = !msg;
 }
 
+// claude.ai 아티팩트 버전: 빌드(tools/build_artifact.py)가 D2P_HOST·D2P_DOCS·D2P_SHARE를 넣는다
+//   주소는 #<key>(기획서·버전) — claude.ai는 쿼리를 넘기지 않고 #영문·숫자·- 만 넘겨준다
+const ART = window.D2P_HOST === 'artifact';
+const DOCS = window.D2P_DOCS || [];   // [{ key, slug, version, title, date, pages, live, path }]
+const keyOfHash = () => { const m = /^#([A-Za-z0-9]+)/.exec(location.hash); return m && DOCS.some((d) => d.key === m[1]) ? m[1] : null; };
+
 function start(model, opts) {
   landing.hidden = true;
   document.title = model.title + ' — Doc2Proto';
-  window.D2P.init(model, { onNew: () => { location.href = location.pathname; }, ...opts });
+  const home = ART ? () => { location.hash = ''; location.reload(); } : () => { location.href = location.pathname; };
+  window.D2P.init(model, { onNew: home, ...opts });
 }
 
-/* ---------- 배포된 문서 열기: ?doc=docs/<slug>/<version> ---------- */
-async function openDoc(docPath) {
-  const base = docPath.replace(/\/+$/, '') + '/';
-  if (!/^docs\/[\w가-힣.-]+\/[\w가-힣.-]+\/$/.test(base)) { status('잘못된 문서 경로예요'); return; }
+/* ---------- 배포된 문서 열기: ?doc=docs/<slug>/<version> (아티팩트: #<key>) ---------- */
+async function openDoc(docPath, art) {
+  const base = art ? art.path : docPath.replace(/\/+$/, '') + '/';
+  if (!art && !/^docs\/[\w가-힣.-]+\/[\w가-힣.-]+\/$/.test(base)) { status('잘못된 문서 경로예요'); return; }
   status('문서 불러오는 중…');
   const res = await fetch(base + 'data.json', { cache: 'no-cache' }).catch(() => null);
   if (!res || !res.ok) { status('문서를 찾을 수 없어요: ' + docPath); return; }
   const data = await res.json();
-  const live = await fetch(base + 'live.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const live = art && !art.live ? null : await fetch(base + 'live.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (live && live.src) live.src = base + live.src;
   if (live && live.apps) for (const a of Object.values(live.apps)) a.src = base + a.src;
   // 버전 비교: 새 버전 폴더의 diff.json (이전 버전 대비)
-  const diff = await fetch(base + 'diff.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const diff = art && !art.diff ? null : await fetch(base + 'diff.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const versions = await versionsOf(data.slug, data.version);
-  if (diff) diff.baseDir = base.replace(/[^/]+\/$/, '') + diff.base + '/';
+  if (diff) {
+    const prev = art && DOCS.find((d) => d.slug === data.slug && d.version === diff.base);
+    diff.baseDir = art ? (prev ? prev.path : null) : base.replace(/[^/]+\/$/, '') + diff.base + '/';
+  }
   const model = {
     title: data.title, version: data.version, generated: data.generated, size: data.size,
     pages: data.pages.map((p) => ({ ...p, img: base + p.img })), live, diff,
   };
   status('');
   start(model, {
-    getShareUrl: async () => location.href,
+    getShareUrl: async () => (art ? (window.D2P_SHARE || location.href.split('#')[0]) + location.hash : location.href),
+    hashKey: art ? art.key : '', shareBase: art ? window.D2P_SHARE || '' : '',
     versions,
     diffOn: q.get('diff') !== '0',
-    comments: import('./comments.mjs').then((m) => m.createComments({ doc: data.slug, version: data.version })).catch((e) => { console.error('코멘트 기능을 불러오지 못했어요', e); return null; }),
+    comments: import(art ? './comments-artifact.mjs' : './comments.mjs').then((m) => m.createComments({ doc: data.slug, version: data.version })).catch((e) => { console.error('코멘트 기능을 불러오지 못했어요', e); return null; }),
   });
 }
 
 async function versionsOf(slug, current) {
+  if (ART) return DOCS.filter((d) => d.slug === slug).map((d) => ({ version: d.version, label: d.version, href: '#' + d.key, current: d.version === current }));
   const idx = await fetch('docs/index.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const doc = idx && idx.docs.find((d) => d.slug === slug);
   if (!doc) return null;
@@ -50,7 +62,27 @@ async function versionsOf(slug, current) {
 }
 
 /* ---------- 랜딩: 문서 목록 + 관리 (js/landing.mjs) ---------- */
-const renderList = () => import('./landing.mjs').then((m) => m.renderLanding());
+const renderList = () => (ART ? renderArtifactList() : import('./landing.mjs').then((m) => m.renderLanding()));
+
+// 아티팩트 랜딩: 보기 전용 목록 (올리기·삭제·GitHub 연결은 웹 버전에서만)
+function renderArtifactList() {
+  const box = $('#doclist'); box.innerHTML = '';
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const bySlug = new Map();
+  for (const d of DOCS) { if (!bySlug.has(d.slug)) bySlug.set(d.slug, []); bySlug.get(d.slug).push(d); }
+  for (const vs of [...bySlug.values()].reverse()) {
+    const latest = vs[vs.length - 1];
+    const card = el('div', 'doc');
+    const a = el('a', 'doc-title', latest.title); a.href = '#' + latest.key; card.append(a);
+    card.append(el('div', 'doc-meta', `최신 ${latest.version} · ${latest.date} · ${latest.pages}쪽 · 버전 ${vs.length}개`));
+    const vers = el('div', 'doc-vers');
+    for (const v of [...vs].reverse()) { const l = el('a', v === latest ? 'latest' : null, v.version); l.href = '#' + v.key; l.title = `${v.date} · ${v.pages}쪽`; vers.append(l); }
+    card.append(vers);
+    card.append(el('div', 'livest ' + (latest.live ? 'on' : 'off'), latest.live ? '● 동작 화면 있음' : '○ 동작 화면 없음 — 스냅샷·Description 연결만'));
+    box.append(card);
+  }
+  if (!DOCS.length) box.append(el('div', 'empty', '담긴 기획서가 없어요.'));
+}
 
 /* ---------- PDF 빠른 미리보기 (브라우저 안 변환, 공유 불가) ---------- */
 async function openPdf(file) {
@@ -101,9 +133,9 @@ async function openPdf(file) {
 
 /* ---------- 이벤트 ---------- */
 const drop = $('#drop'), fileIn = $('#file');
-drop.addEventListener('click', () => fileIn.click());
-fileIn.addEventListener('change', () => fileIn.files[0] && openPdf(fileIn.files[0]));
-['dragover', 'dragleave', 'drop'].forEach((t) =>
+if (drop) drop.addEventListener('click', () => fileIn.click());
+if (fileIn) fileIn.addEventListener('change', () => fileIn.files[0] && openPdf(fileIn.files[0]));
+if (drop) ['dragover', 'dragleave', 'drop'].forEach((t) =>
   drop.addEventListener(t, (e) => {
     e.preventDefault();
     drop.classList.toggle('over', t === 'dragover');
@@ -111,5 +143,13 @@ fileIn.addEventListener('change', () => fileIn.files[0] && openPdf(fileIn.files[
   }));
 
 const q = new URLSearchParams(location.search);
-if (q.get('doc')) openDoc(q.get('doc'));
+if (ART) {
+  let cur = keyOfHash();
+  if (cur) openDoc(null, DOCS.find((d) => d.key === cur)); else renderList();
+  // 다른 기획서·버전으로 이동: 목록에서 처음 열 때만 그 자리에서, 나머지는 새로 불러온다 (뷰어는 한 페이지에 하나)
+  window.addEventListener('hashchange', () => {
+    const k = keyOfHash(); if (k === cur) return;
+    if (!cur && k) { cur = k; openDoc(null, DOCS.find((d) => d.key === k)); } else location.reload();
+  });
+} else if (q.get('doc')) openDoc(q.get('doc'));
 else renderList();
