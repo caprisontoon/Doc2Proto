@@ -309,6 +309,31 @@ def page_title(items):
     return ''
 
 
+def screen_name(items, layout_items=()):
+    """템플릿 머리 표의 '화면명' 칸 오른쪽 값 (같은 제목이 이어지는 하위 페이지를 구분하는 이름, 예: '인벤토리 > 선물 후기 Tab')."""
+    for sh, r, d in items:
+        if r['t'] > 20 or not (getattr(sh, 'has_table', False) and sh.has_table):
+            continue
+        for row in sh.table.rows:
+            cells = [c.text.strip() for c in row.cells]
+            for i, c in enumerate(cells):
+                if re.sub(r'\s+', '', c).lower() in ('화면명', 'screenname'):
+                    for nxt in cells[i + 1:]:
+                        v = re.sub(r'\s+', ' ', nxt.replace('\x0b', ' ')).strip()
+                        if v and v != '-':
+                            return v
+    # 머리 표가 슬라이드 레이아웃에 있고 값만 자리 표시자(placeholder)로 채우는 템플릿: 레이아웃의 '화면명' 칸 오른쪽 첫 값
+    for lsh, lr, ld in layout_items:
+        if getattr(lsh, 'is_placeholder', False) or re.sub(r'\s+', '', shape_text(lsh)).lower() not in ('화면명', 'screenname'):   # 자리 표시자의 안내 글자('화면명')는 칸 이름이 아님
+            continue
+        right = [(r['l'], shape_text(sh)) for sh, r, d in items
+                 if abs((r['t'] + r['h'] / 2) - (lr['t'] + lr['h'] / 2)) < 2.5 and r['l'] > lr['l'] and shape_text(sh).strip()]
+        if right:
+            v = re.sub(r'\s+', ' ', sorted(right)[0][1].replace('\x0b', ' ')).strip()
+            return '' if v == '-' else v
+    return ''
+
+
 def heading_text(items):
     """슬라이드 상단(13% 이내)에서 글자가 가장 큰 텍스트 (표·작은 글씨 제외)."""
     best = None
@@ -332,6 +357,11 @@ def heading_text(items):
 def analyze_slide(slide, idx, SW, SH):
     items = walk(slide.shapes, SW, SH)
     section = page_title(items)
+    try:
+        layout_items = walk(slide.slide_layout.shapes, SW, SH)
+    except Exception:
+        layout_items = []
+    screen = screen_name(items, layout_items)
     head = heading_text(items)
     title = head if head and head != section else section
     if not title:
@@ -629,7 +659,7 @@ def analyze_slide(slide, idx, SW, SH):
         h['mockup'] = max(mock, key=lambda b: area(b['rect']))['id'] if mock else None
 
     return {
-        'index': idx, 'title': title, 'full_title': full_title or title, 'section': section, 'slide_id': slide.slide_id,
+        'index': idx, 'title': title, 'full_title': full_title or title, 'section': section, 'screen': screen, 'slide_id': slide.slide_id,
         'blocks': [{k: v for k, v in b.items() if k not in ('depth',)} for b in blocks],
         'hotspots': [{k: v for k, v in h.items() if k not in ('shape_id',)} for h in hotspots],
         'nav': nav, 'links': [], 'behaviors': tooltip_behaviors, 'tables': tables,
@@ -693,12 +723,21 @@ def number_sections(pages, items_by_page=None):
             p['num'] = ''; p['label'] = '표지'; prev_group = None; prev_title = None; continue
         if not t and not content:
             big = sorted([b for b in p['blocks'] if b['text']], key=lambda b: -area(b['rect']))
-            p['num'] = ''; p['label'] = (big[0]['text'].split('\n')[0][:24] if big else f"페이지 {p['index'] + 1}")
+            # 간지: 여러 줄·여러 상자의 제목을 위→아래 순서로 한 줄로 (예: '1-1. 투네이션 ID 로그인 > 연결된 SNS 계정이 있을 경우', '공통 > 통합 로그인')
+            if big:
+                parts = sorted([b for b in p['blocks'] if b['text'] and not b['inner'] and not re.match(r'^\s*\d{1,2}\.\d{1,2}', b['text'])],
+                               key=lambda b: (round(b['rect']['t']), b['rect']['l']))   # 변경 이력 메모('26.08.06 …')는 제외
+                whole = re.sub(r'\s*>\s*', ' > ', re.sub(r'\s+', ' ', ' '.join(b['text'] for b in parts))).strip(' >')
+                lab = whole if 1 < len(whole) <= 60 else big[0]['text'].split('\n')[0][:24]
+            p['num'] = ''; p['label'] = (lab if big else f"페이지 {p['index'] + 1}")
             p['kind'] = 'chapter' if (big and p['index'] != last) else 'plain'
             prev_group = None; prev_title = None; continue
         if not t:
             text = ' '.join(b['text'] for b in p['blocks'])
-            t = '개정 이력' if ('Version' in text or '변경' in text) else f"페이지 {p['index'] + 1}"
+            # 제목 없는 내용 페이지: 맨 위 왼쪽의 짧은 글자 (예: '보이스 검색')
+            tops = sorted([b for b in p['blocks'] if b['text'] and not b['inner'] and 1 < len(b['text'].split('\n')[0].strip()) <= 30],
+                          key=lambda b: (round(b['rect']['t'] / 3), b['rect']['l']))
+            t = '개정 이력' if ('Version' in text or '변경' in text) else (tops[0]['text'].split('\n')[0].strip() if tops else f"페이지 {p['index'] + 1}")
         r = rel(t) or [t]
         group = re.sub(r'\s*\(\s*\d+\s*/\s*\d+\s*\)\s*$', '', r[0]).strip()
         is_sub = group == prev_group or t == prev_title
@@ -707,9 +746,14 @@ def number_sections(pages, items_by_page=None):
             p['num'] = f'{n}.{sub}'
             if len(r) == 1 and t != prev_title:
                 p['label'] = r[0]
+            elif t == prev_title and p.get('screen'):   # 머리 표가 있는 템플릿: 화면명으로 구분 (목업 속 글자는 쓰지 않음)
+                base = re.sub(r'\s*\(\s*\d+(?:\s*/\s*\d+)?\s*\)\s*$', '', r[-1])   # '공지사항 (2)' → '공지사항 (1)'처럼 번호가 겹치지 않게
+                p['label'] = p['screen'][:40] if p['screen'] not in t and p['screen'] not in p['title'] else f"{base} ({sub})"
             elif t == prev_title:
+                # 변경 이력 메모('26.10.26 - …', '06.12 - …')·머리 띠·문장(…다.)은 제목으로 쓰지 않는다
                 cands = [b['text'].split('\n')[0].strip() for b in p['blocks'] if not b['inner'] and b['text'] and b['kind'] == 'shape'
-                         and b['rect']['t'] < 35 and b['rect']['l'] > 30 and 1 < len(b['text'].split('\n')[0].strip()) < 24 and b['text'].split('\n')[0].strip() != p['title']]
+                         and 8 <= b['rect']['t'] < 35 and b['rect']['l'] > 30 and 1 < len(b['text'].split('\n')[0].strip()) < 24 and b['text'].split('\n')[0].strip() != p['title']
+                         and not re.match(r'^\d{1,2}\.\d{1,2}', b['text'].strip()) and not re.search(r'[다요]\.?$', b['text'].split('\n')[0].strip())]
                 p['label'] = cands[0] if cands else f"{r[-1]} ({sub})"
             else:
                 p['label'] = r[-1]

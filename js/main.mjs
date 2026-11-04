@@ -11,8 +11,8 @@ function status(msg) {
 // claude.ai 아티팩트 버전: 빌드(tools/build_artifact.py)가 D2P_HOST·D2P_DOCS·D2P_SHARE를 넣는다
 //   주소는 #<key>(기획서·버전) — claude.ai는 쿼리를 넘기지 않고 #영문·숫자·- 만 넘겨준다
 const ART = window.D2P_HOST === 'artifact';
-const DOCS = window.D2P_DOCS || [];   // [{ key, slug, version, title, date, pages, live, path }]
-const keyOfHash = () => { const m = /^#([A-Za-z0-9]+)/.exec(location.hash); return m && DOCS.some((d) => d.key === m[1]) ? m[1] : null; };
+const DOCS = window.D2P_DOCS || [];   // [{ key, slug, version, title, date, pages, live, path, ext? }] — ext: 다른 아티팩트에 있는 기획서 링크
+const keyOfHash = () => { const m = /^#([A-Za-z0-9]+)/.exec(location.hash); return m && DOCS.some((d) => d.key === m[1] && !d.ext) ? m[1] : null; };
 
 function start(model, opts) {
   landing.hidden = true;
@@ -54,7 +54,7 @@ async function openDoc(docPath, art) {
 }
 
 async function versionsOf(slug, current) {
-  if (ART) return DOCS.filter((d) => d.slug === slug).map((d) => ({ version: d.version, label: d.version, href: '#' + d.key, current: d.version === current }));
+  if (ART) return DOCS.filter((d) => d.slug === slug && !d.ext).map((d) => ({ version: d.version, label: d.version, href: '#' + d.key, current: d.version === current }));
   const idx = await fetch('docs/index.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const doc = idx && idx.docs.find((d) => d.slug === slug);
   if (!doc) return null;
@@ -73,10 +73,11 @@ function renderArtifactList() {
   for (const vs of [...bySlug.values()].reverse()) {
     const latest = vs[vs.length - 1];
     const card = el('div', 'doc');
-    const a = el('a', 'doc-title', latest.title); a.href = '#' + latest.key; card.append(a);
+    const go = (n, d) => { if (d.ext) { n.href = d.ext; n.target = '_blank'; n.rel = 'noopener'; } else n.href = '#' + d.key; return n; };   // 다른 아티팩트는 새 탭
+    const a = go(el('a', 'doc-title', latest.title + (latest.ext ? ' ↗' : '')), latest); if (latest.ext) a.title = '다른 아티팩트에서 열려요'; card.append(a);
     card.append(el('div', 'doc-meta', `최신 ${latest.version} · ${latest.date} · ${latest.pages}쪽 · 버전 ${vs.length}개`));
     const vers = el('div', 'doc-vers');
-    for (const v of [...vs].reverse()) { const l = el('a', v === latest ? 'latest' : null, v.version); l.href = '#' + v.key; l.title = `${v.date} · ${v.pages}쪽`; vers.append(l); }
+    for (const v of [...vs].reverse()) { const l = go(el('a', v === latest ? 'latest' : null, v.version), v); l.title = `${v.date} · ${v.pages}쪽`; vers.append(l); }
     card.append(vers);
     card.append(el('div', 'livest ' + (latest.live ? 'on' : 'off'), latest.live ? '● 동작 화면 있음' : '○ 동작 화면 없음 — 스냅샷·Description 연결만'));
     box.append(card);

@@ -1,0 +1,5 @@
+{
+ "_설명": "claude.ai 아티팩트 묶음 — 아티팩트 하나에 파일 511개까지라 큰 기획서는 따로 올린다. slugs가 \"*\"인 묶음에 나머지 기획서가 모두 들어간다. url은 처음 올린 뒤 채운다 (서로의 목록에서 링크로 이어짐)",
+ "main": {"title": "Doc2Proto", "url": "https://claude.ai/artifact/XSNcoGXYb4dpFAW6r2ew7L", "slugs": "*"},
+ "home": {"title": "Doc2Proto · 차세대 통합 홈", "url": "https://claude.ai/artifact/Hdmg8Nx4tdfc3Pwqg8Yx4o", "slugs": ["차세대-투네이션-통합-홈"]}
+}

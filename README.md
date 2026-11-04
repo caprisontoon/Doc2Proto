@@ -16,6 +16,7 @@
 |---|---|---|
 | `docs/후원페이지` | v0.1, v0.2 | 플레이어·해상도·설정·PIP·영화관·전체 화면·버퍼링·송출 끊김·방송 종료·오프라인·제재·탈퇴, 시청자 수 규칙, 프로필 모달 (v0.2는 버전 비교 테스트용) |
 | `docs/투네이션-스트리밍-서비스-20260930` | v1.00 | 방송 스튜디오, 채팅(클린봇·투표·차단·팝업 분리), 후원페이지 |
+| `docs/차세대-투네이션-통합-홈` | v3.5 | 없음 (402쪽, 스냅샷·Description 연결·코멘트) |
 | `docs/리모컨개편-상세기획-20260220` | v0.21 | 클라이언트 리모컨(분할 레이아웃·Dock·프리셋·설정·자석·창 분리), 실행 화면, 후원 리스트 위젯(표/카드 반응형), 기타 위젯 10종, PC 웹·모바일 웹 리모컨 |
 
 ## 뷰어 기능
@@ -54,8 +55,11 @@
 ## claude.ai 아티팩트 버전 (Vercel 없이 사내 공유)
 
 ```bash
-python3 tools/build_artifact.py <출력 폴더> --share https://claude.ai/artifact/<id>
+python3 tools/build_artifact.py <출력 폴더> --bundle main   # 또는 --bundle home
 ```
+- 아티팩트 하나에 파일 511개까지라 큰 기획서는 다른 아티팩트로 나눈다 — `tools/artifact_bundles.json`(묶음별 주소·기획서). 목록에서 다른 묶음의 기획서는 그 아티팩트 링크(↗, 새 탭)로 보인다
+  - main `https://claude.ai/artifact/XSNcoGXYb4dpFAW6r2ew7L`: 후원페이지·스트리밍 서비스·리모컨
+  - home `https://claude.ai/artifact/Hdmg8Nx4tdfc3Pwqg8Yx4o`: 차세대 투네이션 통합 홈 (한 번에 255개까지라 두 번에 나눠 올림)
 - 출력 폴더의 `index.html`(본문)과 `d/<key>/…`, `js/…`를 Claude Code의 Artifact 도구로 올린다 (capabilities `db`, `user`(profile)). 기획서·버전 주소는 `#<key>` (claude.ai는 `#영문·숫자·-`만 넘겨줌 → `#<key>-s8`, `#<key>-p8-h3`, `#<key>-c<id>`)
 - 코멘트는 아티팩트 db(`threads`, `threads/{id}/replies`)에 claude.ai 계정 id로 저장 — 이름 입력 없음. 쓰려면 공유 권한이 **참여자(Contributor) 이상**
 - 없는 것: 웹에서 올리기·삭제·GitHub 연결, Slack 알림, PDF 빠른 미리보기 (`js/comments-artifact.mjs`, `js/main.mjs`의 `D2P_HOST==='artifact'` 분기)
