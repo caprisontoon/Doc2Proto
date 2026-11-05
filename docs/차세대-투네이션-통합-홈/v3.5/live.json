@@ -1,0 +1,545 @@
+{
+ "apps": {
+  "home": {
+   "title": "통합 홈",
+   "src": "live/home/index.html",
+   "size": [
+    703.5,
+    442.5
+   ],
+   "events": [
+    {
+     "group": "로그인 · 메뉴",
+     "items": [
+      {
+       "label": "로그인 전 화면",
+       "name": "login",
+       "value": "out",
+       "page": 119
+      },
+      {
+       "label": "로그인 후 화면",
+       "name": "login",
+       "value": "in",
+       "page": 126
+      },
+      {
+       "label": "메뉴 닫힘 / 펼침",
+       "name": "menu",
+       "page": 127
+      },
+      {
+       "label": "알림 배너 닫기 / 다시 보기",
+       "name": "notice",
+       "page": 119
+      }
+     ]
+    },
+    {
+     "group": "통합 홈",
+     "items": [
+      {
+       "label": "추천 라이브 — 다음 영상 펼치기",
+       "name": "hero",
+       "page": 120
+      },
+      {
+       "label": "추천 라이브 더보기 (최대 8개)",
+       "name": "more",
+       "value": "rec",
+       "page": 121
+      },
+      {
+       "label": "인기 크리에이터 더보기 (+5)",
+       "name": "popmore",
+       "page": 121
+      },
+      {
+       "label": "첫 후원 응원하기 더보기",
+       "name": "more",
+       "value": "cheer",
+       "page": 122
+      },
+      {
+       "label": "LIVE TOP 50 더보기 (최대 16개)",
+       "name": "more",
+       "value": "top",
+       "page": 123
+      },
+      {
+       "label": "화면 폭 1440 이상 (5×2) / 미만 (4×2)",
+       "name": "wide",
+       "page": 120
+      }
+     ]
+    },
+    {
+     "group": "헤더",
+     "items": [
+      {
+       "label": "밝은 / 어두운 테마",
+       "name": "theme",
+       "page": 130
+      },
+      {
+       "label": "다국어 레이어 팝업",
+       "name": "pop",
+       "value": "lang",
+       "page": 130
+      },
+      {
+       "label": "보유 캐시 레이어 팝업",
+       "name": "pop",
+       "value": "cash",
+       "page": 131
+      },
+      {
+       "label": "알림 레이어 팝업",
+       "name": "pop",
+       "value": "noti",
+       "page": 133
+      },
+      {
+       "label": "새 알림 도착 (숫자 배지)",
+       "name": "noti",
+       "page": 133
+      },
+      {
+       "label": "마이메뉴(프로필) 레이어 팝업",
+       "name": "pop",
+       "value": "my",
+       "page": 134
+      }
+     ]
+    },
+    {
+     "group": "전체 라이브",
+     "items": [
+      {
+       "label": "카테고리 레이어 팝업",
+       "name": "cat",
+       "page": 137
+      },
+      {
+       "label": "유튜브 탭",
+       "name": "tab",
+       "value": "yt",
+       "page": 138
+      },
+      {
+       "label": "CHEAR 탭 (카테고리 없음)",
+       "name": "tab",
+       "value": "chear",
+       "page": 139
+      },
+      {
+       "label": "KICK 탭 (카테고리 없음)",
+       "name": "tab",
+       "value": "kick",
+       "page": 140
+      },
+      {
+       "label": "트위치 탭",
+       "name": "tab",
+       "value": "tw",
+       "page": 141
+      },
+      {
+       "label": "기타 탭 (치지직 카테고리)",
+       "name": "tab",
+       "value": "etc",
+       "page": 142
+      },
+      {
+       "label": "정렬 바꾸기",
+       "name": "sort",
+       "page": 136
+      },
+      {
+       "label": "비로그인 55개째 도달",
+       "name": "end",
+       "page": 144
+      }
+     ]
+    },
+    {
+     "group": "인기 라이브",
+     "items": [
+      {
+       "label": "채널 전체보기 (추천 음악/댄스)",
+       "name": "chan",
+       "value": "추천 음악/댄스 채널",
+       "page": 147
+      }
+     ]
+    },
+    {
+     "group": "검색",
+     "items": [
+      {
+       "label": "최근 검색 목록 열기",
+       "name": "search",
+       "value": "recent",
+       "page": 148
+      },
+      {
+       "label": "크리에이터 검색 결과",
+       "name": "search",
+       "value": "칸|c",
+       "page": 149
+      },
+      {
+       "label": "라이브 검색 결과",
+       "name": "search",
+       "value": "칸|l",
+       "page": 150
+      },
+      {
+       "label": "검색 결과 없음",
+       "name": "search",
+       "value": "없는검색어|c",
+       "page": 151
+      },
+      {
+       "label": "인증 크리에이터만 보기",
+       "name": "vf",
+       "page": 149
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "frames": [
+  {
+   "page": 119,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "home-out",
+   "app": "home"
+  },
+  {
+   "page": 120,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "home-out",
+   "app": "home"
+  },
+  {
+   "page": 121,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "home-out",
+   "app": "home"
+  },
+  {
+   "page": 122,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "home-cheer",
+   "app": "home"
+  },
+  {
+   "page": 123,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "home-top",
+   "app": "home"
+  },
+  {
+   "page": 124,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "home-foot",
+   "app": "home"
+  },
+  {
+   "page": 125,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "group",
+   "app": "home"
+  },
+  {
+   "page": 126,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "home-in",
+   "app": "home"
+  },
+  {
+   "page": 127,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "home-closed",
+   "app": "home"
+  },
+  {
+   "page": 130,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "lang",
+   "app": "home"
+  },
+  {
+   "page": 131,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "cash",
+   "app": "home"
+  },
+  {
+   "page": 133,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "noti",
+   "app": "home"
+  },
+  {
+   "page": 134,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "my",
+   "app": "home"
+  },
+  {
+   "page": 136,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "all",
+   "app": "home"
+  },
+  {
+   "page": 137,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "all-cat",
+   "app": "home"
+  },
+  {
+   "page": 138,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "all-yt",
+   "app": "home"
+  },
+  {
+   "page": 139,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "all-chear",
+   "app": "home"
+  },
+  {
+   "page": 140,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "all-kick",
+   "app": "home"
+  },
+  {
+   "page": 141,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "all-tw",
+   "app": "home"
+  },
+  {
+   "page": 142,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "all-etc-cat",
+   "app": "home"
+  },
+  {
+   "page": 143,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "all-ow",
+   "app": "home"
+  },
+  {
+   "page": 144,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "all-end",
+   "app": "home"
+  },
+  {
+   "page": 145,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "popular",
+   "app": "home"
+  },
+  {
+   "page": 146,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "popular-top",
+   "app": "home"
+  },
+  {
+   "page": 147,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "chan",
+   "app": "home"
+  },
+  {
+   "page": 148,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "search-recent",
+   "app": "home"
+  },
+  {
+   "page": 149,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "search",
+   "app": "home"
+  },
+  {
+   "page": 150,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "search-live",
+   "app": "home"
+  },
+  {
+   "page": 151,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "search-none",
+   "app": "home"
+  },
+  {
+   "page": 152,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "search-none-live",
+   "app": "home"
+  }
+ ]
+}
