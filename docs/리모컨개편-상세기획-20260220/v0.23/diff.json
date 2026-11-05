@@ -1,0 +1,954 @@
+{
+ "base": "v0.22",
+ "version": "v0.23",
+ "pagemap": {
+  "1": 1,
+  "2": 2,
+  "3": 3,
+  "4": 4,
+  "5": 5,
+  "6": 6,
+  "7": 7,
+  "8": 8,
+  "9": 9,
+  "10": 10,
+  "11": 11,
+  "12": 12,
+  "13": 13,
+  "14": 14,
+  "15": 15,
+  "16": 16,
+  "17": 17,
+  "18": 18,
+  "19": 19,
+  "20": 20,
+  "21": 21,
+  "22": 22,
+  "23": 23,
+  "24": 24,
+  "25": 25,
+  "26": 26,
+  "27": 27,
+  "28": 28,
+  "29": 29,
+  "30": 30,
+  "31": 31,
+  "32": 32,
+  "33": 33,
+  "34": 34,
+  "35": 35,
+  "36": 36,
+  "37": 37,
+  "38": 38,
+  "39": 39,
+  "40": 40,
+  "41": 41,
+  "42": 42,
+  "43": 43,
+  "44": 44,
+  "45": 45,
+  "46": 46,
+  "47": 47,
+  "48": 48,
+  "49": 49,
+  "50": 50,
+  "51": 51,
+  "52": 52,
+  "53": 53,
+  "54": 54,
+  "55": 55,
+  "56": 56,
+  "57": 57,
+  "58": 58,
+  "59": 59,
+  "60": 60,
+  "61": 61,
+  "62": 62,
+  "63": 63,
+  "64": 64,
+  "65": 65,
+  "66": 66,
+  "67": 67,
+  "68": 68,
+  "69": 69,
+  "70": 70,
+  "71": 71,
+  "72": 72,
+  "73": 73,
+  "74": 74,
+  "75": 75,
+  "76": 76,
+  "77": 77,
+  "78": 78,
+  "79": 79,
+  "80": 80,
+  "81": 81,
+  "82": 82,
+  "83": 83,
+  "84": 84,
+  "85": 85,
+  "86": 86,
+  "87": 87,
+  "88": 88,
+  "89": 89,
+  "90": 90,
+  "91": 91,
+  "92": 92,
+  "93": 93,
+  "94": 94,
+  "95": 95,
+  "96": 96,
+  "97": 97,
+  "98": 98,
+  "99": 99,
+  "100": 100,
+  "101": 101,
+  "102": 102,
+  "103": 103,
+  "104": 104,
+  "105": 105,
+  "106": 106,
+  "107": 107,
+  "108": 108,
+  "109": 109,
+  "110": 110,
+  "111": 111,
+  "112": 112,
+  "113": 113,
+  "114": 114,
+  "115": 115,
+  "116": 116
+ },
+ "pages": [
+  {
+   "page": 1,
+   "base": 1,
+   "status": "same",
+   "title": "표지"
+  },
+  {
+   "page": 2,
+   "base": 2,
+   "status": "same",
+   "title": "개정 이력"
+  },
+  {
+   "page": 3,
+   "base": 3,
+   "status": "same",
+   "title": "개요"
+  },
+  {
+   "page": 4,
+   "base": 4,
+   "status": "same",
+   "title": "벤치마킹 대상 및 핵심 가치"
+  },
+  {
+   "page": 5,
+   "base": 5,
+   "status": "same",
+   "title": "클라이언트 리모컨"
+  },
+  {
+   "page": 6,
+   "base": 6,
+   "status": "same",
+   "title": "웹 리모컨 – PC UI"
+  },
+  {
+   "page": 7,
+   "base": 7,
+   "status": "same",
+   "title": "웹 리모컨 – 모바일 UI"
+  },
+  {
+   "page": 8,
+   "base": 8,
+   "status": "same",
+   "title": "클라이언트 리모컨 기본 구성"
+  },
+  {
+   "page": 9,
+   "base": 9,
+   "status": "same",
+   "title": "클라이언트 리모컨 기본 구성"
+  },
+  {
+   "page": 10,
+   "base": 10,
+   "status": "same",
+   "title": "Dock"
+  },
+  {
+   "page": 11,
+   "base": 11,
+   "status": "same",
+   "title": "도킹/엣지 인디케이터"
+  },
+  {
+   "page": 12,
+   "base": 12,
+   "status": "same",
+   "title": "레이아웃 프리셋"
+  },
+  {
+   "page": 13,
+   "base": 13,
+   "status": "same",
+   "title": "알림"
+  },
+  {
+   "page": 14,
+   "base": 14,
+   "status": "same",
+   "title": "설정 > 기본"
+  },
+  {
+   "page": 15,
+   "base": 15,
+   "status": "same",
+   "title": "단축키"
+  },
+  {
+   "page": 16,
+   "base": 16,
+   "status": "same",
+   "title": "정보"
+  },
+  {
+   "page": 17,
+   "base": 17,
+   "status": "same",
+   "title": "위젯 동작"
+  },
+  {
+   "page": 18,
+   "base": 18,
+   "status": "same",
+   "title": "리모컨 그리드 및 위젯 정책 정리 (1/2)"
+  },
+  {
+   "page": 19,
+   "base": 19,
+   "status": "same",
+   "title": "리모컨 그리드 및 위젯 정책 정리 (2/2)"
+  },
+  {
+   "page": 20,
+   "base": 20,
+   "status": "same",
+   "title": "초기 셋팅 위젯"
+  },
+  {
+   "page": 21,
+   "base": 21,
+   "status": "same",
+   "title": "위젯 추가"
+  },
+  {
+   "page": 22,
+   "base": 22,
+   "status": "same",
+   "title": "위젯 삭제"
+  },
+  {
+   "page": 23,
+   "base": 23,
+   "status": "same",
+   "title": "위젯 위치 교환"
+  },
+  {
+   "page": 24,
+   "base": 24,
+   "status": "same",
+   "title": "위젯 이동"
+  },
+  {
+   "page": 25,
+   "base": 25,
+   "status": "same",
+   "title": "위젯 사이즈 조정"
+  },
+  {
+   "page": 26,
+   "base": 26,
+   "status": "same",
+   "title": "드레그 인 & 드레그 아웃"
+  },
+  {
+   "page": 27,
+   "base": 27,
+   "status": "same",
+   "title": "자석 기능 (ex. 팟플레이어의 자석 기능 참고)"
+  },
+  {
+   "page": 28,
+   "base": 28,
+   "status": "same",
+   "title": "위젯 창 사이즈 및 압정 기능"
+  },
+  {
+   "page": 29,
+   "base": 29,
+   "status": "same",
+   "title": "기본 화면"
+  },
+  {
+   "page": 30,
+   "base": 30,
+   "status": "same",
+   "title": "스플레시 화면"
+  },
+  {
+   "page": 31,
+   "base": 31,
+   "status": "same",
+   "title": "로그인"
+  },
+  {
+   "page": 32,
+   "base": 32,
+   "status": "same",
+   "title": "로그인 관련 안내 창"
+  },
+  {
+   "page": 33,
+   "base": 33,
+   "status": "same",
+   "title": "로그인 계정 선택"
+  },
+  {
+   "page": 34,
+   "base": 34,
+   "status": "same",
+   "title": "광고 팝업"
+  },
+  {
+   "page": 35,
+   "base": 35,
+   "status": "same",
+   "title": "점검 화면"
+  },
+  {
+   "page": 36,
+   "base": 36,
+   "status": "same",
+   "title": "버전 업데이트 화면"
+  },
+  {
+   "page": 37,
+   "base": 37,
+   "status": "same",
+   "title": "투네이션 ID 없는 크리에이터의 로그인 만료 화면"
+  },
+  {
+   "page": 38,
+   "base": 38,
+   "status": "same",
+   "title": "스트리밍 채널 재연동 요청 팝업"
+  },
+  {
+   "page": 39,
+   "base": 39,
+   "status": "same",
+   "title": "크리에이터 스튜디오 약관 미동의 회원이 입장했을 경우 안내"
+  },
+  {
+   "page": 40,
+   "base": 40,
+   "status": "same",
+   "title": "후원 리스트 위젯"
+  },
+  {
+   "page": 41,
+   "base": 41,
+   "status": "same",
+   "title": "후원 리스트 반응형 UI"
+  },
+  {
+   "page": 42,
+   "base": 42,
+   "status": "same",
+   "title": "알림 리스트 노출 정책"
+  },
+  {
+   "page": 43,
+   "base": 43,
+   "status": "same",
+   "title": "시간 표기 정책"
+  },
+  {
+   "page": 44,
+   "base": 44,
+   "status": "same",
+   "title": "통합 알림"
+  },
+  {
+   "page": 45,
+   "base": 45,
+   "status": "same",
+   "title": "필터, 정렬, 알림 배치"
+  },
+  {
+   "page": 46,
+   "base": 46,
+   "status": "same",
+   "title": "재생 중인 후원 통합 알림창 위젯 싱크"
+  },
+  {
+   "page": 47,
+   "base": 47,
+   "status": "same",
+   "title": "게임"
+  },
+  {
+   "page": 48,
+   "base": 48,
+   "status": "same",
+   "title": "뽑기 > 완료 처리"
+  },
+  {
+   "page": 49,
+   "base": 49,
+   "status": "same",
+   "title": "잔여 수량"
+  },
+  {
+   "page": 50,
+   "base": 50,
+   "status": "same",
+   "title": "검색"
+  },
+  {
+   "page": 51,
+   "base": 51,
+   "status": "same",
+   "title": "검색 옵션"
+  },
+  {
+   "page": 52,
+   "base": 52,
+   "status": "same",
+   "title": "뽑기 > 검색 결과"
+  },
+  {
+   "page": 53,
+   "base": 53,
+   "status": "same",
+   "title": "반응형 UI > 후원 자세히 보기"
+  },
+  {
+   "page": 54,
+   "base": 54,
+   "status": "same",
+   "title": "차단/해제"
+  },
+  {
+   "page": 55,
+   "base": 55,
+   "status": "same",
+   "title": "반응형 UI"
+  },
+  {
+   "page": 56,
+   "base": 56,
+   "status": "same",
+   "title": "게임"
+  },
+  {
+   "page": 57,
+   "base": 57,
+   "status": "same",
+   "title": "뽑기"
+  },
+  {
+   "page": 58,
+   "base": 58,
+   "status": "same",
+   "title": "완료 처리"
+  },
+  {
+   "page": 59,
+   "base": 59,
+   "status": "same",
+   "title": "잔여 수량 확인"
+  },
+  {
+   "page": 60,
+   "base": 60,
+   "status": "same",
+   "title": "검색"
+  },
+  {
+   "page": 61,
+   "base": 61,
+   "status": "same",
+   "title": "검색 기간"
+  },
+  {
+   "page": 62,
+   "base": 62,
+   "status": "same",
+   "title": "검색 결과"
+  },
+  {
+   "page": 63,
+   "base": 63,
+   "status": "same",
+   "title": "기타 위젯"
+  },
+  {
+   "page": 64,
+   "base": 64,
+   "status": "same",
+   "title": "퀵 제어"
+  },
+  {
+   "page": 65,
+   "base": 65,
+   "status": "same",
+   "title": "대기 중인 후원 > 반응형 UI"
+  },
+  {
+   "page": 66,
+   "base": 66,
+   "status": "same",
+   "title": "대기 중인 후원"
+  },
+  {
+   "page": 67,
+   "base": 67,
+   "status": "same",
+   "title": "영상 후원"
+  },
+  {
+   "page": 68,
+   "base": 68,
+   "status": "same",
+   "title": "퀘스트"
+  },
+  {
+   "page": 69,
+   "base": 69,
+   "status": "same",
+   "title": "럭키박스"
+  },
+  {
+   "page": 70,
+   "base": 70,
+   "status": "same",
+   "title": "플레이"
+  },
+  {
+   "page": 71,
+   "base": 71,
+   "status": "same",
+   "title": "볼륨 제어"
+  },
+  {
+   "page": 72,
+   "base": 72,
+   "status": "same",
+   "title": "후원 사용 > 반응형 UI"
+  },
+  {
+   "page": 73,
+   "base": 73,
+   "status": "same",
+   "title": "후원 사용"
+  },
+  {
+   "page": 74,
+   "base": 74,
+   "status": "same",
+   "title": "후원 알림"
+  },
+  {
+   "page": 75,
+   "base": 75,
+   "status": "same",
+   "title": "영상 후원 제어"
+  },
+  {
+   "page": 76,
+   "base": 76,
+   "status": "same",
+   "title": "뽑기 잔여 수량"
+  },
+  {
+   "page": 77,
+   "base": 77,
+   "status": "same",
+   "title": "투표 > 반응형 UI"
+  },
+  {
+   "page": 78,
+   "base": 78,
+   "status": "same",
+   "title": "투표"
+  },
+  {
+   "page": 79,
+   "base": 79,
+   "status": "same",
+   "title": "투표 (2)"
+  },
+  {
+   "page": 80,
+   "base": 80,
+   "status": "same",
+   "title": "v0.22"
+  },
+  {
+   "page": 81,
+   "base": 81,
+   "status": "same",
+   "title": "투표 필수 입력 사항"
+  },
+  {
+   "page": 82,
+   "base": 82,
+   "status": "same",
+   "title": "크루 후원"
+  },
+  {
+   "page": 83,
+   "base": 83,
+   "status": "same",
+   "title": "크루 후원 (1)"
+  },
+  {
+   "page": 84,
+   "base": 84,
+   "status": "same",
+   "title": "투네애드 반영형 UI"
+  },
+  {
+   "page": 85,
+   "base": 85,
+   "status": "same",
+   "title": "투네애드"
+  },
+  {
+   "page": 86,
+   "base": 86,
+   "status": "same",
+   "title": "광고 자세히 보기 팝업"
+  },
+  {
+   "page": 87,
+   "base": 87,
+   "status": "same",
+   "title": "반영형 UI 상세"
+  },
+  {
+   "page": 88,
+   "base": 88,
+   "status": "same",
+   "title": "PC 웹 리모컨"
+  },
+  {
+   "page": 89,
+   "base": 89,
+   "status": "same",
+   "title": "PC 웹 리모컨"
+  },
+  {
+   "page": 90,
+   "base": 90,
+   "status": "same",
+   "title": "※ 예외 사항"
+  },
+  {
+   "page": 91,
+   "base": 91,
+   "status": "same",
+   "title": "모바일 웹 리모컨"
+  },
+  {
+   "page": 92,
+   "base": 92,
+   "status": "same",
+   "title": "모바일 웹 리모컨"
+  },
+  {
+   "page": 93,
+   "base": 93,
+   "status": "same",
+   "title": "로그인 화면"
+  },
+  {
+   "page": 94,
+   "base": 94,
+   "status": "same",
+   "title": "광고 팝업, 점검"
+  },
+  {
+   "page": 95,
+   "base": 95,
+   "status": "same",
+   "title": "투네이션 ID 없는 크리에이터의 로그인 만료 화면"
+  },
+  {
+   "page": 96,
+   "base": 96,
+   "status": "same",
+   "title": "통합 알림 > 자세히 보기"
+  },
+  {
+   "page": 97,
+   "base": 97,
+   "status": "same",
+   "title": "영상 자세히 보기"
+  },
+  {
+   "page": 98,
+   "base": 98,
+   "status": "same",
+   "title": "차단 / 해제"
+  },
+  {
+   "page": 99,
+   "base": 99,
+   "status": "same",
+   "title": "기타 (정렬, 필터, 재생 중인 위젯, 확인 하지 않은 후원 배지)"
+  },
+  {
+   "page": 100,
+   "base": 100,
+   "status": "same",
+   "title": "게임"
+  },
+  {
+   "page": 101,
+   "base": 101,
+   "status": "same",
+   "title": "뽑기 > 자세히 보기"
+  },
+  {
+   "page": 102,
+   "base": 102,
+   "status": "same",
+   "title": "완료 처리"
+  },
+  {
+   "page": 103,
+   "base": 103,
+   "status": "same",
+   "title": "잔여 수량 확인"
+  },
+  {
+   "page": 104,
+   "base": 104,
+   "status": "same",
+   "title": "검색"
+  },
+  {
+   "page": 105,
+   "base": 105,
+   "status": "same",
+   "title": "검색 기간"
+  },
+  {
+   "page": 106,
+   "base": 106,
+   "status": "same",
+   "title": "검색 결과"
+  },
+  {
+   "page": 107,
+   "base": 107,
+   "status": "modified",
+   "title": "설정",
+   "rows": [
+    {
+     "status": "modified",
+     "key": "1",
+     "old_key": "1",
+     "title": "창분리(벽지) 버튼 – v0.23 삭제",
+     "old": "벽지 버튼\n - 벽지 창 새 창으로 오픈",
+     "new": "창분리(벽지) 버튼 – v0.23 삭제\n - 모바일 웹 리모컨에서는 노출하지 않음",
+     "segs": [
+      [
+       "+",
+       "창분리("
+      ],
+      [
+       "=",
+       "벽지"
+      ],
+      [
+       "+",
+       ")"
+      ],
+      [
+       "=",
+       " 버튼"
+      ],
+      [
+       "+",
+       " – v0.23 삭제"
+      ],
+      [
+       "=",
+       "\n - "
+      ],
+      [
+       "-",
+       "벽지"
+      ],
+      [
+       "+",
+       "모바일"
+      ],
+      [
+       "=",
+       " "
+      ],
+      [
+       "-",
+       "창"
+      ],
+      [
+       "+",
+       "웹"
+      ],
+      [
+       "=",
+       " "
+      ],
+      [
+       "-",
+       "새"
+      ],
+      [
+       "+",
+       "리모컨에서는"
+      ],
+      [
+       "=",
+       " "
+      ],
+      [
+       "-",
+       "창으로"
+      ],
+      [
+       "+",
+       "노출하지"
+      ],
+      [
+       "=",
+       " "
+      ],
+      [
+       "-",
+       "오픈"
+      ],
+      [
+       "+",
+       "않음"
+      ]
+     ]
+    }
+   ],
+   "shapes": [
+    {
+     "status": "added",
+     "rect": {
+      "l": 60.94,
+      "t": 5.74,
+      "w": 17.19,
+      "h": 5.0
+     },
+     "text": "v0.23\n- 모바일 웹 리모컨 창분리(벽지) 버튼 삭제",
+     "name": "TextBox v0.23"
+    },
+    {
+     "status": "removed",
+     "old_rect": {
+      "l": 18.99,
+      "t": 21.9,
+      "w": 1.6,
+      "h": 2.84
+     },
+     "text": "+",
+     "name": "그룹 453"
+    },
+    {
+     "status": "removed",
+     "old_rect": {
+      "l": 17.47,
+      "t": 20.79,
+      "w": 1.22,
+      "h": 2.17
+     },
+     "text": "1",
+     "name": "타원 470"
+    }
+   ],
+   "summary": "항목 1개 수정, 화면 요소 3곳 변경"
+  },
+  {
+   "page": 108,
+   "base": 108,
+   "status": "same",
+   "title": "설정 (1)"
+  },
+  {
+   "page": 109,
+   "base": 109,
+   "status": "same",
+   "title": "알림"
+  },
+  {
+   "page": 110,
+   "base": 110,
+   "status": "same",
+   "title": "기능 버튼"
+  },
+  {
+   "page": 111,
+   "base": 111,
+   "status": "same",
+   "title": "리모컨 위젯"
+  },
+  {
+   "page": 112,
+   "base": 112,
+   "status": "same",
+   "title": "리모컨 위젯 (1)"
+  },
+  {
+   "page": 113,
+   "base": 113,
+   "status": "same",
+   "title": "리모컨 위젯 (2)"
+  },
+  {
+   "page": 114,
+   "base": 114,
+   "status": "same",
+   "title": "리모컨 위젯 (3)"
+  },
+  {
+   "page": 115,
+   "base": 115,
+   "status": "same",
+   "title": "리모컨 위젯 (4)"
+  },
+  {
+   "page": 116,
+   "base": 116,
+   "status": "same",
+   "title": "페이지 116"
+  }
+ ],
+ "removed": [],
+ "counts": {
+  "modified": 1,
+  "added": 0,
+  "removed": 0
+ }
+}
