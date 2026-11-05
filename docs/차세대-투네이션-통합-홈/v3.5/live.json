@@ -1,7 +1,7 @@
 {
  "apps": {
   "auth": {
-   "title": "통합 회원가입 · 로그인",
+   "title": "통합 회원가입 · 로그인 · 전환",
    "src": "live/auth/index.html",
    "size": [
     703.5,
@@ -187,6 +187,158 @@
        "name": "2fa",
        "value": "req10",
        "page": 52
+      }
+     ]
+    },
+    {
+     "group": "통합회원 전환",
+     "items": [
+      {
+       "label": "ID 로그인 → 전환 안내 (SNS 연결)",
+       "name": "conv",
+       "value": "id",
+       "page": 68
+      },
+      {
+       "label": "ID 로그인 → 전환 안내 (SNS 미연결)",
+       "name": "conv",
+       "value": "nosns",
+       "page": 77
+      },
+      {
+       "label": "SNS 로그인 → 전환 안내 (기존 ID 연결)",
+       "name": "conv",
+       "value": "snsid",
+       "page": 81
+      },
+      {
+       "label": "SNS 로그인 → 전환 안내 (ID 미연결)",
+       "name": "conv",
+       "value": "snsnew",
+       "page": 89
+      },
+      {
+       "label": "SNS 계정 선택 — 병합 계정",
+       "name": "pick",
+       "value": "c1",
+       "page": 70
+      },
+      {
+       "label": "SNS 계정 선택 — 탈퇴 유예 포함",
+       "name": "pick",
+       "value": "c3",
+       "page": 70
+      },
+      {
+       "label": "SNS 계정 선택 — 모두 선택 불가",
+       "name": "pick",
+       "value": "c4",
+       "page": 71
+      },
+      {
+       "label": "닉네임 삭제 (유효성 체크)",
+       "name": "cnick",
+       "value": "empty",
+       "page": 72
+      }
+     ]
+    },
+    {
+     "group": "SNS 간편 로그인 연결",
+     "items": [
+      {
+       "label": "연결 성공",
+       "name": "snsl",
+       "value": "ok",
+       "page": 74
+      },
+      {
+       "label": "미전환 SNS 계정",
+       "name": "snsl",
+       "value": "unconv",
+       "page": 74
+      },
+      {
+       "label": "이미 연결된 계정",
+       "name": "snsl",
+       "value": "dup",
+       "page": 74
+      },
+      {
+       "label": "로그인 정보 불러오기 실패",
+       "name": "snsl",
+       "value": "fail",
+       "page": 74
+      }
+     ]
+    },
+    {
+     "group": "클라이언트 리모컨",
+     "items": [
+      {
+       "label": "통합회원 전환 필수 안내",
+       "name": "rmt",
+       "value": "conv",
+       "page": 100
+      },
+      {
+       "label": "스튜디오 설정 요청 안내",
+       "name": "rmt",
+       "value": "studio",
+       "page": 111
+      },
+      {
+       "label": "회원가입 요청 안내",
+       "name": "rmt",
+       "value": "join",
+       "page": 115
+      }
+     ]
+    },
+    {
+     "group": "아이디 · 비밀번호 찾기",
+     "items": [
+      {
+       "label": "아이디 찾기 — 보유 ID 있음",
+       "name": "find",
+       "value": "id-ok",
+       "page": 116
+      },
+      {
+       "label": "아이디 찾기 — 조회 정보 없음",
+       "name": "find",
+       "value": "id-none",
+       "page": 116
+      },
+      {
+       "label": "아이디 찾기 — 본인인증 실패",
+       "name": "find",
+       "value": "id-fail",
+       "page": 116
+      },
+      {
+       "label": "비밀번호 찾기 — 아이디 형식 오류",
+       "name": "find",
+       "value": "pw-invalid",
+       "page": 117
+      },
+      {
+       "label": "비밀번호 찾기 — 존재하지 않는 사용자",
+       "name": "find",
+       "value": "pw-unknown",
+       "page": 117
+      },
+      {
+       "label": "비밀번호 찾기 — 본인인증 실패",
+       "name": "find",
+       "value": "pw-fail",
+       "page": 117
+      },
+      {
+       "label": "비밀번호 재설정 — 유효성 체크",
+       "name": "find",
+       "value": "pw-reset",
+       "page": 117
       }
      ]
     }
@@ -610,6 +762,314 @@
     "h": 81.944
    },
    "state": "login@56,62,400,705",
+   "app": "auth"
+  },
+  {
+   "page": 68,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "login-conv@447,62,400,705",
+   "app": "auth"
+  },
+  {
+   "page": 69,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "conv-checked@447,23,400,840",
+   "app": "auth"
+  },
+  {
+   "page": 70,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "pick-c1@63,48,400,748|pick-c2@504,48,400,748|pick-c3@945,48,400,748",
+   "app": "auth"
+  },
+  {
+   "page": 71,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "pick-c1@63,48,400,748|pick-c2@504,48,400,748|pick-c4@945,48,400,748",
+   "app": "auth"
+  },
+  {
+   "page": 72,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "cnick@61,47,400,706|cnick-focus@503,47,400,706|cnick-blur@944,47,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 73,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "cdone-c1@64,61,400,706|cdone-c2@508,61,400,706|cdone-c3@949,61,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 74,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "snsl@72,47,400,775|snsl-err@516,47,400,838|snsl-done@961,47,400,775",
+   "app": "auth"
+  },
+  {
+   "page": 77,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "login-conv.nosns@201,48,400,705|conv-checked.nosns@781,24,400,840",
+   "app": "auth"
+  },
+  {
+   "page": 78,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "cnick.nosns@201,48,400,706|snsl.nosns@781,48,400,775",
+   "app": "auth"
+  },
+  {
+   "page": 81,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "login@447,62,400,705",
+   "app": "auth"
+  },
+  {
+   "page": 82,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "conv-checked.snsid@447,23,400,840",
+   "app": "auth"
+  },
+  {
+   "page": 83,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "idpick-c1.snsid@203,48,400,706|idpick-c2.snsid@781,50,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 84,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "cnick.snsid@61,47,400,706|cnick-focus.snsid@503,47,400,706|cnick-blur.snsid@944,47,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 85,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "cdone-c1.snsid@64,61,400,706|cdone-c2.snsid@508,61,400,706|cdone-c3.snsid@949,61,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 86,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "snsl.snsid@72,47,400,775|snsl-err.snsid@516,47,400,838|snsl-done.snsid@961,47,400,775",
+   "app": "auth"
+  },
+  {
+   "page": 89,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "login@447,62,400,705",
+   "app": "auth"
+  },
+  {
+   "page": 90,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "conv-checked.snsnew@447,23,400,840",
+   "app": "auth"
+  },
+  {
+   "page": 91,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "cauth.snsnew@171,48,400,706|pass-conv.snsnew@794,48,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 92,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "snspick-c1.snsnew@53,48,400,706|snspick-c2.snsnew@503,48,400,706|snspick-c3.snsnew@948,48,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 93,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "cnew.snsnew@171,48,400,706|cnew-filled.snsnew@794,48,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 94,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "cdone4-c1@173,48,400,706|cdone4-c2@792,48,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 95,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "snsl.snsnew@72,47,400,775|snsl-err.snsnew@516,47,400,838|snsl-done.snsnew@961,47,400,775",
+   "app": "auth"
+  },
+  {
+   "page": 100,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "rmt-conv@113,51,1170,786",
+   "app": "auth"
+  },
+  {
+   "page": 111,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "rmt-studio@113,51,1170,786",
+   "app": "auth"
+  },
+  {
+   "page": 115,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "rmt-join@113,51,1170,786",
+   "app": "auth"
+  },
+  {
+   "page": 116,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "fid@48,45,400,706|fidlist-tip@503,45,400,706|fidnone@958,45,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 117,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "fpw-err@48,45,400,706|fpwauth@503,45,400,706|fpwreset-err@958,45,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 118,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "fpwdone@545,61,400,706",
    "app": "auth"
   },
   {

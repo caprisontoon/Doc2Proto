@@ -251,6 +251,133 @@ svg{display:block}
 .snsp p{margin:0 0 ${u(16)};font-size:${u(14)};color:#666;line-height:${u(20)}}
 .snsp button{display:block;width:100%;height:${u(46)};border-radius:${u(9)};margin-top:${u(8)};font-size:${u(16)};background:#3d3d3d;color:#fff}
 .snsp button.g{background:#e6e6e6;color:#333}
+/* ===== 3장 통합회원 전환 ===== */
+.prog.t{top:${u(20)};left:${u(24)};right:${u(24)}}
+.chd{position:absolute;left:${u(30)};top:${u(64)};font-size:${u(21.5)};line-height:${u(27)};font-weight:700;letter-spacing:${u(-.3)}}
+.ckv{position:absolute;left:${u(30)};right:${u(24)};top:${u(157)};height:${u(32)};border-bottom:${u(1.6)} solid #c8c8c8;display:flex;align-items:center;font-size:${u(17)}}
+.ckv b{font-size:${u(16.5)};width:${u(105)};flex:none}
+.ckv span{letter-spacing:${u(1.5)}}
+.clb{position:absolute;left:${u(30)};top:${u(203)};font-weight:700;font-size:${u(16.5)}}
+.gtw{position:absolute;top:${u(234)}}
+.gtb{border-collapse:collapse;table-layout:fixed}
+.gtb th{background:#6b6b6b;color:#fff;font-weight:700;height:${u(38)};font-size:${u(15)};border:${u(1)} solid #8a8a8a;padding:0}
+.gtb td{border:${u(1)} solid #9a9a9a;height:${u(46)};text-align:center;line-height:1.15;background:#fff;font-size:${u(16)};padding:0 ${u(2)};word-break:break-all}
+.gtb tr[data-a]{cursor:pointer}
+.gtb tr.mg td{background:#eef4fb}
+.gtb tr.dis td{background:#c9c9c9;cursor:not-allowed}
+.rd{display:inline-block;width:${u(15)};height:${u(15)};border-radius:50%;border:${u(1.4)} solid #333;vertical-align:middle}
+.rd.on{background:#111}
+.gtb tr.dis .rd{border-color:#999;background:none}
+.sbar{position:absolute;width:${u(8)};background:#d4d4d4;border-radius:${u(2)}}
+.cnote{position:absolute;left:${u(30)};right:${u(24)};font-size:${u(14.5)};line-height:${u(18)};color:#999;letter-spacing:${u(-.4)}}
+.cbt{position:absolute;left:${u(26)};right:${u(26)};top:${u(622)};display:flex;gap:${u(12)}}
+.cbt button{flex:1;height:${u(52)};border-radius:${u(9)};font-size:${u(18)};color:#fff;background:#3d3d3d}
+.cbt button.g{background:#bdbdbd}
+.cbt button:disabled{background:#8a8a8a;cursor:default}
+/* 전환 안내 */
+.cv .logo{position:absolute;left:0;right:0;top:${u(60)}}
+.cvt{position:absolute;left:0;right:0;top:${u(126)};margin:0;text-align:center;font-size:${u(24)};letter-spacing:${u(-.5)}}
+.cvs{position:absolute;left:0;right:0;top:${u(160)};text-align:center;font-size:${u(14)};line-height:${u(19)};color:#999;letter-spacing:${u(-.9)}}
+.cvb{position:absolute;left:${u(16)};right:${u(16)};top:${u(217)};height:${u(250)};background:#f2f2f2;border:${u(1)} solid #ddd;border-radius:${u(12)};padding:${u(15)} ${u(14)} 0 ${u(16)};font-size:${u(16)};line-height:${u(19)}}
+.cvb b{display:block;padding-left:${u(14)};text-indent:${u(-12)}}
+.cvb p{margin:${u(9)} 0 ${u(24)};color:#777;font-size:${u(15.5)}}
+.cv .agall{left:${u(21)};top:${u(490)}}
+.cv .agsub{left:${u(42)};top:${u(523)}}
+.cv .agl{left:${u(21)};right:${u(28)};top:${u(576)}}
+/* 닉네임 */
+.cnf{position:absolute;left:${u(32)};right:${u(36)}}
+.cnf label{display:block;font-weight:700;font-size:${u(16.5)};height:${u(26)}}
+.cnf .row{display:flex;align-items:center;height:${u(32)};border-bottom:${u(1.6)} solid #c8c8c8}
+.cnf .row.err{border-bottom-color:#e4141e}
+.cnf input{flex:1;font-size:${u(16)}}
+.cnf input::placeholder{color:#a8a8a8}
+.cnf .msg{color:#e4141e;font-size:${u(15)};margin-top:${u(9)}}
+.cnf .nt{color:#999;font-size:${u(14.5)};line-height:${u(18)};margin-top:${u(16)};letter-spacing:${u(-.3)}}
+/* 전환 완료 */
+.cdn .logo{position:absolute;left:0;right:0;top:${u(87)}}
+.cdn h2{position:absolute;left:0;right:0;top:${u(153)};margin:0;text-align:center;font-size:${u(24)};letter-spacing:${u(-1.2)}}
+.cdn p{position:absolute;left:0;right:0;top:${u(188)};margin:0;text-align:center;font-size:${u(15)};line-height:${u(19)}}
+.cbx{position:absolute;left:${u(21)};right:${u(21)};background:#f2f2f2;border-radius:${u(10)};text-align:center}
+.cbx .sec{height:${u(84)};padding-top:${u(13)}}
+.cbx .sec b{display:block;font-size:${u(16.5)};font-weight:600}
+.cbx hr{margin:0 ${u(18)};border:0;border-top:${u(1)} solid #ccc}
+.cpl{display:flex;align-items:center;justify-content:center;gap:${u(6)};margin-top:${u(9)};font-size:${u(14)}}
+.cpl svg{width:${u(22)};height:${u(22)}}
+.cpl b{font-size:${u(14)}!important;display:inline!important}
+.cpl i{font-style:normal;color:#555;font-size:${u(13)};border-left:${u(1)} solid #bbb;padding-left:${u(6)}}
+.cbx.id{height:${u(77)};padding-top:${u(11)}}
+.cbx.id b{display:block;font-size:${u(16.5)};font-weight:600}
+.cbx.id span{display:block;font-size:${u(17)};margin-top:${u(6)};color:#444}
+.carr{position:absolute;left:0;right:0;display:flex;justify-content:center}
+.carr svg{width:${u(26)};height:${u(28)}}
+.cdn .one{position:absolute;left:${u(26)};right:${u(26)};top:${u(623)};height:${u(52)};border-radius:${u(9)};background:#3d3d3d;color:#fff;font-size:${u(18)}}
+/* SNS 간편 로그인 연결 */
+.slt{position:absolute;left:${u(30)};top:${u(32)};font-size:${u(21.5)};line-height:${u(26)};font-weight:700}
+.sll{position:absolute;left:${u(25)};right:${u(24)};top:${u(107)};bottom:${u(81)};overflow:auto;scrollbar-width:none}
+.sli{display:flex;align-items:center;height:${u(62)};border:${u(1.2)} solid #c8c8c8;border-radius:${u(7)};padding:0 ${u(17)} 0 ${u(12)};margin-bottom:${u(11)};font-size:${u(17.5)};gap:${u(9)}}
+.sli.e{margin-bottom:${u(4)}}
+.sli svg{width:${u(24)};height:${u(24)};flex:none}
+.sli .nm{font-weight:600;flex:none}
+.sli .pid{color:#333;font-size:${u(15)};border-left:${u(1)} solid #999;padding-left:${u(8)};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;font-weight:600}
+.sli .ad{margin-left:auto;font-size:${u(16)};white-space:nowrap;flex:none}
+.sli .ok{margin-left:auto;color:#666;font-size:${u(16)};white-space:nowrap;flex:none}
+.sle{color:#e4141e;font-size:${u(14)};margin:0 0 ${u(9)} ${u(2)};line-height:${u(19)};letter-spacing:${u(-.4)}}
+.snote{color:#999;font-size:${u(14.5)};line-height:${u(18)};margin-top:${u(2)};padding:0 ${u(4)};letter-spacing:${u(-.3)}}
+.sst{position:absolute;left:${u(26)};right:${u(26)};bottom:${u(19)};height:${u(52)};border-radius:${u(9)};background:#3d3d3d;color:#fff;font-size:${u(18)};z-index:4}
+/* 전환 인증 유형 */
+.copts{position:absolute;left:${u(26)};right:${u(26)};top:${u(149)}}
+.copts .opt{height:${u(121)};margin-bottom:${u(12)};padding:${u(36)} 0 0 ${u(27)}}
+.copts .opt b{font-size:${u(18.5)}}
+.copts .opt small{font-size:${u(18)}}
+/* 클라이언트 리모컨 */
+.scr.rmw{border:${u(1)} solid #777}
+.rtb{position:absolute;left:0;right:0;top:0;height:${u(26)};display:flex;align-items:center;gap:${u(8)};padding:0 ${u(12)};font-size:${u(13)};font-weight:700;color:#333;background:#fafafa}
+.rtb .lg{display:flex;gap:${u(1)};align-items:center;color:#3b7cf0;font-weight:900}
+.rtb .ic{margin-left:auto;display:flex;gap:${u(28)};font-weight:400;font-size:${u(16)};color:#444}
+.rm .logo{position:absolute;left:0;right:0;top:${u(101)}}
+.rm h2{position:absolute;left:0;right:0;top:${u(176)};margin:0;text-align:center;font-size:${u(26)}}
+.rm .rbase{position:absolute;left:${u(400)};right:${u(400)};top:${u(260)};border:${u(1.5)} dashed #bbb;border-radius:${u(12)};padding:${u(26)};text-align:center;font-size:${u(16)};line-height:${u(24)};color:#666}
+.rm .rbase button{margin-top:${u(18)};height:${u(46)};padding:0 ${u(28)};border-radius:${u(8)};background:#4a90f0;color:#fff;font-size:${u(16)}}
+.rdim{position:absolute;inset:0;background:rgba(0,0,0,.37);z-index:20}
+.rmd{position:absolute;left:${u(327)};top:${u(206)};width:${u(516)};height:${u(467)};background:#fff;border-radius:${u(22)};z-index:21;box-shadow:0 ${u(4)} ${u(14)} rgba(0,0,0,.3)}
+.rmd h3{margin:0;position:absolute;left:0;right:0;top:${u(34)};text-align:center;font-size:${u(21)};font-weight:600}
+.rmd .rt{position:absolute;left:${u(23)};right:${u(12)};font-size:${u(16.5)};line-height:${u(19.5)};letter-spacing:${u(-.2)}}
+.rmd .rb{position:absolute;left:${u(30)};right:${u(28)};background:#f2f2f2;border-radius:${u(14)};padding:${u(30)} ${u(14)} 0 ${u(16)};font-size:${u(16)};line-height:${u(19)};color:#333}
+.rmd .rb div{margin-bottom:${u(20)};padding-left:${u(22)};text-indent:${u(-22)}}
+.rmd .rb.dot{padding-top:${u(21)};line-height:${u(28.7)}}
+.rmd .rb.dot div{margin:0;padding-left:${u(16)};text-indent:${u(-16)}}
+.rbt{position:absolute;height:${u(56)};border-radius:${u(8)};background:#4a90f0;color:#fff;font-size:${u(20)};font-weight:600}
+.rbt.g{background:#a9a9a9}
+.rnote{position:absolute;left:0;right:0;top:${u(690)};text-align:center;color:#e03c3c;font-size:${u(13.5)};line-height:${u(19)};z-index:22}
+/* 아이디·비밀번호 찾기 팝업 */
+.fdt{position:absolute;left:${u(3)};right:${u(3)};top:${u(3)};display:flex;border-bottom:${u(2)} solid #333}
+.fdt button{flex:1;height:${u(45)};background:#bdbdbd;color:#fff;font-weight:700;font-size:${u(16)}}
+.fdt button.on{background:#3d3d3d}
+.fh{position:absolute;left:${u(43)};top:${u(105)};font-size:${u(24)};line-height:${u(29)};font-weight:600}
+.fsub{position:absolute;left:${u(51)};top:${u(157)};font-size:${u(18)};color:#555}
+.fopts{position:absolute;left:${u(27)};right:${u(27)};top:${u(205)}}
+.fopts .opt{height:${u(121)};margin-bottom:${u(11)};padding:${u(36)} 0 0 ${u(27)}}
+.fbtn{position:absolute;left:${u(27)};right:${u(27)};top:${u(625)};height:${u(53)};border-radius:${u(9)};background:#3d3d3d;color:#fff;font-size:${u(18)}}
+.fbb{position:absolute;left:${u(35)};right:${u(24)};top:${u(625)};display:flex;gap:${u(11)}}
+.fbb button{flex:1;height:${u(53)};border-radius:${u(9)};background:#3d3d3d;color:#fff;font-size:${u(17)}}
+.fbb button.l{background:#f2f2f2;border:${u(1.4)} solid #999;color:#111;font-weight:700}
+.ftip{position:absolute;left:${u(58)};top:${u(335)};width:${u(330)};background:#fff;border:${u(1)} solid #bbb;box-shadow:0 ${u(3)} ${u(8)} rgba(0,0,0,.2);padding:${u(9)} ${u(14)};font-size:${u(15)};line-height:${u(19.5)};z-index:5;text-align:left}
+.qm.s{width:${u(18)};height:${u(18)};font-size:${u(12)};margin-left:${u(3)};background:#777}
+.ff{position:absolute;right:${u(42)}}
+.ff label{display:block;font-weight:700;font-size:${u(16)};height:${u(24)}}
+.ff .row{display:flex;align-items:center;height:${u(34)};border-bottom:${u(1.6)} solid #c8c8c8}
+.ff .row.err{border-bottom-color:#e4141e}
+.ff input{flex:1;font-size:${u(17)}}
+.ff input.pw{font-size:${u(22)};letter-spacing:${u(3)}}
+.ff input::placeholder{color:#a8a8a8;font-size:${u(16)};letter-spacing:0}
+.ff .eye svg{width:${u(22)};height:${u(22)}}
+.ff .msg{color:#e4141e;font-size:${u(14.5)};margin-top:${u(8)}}
+.ff .fn{color:#999;font-size:${u(13.5)};line-height:${u(17)};margin:${u(9)} 0 ${u(26)}}
+.ff .rv{flex:1;font-size:${u(17)}}
+.fdn h2{position:absolute;left:0;right:0;top:${u(288)};margin:0;text-align:center;font-size:${u(24)};letter-spacing:${u(-1.2)}}
+.fdn p{position:absolute;left:0;right:0;top:${u(328)};margin:0;text-align:center;font-size:${u(15)}}
+.ftst{position:absolute;left:50%;transform:translateX(-50%);top:${u(560)};background:#222;color:#fff;border-radius:${u(9)};padding:${u(9)} ${u(16)} ${u(9)} ${u(10)};display:flex;align-items:center;gap:${u(10)};font-size:${u(17)};font-weight:700;white-space:nowrap;z-index:30;box-shadow:0 ${u(3)} ${u(8)} rgba(0,0,0,.3)}
+.ftst i{width:${u(26)};height:${u(26)};border-radius:50%;background:#f04040;color:#fff;font-style:normal;display:flex;align-items:center;justify-content:center;font-size:${u(18)};font-weight:400}
 /* 토스트·기획서 연결 */
 .toast{position:absolute;left:50%;bottom:${u(90)};transform:translateX(-50%);background:rgba(20,20,20,.88);color:#fff;font-size:${u(13)};padding:${u(8)} ${u(14)};border-radius:${u(8)};z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;width:max-content;max-width:94%;text-align:center;line-height:1.4}
 .toast.show{opacity:1}
@@ -272,6 +399,22 @@ const GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 const LOGO = '<div class="logo"><i class="p"></i><i class="o l"></i><i class="o"></i></div>';
 const LOGOS = '<div class="logo" style="transform:scale(.4);transform-origin:left center;width:120px"><i class="p"></i><i class="o l"></i><i class="o"></i></div>';
 const prog = (n) => `<div class="prog">${[1, 2, 3, 4].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</div>`;
+const prog2 = (n, tot) => `<div class="prog t">${Array.from({ length: tot }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>`;
+// 플랫폼 로고 (간이 SVG)
+const PICO = {
+  twitch: '<svg viewBox="0 0 24 24"><path d="M4.5 2 3 6v14h5v3h3l3-3h4.5L23 15.5V2z" fill="#9146ff"/><path d="M5.8 3.8h15.4v11l-3.4 3.4h-5l-3 3v-3H5.8z" fill="#fff"/><path d="M11 7.5h2v5.5h-2zM16 7.5h2v5.5h-2z" fill="#9146ff"/></svg>',
+  youtube: '<svg viewBox="0 0 24 24"><rect x="1" y="4.5" width="22" height="15" rx="4" fill="#f00"/><path d="M10 8.5v7l6-3.5z" fill="#fff"/></svg>',
+  kakao: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="11" rx="11" ry="8.6" fill="#111"/><path d="M5.5 16.5 4.5 22l5.5-3.6z" fill="#111"/></svg>',
+  payco: '<svg viewBox="0 0 24 24"><path d="M5 2h8a7 7 0 0 1 0 14H10v6H5zM10 6.5v5h3a2.5 2.5 0 0 0 0-5z" fill="#f42e2e" fill-rule="evenodd"/></svg>',
+  naver: '<svg viewBox="0 0 24 24"><path d="M3 3h6l6 9V3h6v18h-6l-6-9v9H3z" fill="#03c75a"/></svg>',
+  chear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#f0567f"/><path d="M16 8.3a5.2 5.2 0 1 0 0 7.4" stroke="#fff" stroke-width="3.2" fill="none"/></svg>',
+  kick: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11.5" fill="#111"/><path d="M7 5.5h4v4h1.5v-2h2v-2h3.5v4.5h-2v2h-2v1h2v2h2V19h-3.5v-2h-2v-2H11v4H7z" fill="#53fc18"/></svg>',
+};
+const PLAT = [['twitch', 'Twitch'], ['youtube', 'YouTube'], ['kakao', 'Kakao'], ['payco', 'Payco'], ['naver', 'Naver'], ['chear', 'CHEAR'], ['kick', 'KICK']];
+const PKO = { 트위치: 'twitch', 유튜브: 'youtube', 카카오: 'kakao', 페이코: 'payco', 네이버: 'naver' };
+const PID = { twitch: 'tunaking', youtube: 'toonaone@gmail.com', kakao: 'yam34song', payco: 'toonalove', naver: 'toonathree', chear: 'toona_chear', kick: 'toonakick' };
+const LERR = { unconv: '차세대 통합회원 미전환 계정은 연결할 수 없습니다.', dup: '이미 SNS 간편 로그인으로 연결된 계정입니다. 다른 계정으로 시도해 주세요.', fail: '로그인 정보를 불러오지 못했습니다. 다시 시도해 주세요.' };
+const ARROW = '<svg viewBox="0 0 26 28"><path d="M8 0h10v13h7L13 27 1 13h7z" fill="#4a8de0"/></svg>';
 
 /* ---------------- 데이터·규칙 ---------------- */
 const TERMS = [['필수', '개인정보 처리 방침'], ['필수', '통합회원 이용약관(도네이터)'], ['선택', '통합회원 이용약관(크리에이터)'], ['선택', '광고성 정보 수신 및 마케팅 활용 동의']];
@@ -279,7 +422,7 @@ const TERM_DOCS = ['개인정보 처리 방침', '통합회원 이용약관(도�
 // 35p 국가번호: 슈어엠 지원 국가 (대한민국 제외), 아프리카 + 아프가니스탄 차단
 const CC = [['+1', '미국·캐나다'], ['+81', '일본'], ['+86', '중국'], ['+886', '대만'], ['+852', '홍콩'], ['+853', '마카오'], ['+65', '싱가포르'], ['+66', '태국'], ['+84', '베트남'], ['+63', '필리핀'], ['+62', '인도네시아'], ['+60', '말레이시아'], ['+91', '인도'], ['+975', '부탄'], ['+976', '몽골'], ['+7', '러시아'], ['+44', '영국'], ['+33', '프랑스'], ['+49', '독일'], ['+39', '이탈리아'], ['+34', '스페인'], ['+61', '호주'], ['+64', '뉴질랜드'], ['+55', '브라질'], ['+52', '멕시코']];
 const CODE = '482917';   // (프로토타입) 인증번호
-const TAKEN = ['toona', 'tunaone', 'toonation', 'admin', 'toonaone'];
+const TAKEN = ['toona', 'tunaone', 'toonation', 'admin'];
 const BAD = ['바보', '멍청', '욕설', 'fuck', 'shit'];
 const EMOJI = /\p{Extended_Pictographic}/u;
 // 27p 회원가입 메시지 레이블 영역 별 표기 문구
@@ -287,6 +430,25 @@ function vNick(v, t) { if (!t) return ''; if (EMOJI.test(v)) return '이모지�
 function vId(v, t) { if (!t) return ''; if (!v) return '아이디를 입력해 주세요.'; if (/[^A-Za-z0-9]/.test(v)) return '아이디에는 영문 또는 숫자만 쓸 수 있습니다.'; if (v.length < 4 || v.length > 25) return '아이디는 4자에서 25자 사이여야 합니다.'; if (TAKEN.includes(v.toLowerCase())) return '사용할 수 없는 아이디입니다.'; return ''; }
 function vPw(v, t) { if (!t) return ''; if (!v) return '비밀번호를 입력해 주세요.'; const k = [/[A-Za-z]/, /[0-9]/, /[^A-Za-z0-9]/].filter((r) => r.test(v)).length; if (k < 2) return '영문, 특수문자, 숫자 중 2가지 이상을 조합하세요.'; if (v.length < 10 || v.length > 25) return '비밀번호는 10자에서 25자 사이여야 합니다.'; return ''; }
 function vPw2(v, pw, t) { if (!t) return ''; if (!v) return '비밀번호를 다시 한번 입력해 주세요.'; if (v !== pw) return '비밀번호가 일치 하지 않습니다.'; return ''; }
+// 3장 통합회원 전환 — 70~71p 연결 계정 (플랫폼 ID, 계정 유형, 플랫폼) · mg = 병합(크리·도네 동일 플랫폼) · dis = 탈퇴 유예
+const MG = [['toonaone@gmail.com', '크리에이터', '유튜브'], ['toonatwo@gmail.com', '도네이터', '유튜브']];
+const PK = {
+  c1: [{ r: MG, mg: 1 }, { r: [['tunaking', '크리에이터', '트위치']] }, { r: [['yam34song', '크리에이터', '카카오']] }, { r: [['toonalove', '도네이터', '페이코']] }],
+  c2: [{ r: [['toonaone', '크리에이터', '트위치']] }, { r: [['toonatwo@gmail.com', '크리에이터', '유튜브']] }, { r: [['toonathree@naver.com', '크리에이터', '네이버']] }, { r: [['yam34song', '도네이터', '카카오']] }, { r: [['toonalove', '도네이터', '페이코']] }],
+  c3: [{ r: MG, mg: 1, dis: 1 }, { r: [['tunaking', '크리에이터', '트위치']] }, { r: [['yam34song', '크리에이터', '카카오']] }, { r: [['toonalove', '도네이터', '페이코']], dis: 1 }],
+  c4: [{ r: MG, mg: 1, dis: 1 }, { r: [['tunaking', '크리에이터', '트위치']], dis: 1 }, { r: [['yam34song', '크리에이터', '카카오']], dis: 1 }, { r: [['toonalove', '도네이터', '페이코']], dis: 1 }],
+};
+// 83p 기존 투네이션 ID 선택 (계정 유형, 플랫폼, 투네이션 ID)
+const IDP = { c1: [{ r: [['크리에이터', '유튜브', 'toonaone']] }, { r: [['도네이터', '유튜브', 'toonatwo']] }], c2: [{ r: [['크리에이터', '유튜브', 'toonathree'], ['도네이터', '유튜브', 'toonathree']], span: [2] }] };
+// 92p SNS 계정 정보 선택 (투네이션 ID 미연결 → '-')
+const SPK = { c1: [{ r: [['크리에이터', '유튜브', '-']] }], c2: [{ r: [['도네이터', '유튜브', '-']] }], c3: [{ r: [['크리에이터', '유튜브', '-']] }, { r: [['도네이터', '유튜브', '-']] }] };
+const SNSID = 'toona144@gmail.com';
+const CVTERMS = [['필수', '개인정보 처리 방침'], ['필수', '서비스 이용약관(도네이터)'], ['선택', '서비스 이용약관(크리에이터)'], ['선택', '광고성 정보 수신 및 마케팅 활용 동의']];
+// 116p 보유 ID
+const FIDS = [['tunaking', '2025-12-12', '정상'], ['yam12song', '2024-01-10', '탈퇴유예'], ['yam34song', '2022-04-08', '정상']];
+const KNOWN = ['tunaking', 'yam12song', 'yam34song', 'toonaone', 'toonatwo', 'tunaone'];
+function vCnick(v) { if (!v) return '닉네임을 입력해 주세요.'; if (EMOJI.test(v)) return '이모지는 사용하실 수 없습니다.'; const n = [...v].length; if (n < 2 || n > 16) return '닉네임은 2자에서 16자 사이여야 합니다.'; return ''; }   // 닉네임 중복 가능
+function vFid(v) { if (!v) return '아이디를 입력해 주세요.'; if (/[^A-Za-z0-9]/.test(v)) return '아이디에는 영문 또는 숫자만 쓸 수 있습니다.'; if (v.length < 4 || v.length > 25) return '아이디는 4자에서 25자 사이여야 합니다.'; return ''; }
 const mmss = (s) => `${String(Math.floor(Math.max(0, s) / 60)).padStart(2, '0')}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
 const m1ss = (s) => `${Math.floor(Math.max(0, s) / 60)}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
 
@@ -307,10 +469,18 @@ Screen.prototype.fresh = function () {
     ovs: { cc: '', ph: '', dd: false, sends: 0, block: 0, msg: '' }, oc: { v: '', left: 600, retry: 3, resend: 0, msg: '', dead: false },
     lg: { id: '', pw: '', keep: false, cap: 'wait', fails: 0, mId: '', mPw: '', eye: false, hint: false },
     tf: { m: 'phone', code: '', left: 600, wait: 0, req: 1, st: '', tip: false, toast: '' }, cut: false, find: 0, fsel: null, sns: null,
+    passFor: null,
+    cv: { mode: 'id', terms: [0, 0, 0, 0], pc: 'c1', ic: 'c1', sc: 'c1', sel: 0, nick: '송송송', nt: 0, nf: 0, done: null, tid: 'toonaone', ln: {}, le: {}, oauth: null, as: 0 },
+    fd: { as: 0, sel: 0, tip: false, id: '', it: 0, uid: 'tunaking', pw: '', pw2: '', t: {}, eye: {}, toast: '', toastSpec: '' },
+    rm: { k: 'conv', m: 'conv' },
   };
 };
-Screen.prototype.preset = function (v) {
+Screen.prototype.preset = function (v0) {
   this.fresh(); const S = this.S;
+  const [v, md] = v0.split('.');
+  if (md) S.cv.mode = md;
+  this.el.classList.remove('cut');
+  if (presetConv(this, v)) { this.render(); return; }
   const P = { terms: ['terms'], 'terms-checked': ['terms'], 'terms-detail': ['detail'], authsel: ['authsel'], 'auth-u14': ['authsel'], 'auth-o14': ['authsel'], 'auth-ovs': ['authsel'],
     'pass-u14': ['pass'], 'pass-o14': ['pass'], 'pass-guard': ['pass'], 'pass-legal': ['plegal'], newid: ['newid'], 'newid-filled': ['newid'], done: ['done'], 'ovs-phone': ['ovsp'], 'ovs-phone-err': ['ovsp'], 'ovs-code': ['ovsc'],
     login: ['login'], 'login-filled': ['login'], 'login-err': ['login'], fail6: ['login'], withdrawn: ['login'], find: ['find'], '2fa-select': ['tfsel'], '2fa-phone': ['tfcode'], '2fa-email-filled': ['tfcode'],
@@ -356,9 +526,14 @@ Screen.prototype.toast = function (m, ms) {
 /* ----- 그리기 ----- */
 Screen.prototype.render = function () {
   const S = this.S, V = S.view;
-  const html = { terms: tTerms, detail: tDetail, authsel: tAuth, pass: tPass, plegal: tPass, newid: tNewId, done: tDone, ovsp: tOvsP, ovsc: tOvsC, login: tLogin, find: tFind, tfsel: tTfSel, tfcode: tTfCode, okp: tOk }[V](S, this);
-  this.el.innerHTML = `<div class="in ${V === 'detail' ? 'dt' : V === 'pass' || V === 'plegal' ? 'pass' : V === 'done' ? 'dn' : V === 'login' ? 'lgn' : V === 'find' ? 'win' : V.startsWith('tf') ? 'tf' + (S.cut ? ' cut' : '') : ''}">${html}</div>${modal(S)}<div class="toast"></div>`;
+  const html = { terms: tTerms, detail: tDetail, authsel: tAuth, pass: tPass, plegal: tPass, newid: tNewId, done: tDone, ovsp: tOvsP, ovsc: tOvsC, login: tLogin, find: tFind, tfsel: tTfSel, tfcode: tTfCode, okp: tOk,
+    conv: tConv, pick: tPick, cnick: tCnick, cdone: tCdone, snsl: tSnsl, idpick: tIdpick, cauth: tCauth, snspick: tSnspick, cnew: tCnew, rmt: tRmt,
+    fid: tFid, fidlist: tFidlist, fidnone: tFidnone, fpw: tFpw, fpwauth: tFpwauth, fpwreset: tFpwreset, fpwdone: tFpwdone }[V](S, this);
+  const cls = { detail: 'dt', pass: 'pass', plegal: 'pass', done: 'dn', login: 'lgn', find: 'win', conv: 'cv', cdone: 'cdn', rmt: 'rm', fpwdone: 'fdn' }[V] || (V.startsWith('tf') ? 'tf' + (S.cut ? ' cut' : '') : '');
+  const ft = V.startsWith('f') && S.fd.toast ? `<div class="ftst" data-spec="${S.fd.toastSpec}"><i>×</i>${S.fd.toast}</div>` : '';
+  this.el.innerHTML = `<div class="in ${cls}">${html}</div>${ft}${modal(S)}<div class="toast"></div>`;
   this.el.classList.toggle('cut', S.cut);
+  this.el.classList.toggle('rmw', V === 'rmt');
   this.sync();
 };
 function tTerms(S) {
@@ -385,9 +560,10 @@ function tAuth(S) {
     <div class="btns" data-spec="29:2"><button class="g" data-a="back">뒤로가기</button><button data-a="anext" ${S.sel ? '' : 'disabled'}>다음</button></div>`;
 }
 function tPass(S) {
-  return `<div class="pl" data-spec="${S.view === 'plegal' ? '31:0' : '30:1 33:1'}">${'PASS'.split('').map((c) => `<i>${c}</i>`).join('')}</div><div class="tg">인증을 넘어<br>일상으로 PASS</div>
+  const sp = { conv: '91:0', fid: '116:1', fpw: '117:0' }[S.passFor] || (S.view === 'plegal' ? '31:0' : '30:1 33:1');
+  return `<div class="pl" data-spec="${sp}">${'PASS'.split('').map((c) => `<i>${c}</i>`).join('')}</div><div class="tg">인증을 넘어<br>일상으로 PASS</div>
     <div class="ph"><b>이용중인 통신사</b>를<br>선택해 주세요</div>
-    <div class="tl" data-spec="${S.view === 'plegal' ? '31:0' : '30:1 33:1'}">${['SKT', 'KT', 'LG U+'].map((t) => `<button data-a="telco" data-v="${t}">${t}</button>`).join('')}${['SKT', 'KT', 'LG U+'].map((t) => `<button class="s" data-a="telco" data-v="${t} 알뜰폰">${t}<br>알뜰폰</button>`).join('')}</div>
+    <div class="tl" data-spec="${sp}">${['SKT', 'KT', 'LG U+'].map((t) => `<button data-a="telco" data-v="${t}">${t}</button>`).join('')}${['SKT', 'KT', 'LG U+'].map((t) => `<button class="s" data-a="telco" data-v="${t} 알뜰폰">${t}<br>알뜰폰</button>`).join('')}</div>
     <div class="mv"><i>i</i>알뜰폰 사업자 확인</div>
     <div class="ft">이용약관 &nbsp;<b>개인정보처리방침</b> &nbsp;API 도입문의<br>VeriSign 256-bit SSL 암호화 적용<em>KCB</em></div>`;
 }
@@ -427,19 +603,19 @@ function tOvsC(S) {
     <div class="btns" data-spec="35:6 36:6"><button class="g" data-a="back">뒤로가기</button><button data-a="cnext" ${o.v.length === 6 && !o.dead ? '' : 'disabled'}>다음</button></div>`;
 }
 const SNS = [['twitch', '트위치', '#9146ff', '⧉'], ['youtube', '유튜브', '#fff', '▶'], ['kakao', '카카오톡', '#fee500', '●'], ['br'], ['payco', '페이코', '#f42e2e', 'P'], ['naver', '네이버', '#03c75a', 'N'], ['chear', 'CHEAR', '#fff', 'C'], ['kick', 'KICK', '#111', 'K']];
-function tLogin(S) {
+function tLogin(S, scr) {
   const L = S.lg, ok = L.id && L.pw && L.cap === 'ok';
   const icon = ([k, n, bg, g]) => k === 'br' ? '<i class="r1"></i>' : `<button data-a="sns" data-v="${k}" title="${n}" style="background:${bg};${k === 'youtube' || k === 'chear' ? 'border:1px solid #ddd;' : ''}color:${k === 'youtube' ? '#f00' : k === 'kakao' ? '#3a1d1d' : k === 'chear' ? '#e8457a' : k === 'kick' ? '#53fc18' : '#fff'}">${g}</button>`;
-  return `${LOGO}<h2 data-spec="45:0">로그인</h2><div class="sb">투네이션 통합계정으로 로그인이 가능합니다.</div>
+  return `<div data-spec="45:0 68:0 77:0 81:0 89:0">${LOGO}</div><h2 data-spec="45:0 68:0 77:0 81:0 89:0">로그인</h2><div class="sb">투네이션 통합계정으로 로그인이 가능합니다.</div>
     <div class="body"><div class="lup"><div data-spec="45:1">
       <div class="lr"><label>아이디</label><input data-f="lid" placeholder="아이디 입력" value="${esc(L.id)}" autocomplete="off"></div>${L.mId ? `<div class="lm" data-spec="45:아이디를 누락했을 경우 46:아이디를 누락했을 경우">${L.mId}</div>` : ''}
       <div class="lr p"><label>비밀번호</label><input data-f="lpw" class="${L.eye ? '' : 'pw'}" type="${L.eye ? 'text' : 'password'}" placeholder="비밀번호 입력" value="${esc(L.pw)}" autocomplete="off"><button class="eye" data-a="leye">${L.eye ? EYEX : EYE}</button></div>${L.mPw ? `<div class="lm" data-spec="${L.mPw.includes('불가능') ? '39:사용정지' : L.mPw.includes('일치') ? '45:아이디 또는 비밀번호가 일치하지 않을 경우 46:아이디 또는 비밀번호가 일치하지 않을 경우' : '45:비밀번호를 누락했을 경우 46:비밀번호를 누락했을 경우'}">${L.mPw}</div>` : ''}
       <button class="keep" data-a="keep"><i class="chk ${L.keep ? 'on' : ''}"></i>로그인 상태 유지</button></div>
       <div class="cap">${L.cap === 'ok' ? '<span class="ok">✓</span>성공!' : '<span class="sp"></span>확인 중...'}<div class="cf"><i></i>CLOUDFLARE<small>개인 정보 · 도움말</small></div></div>
       ${L.cap === 'ok' ? '' : '<div class="capt">보안 인증을 확인하는 중입니다.</div>'}</div>
-      <button class="lbtn" data-a="login" data-spec="45:2" ${ok ? '' : 'disabled'}>로그인</button>
+      <button class="lbtn" data-a="login" data-spec="45:2 68:1 77:1" ${ok ? '' : 'disabled'}>로그인</button>
       <div class="lk" data-spec="45:3"><button data-a="findid">아이디 찾기</button><i>|</i><button data-a="findpw">비밀번호 찾기</button><i>|</i><button data-a="join">회원가입</button></div>
-      </div><div class="snsw"><div class="snsh" data-spec="45:4 54:0">SNS 계정으로 로그인</div><div class="sns" data-spec="45:4 54:0">${SNS.map(icon).join('')}</div></div>`;
+      </div><div class="snsw" style="${scr && scr.def.h < 730 ? `top:${u(548)}` : ''}"><div class="snsh" data-spec="45:4 54:0 81:1 89:1">SNS 계정으로 로그인</div><div class="sns" data-spec="45:4 54:0 81:1 89:1">${SNS.map(icon).join('')}</div></div>`;
 }
 function tFind(S) {
   const O = [['국내 만14세 미만 회원', '법정대리인 명의 휴대폰으로 인증'], ['국내 만14세 이상 회원', '본인 명의 휴대폰으로 인증'], ['해외 회원', '본인 명의 휴대폰으로 인증']];
@@ -474,15 +650,194 @@ function tTfCode(S) {
 }
 const lockText = (s) => `${String(Math.floor(s / 3600)).padStart(2, '0')}시간 ${String(Math.floor(s / 60) % 60).padStart(2, '0')}분 ${String(s % 60).padStart(2, '0')}초`;
 function tOk(S) { return `<div class="okp">${LOGO}<b>로그인되었습니다</b>(프로토타입) 통합 홈 화면으로 이동해요${S.lg.keep ? '<br><small>로그인 상태 유지 ON</small>' : ''}<button data-a="relogin">처음으로</button></div>`; }
+/* ----- 3장 통합회원 전환 화면 ----- */
+// 기획서 항목: 같은 화면이 여러 페이지에 반복되므로 해당 페이지 항목을 모두 연결
+const CSP = {
+  conv: '69:1 77:2 82:1 90:1', cterm: '69:2 82:2 90:2 77:2', cout: '69:3 82:3 90:3 77:2', cgo: '69:2 82:2 90:2 77:2',
+  nick0: '72:0 78:0 84:0', nick1: '72:1 78:1 84:1', nick2: '72:2 78:2 84:2', nick3: '72:3 78:3 84:3',
+  done0: '73:0 85:0 94:0', doneBtn: '73:4 85:3 94:3',
+  sl0: '74:0 78:4 86:0 95:0', sl1: '74:1 78:4 86:1 95:1', sl2: '74:2 86:2 95:2', sl3: '74:3 86:3 95:3', sl4: '74:4 86:4 95:4', sl5: '74:5 86:5 95:5',
+};
+// 표: groups = [{r:[[칸...]...], mg, dis, span:[병합 칸]}]
+function gtable(head, widths, groups, sel, o = {}) {
+  const tw = widths.reduce((a, b) => a + b, 0);
+  const fmt = (c) => esc(c).replace('@', '<br>@');
+  return `<table class="gtb" style="width:${u(tw)}"><colgroup>${widths.map((w) => `<col style="width:${u(w)}">`).join('')}</colgroup>
+    <tr>${head.map((h) => `<th style="${o.hs ? `font-size:${u(o.hs)}` : ''}">${h}</th>`).join('')}</tr>
+    ${groups.map((g, gi) => g.r.map((row, i) => `<tr class="${g.mg && !g.dis ? 'mg' : ''} ${g.dis ? 'dis' : ''}" ${g.dis ? '' : `data-a="gsel" data-v="${gi}"`}>${i === 0 ? `<td rowspan="${g.r.length}" data-spec="${o.rs ? o.rs(g) : ''}"><i class="rd ${sel === gi && !g.dis ? 'on' : ''}"></i></td>` : ''}${row.map((c, j) => (g.span || []).includes(j) ? (i === 0 ? `<td rowspan="${g.r.length}">${fmt(c)}</td>` : '') : `<td>${fmt(c)}</td>`).join('')}</tr>`).join('')).join('')}</table>`;
+}
+const firstOk = (groups) => Math.max(0, groups.findIndex((g) => !g.dis));
+function tConv(S) {
+  const T = S.cv.terms, all = T.every(Boolean), ok = T[0] && T[1];
+  return `<div data-spec="${CSP.conv}">${LOGO}</div><h2 class="cvt" data-spec="${CSP.conv}">통합회원 전환 안내</h2><div class="cvs">도네이터와 크리에이터 계정이 투네이션 ID 하나로 통합됩니다.<br>통합회원 전환 후 서비스를 계속 이어가실 수 있어요</div>
+    <div class="cvb" data-spec="${CSP.conv}"><b>• 투네이션 ID 하나로 크리에이터 · 도네이터 활동을 모두 이용해요.</b><p>계정 구분 없이 아이디 하나로 편하게 이용할 수 있어요.</p><b>• 기존 이력은 그대로 보관하거나, 새로 만들어 사용할 수 있어요.</b><p>기존 ID와 이용 이력은 그대로 유지됩니다. 여러 계정이 있다면 전환할 계정을 선택할 수 있고, 원하지 않으면 따로 사용할 수 있어요.</p></div>
+    <button class="agall" data-a="cvall" data-spec="${CSP.cterm}"><i class="chk ${all ? 'on' : ''}"></i>전체 동의하기</button>
+    <div class="agsub" data-spec="${CSP.cterm}">크리에이터 서비스 약관, 광고성 정보 수신 및<br>마케팅 활용(선택) 동의를 포함합니다.</div>
+    <div class="agl" data-spec="${CSP.cterm}">${CVTERMS.map(([k, t], i) => `<div class="agi"><button data-a="cv1" data-i="${i}" style="display:flex;align-items:center"><i class="chk ${T[i] ? 'on' : ''}"></i><em class="${k === '필수' ? 'r' : ''}">${k}</em>${t}</button><button class="gt" data-a="tdoc" data-i="${i}" title="상세 보기">&gt;</button></div>`).join('')}</div>
+    <div class="cbt" style="left:${u(16)};right:${u(16)};top:${u(762)};gap:${u(6)}"><button class="g" style="flex:none;width:${u(104)}" data-a="cvout" data-spec="${CSP.cout}">로그아웃</button><button data-a="cvgo" data-spec="${CSP.cgo}" ${ok ? '' : 'disabled'}>통합회원 전환하기</button></div>`;
+}
+function tPick(S) {
+  const G = PK[S.cv.pc], any = G.some((g) => !g.dis);
+  const rs = (g) => g.dis ? (g.mg ? '71:0 71:6' : '71:0 71:7') : '70:3';
+  return `${prog2(1, 3)}<div class="chd" data-spec="70:0 71:0">통합회원으로 전환할<br>SNS 계정을 선택해 주세요.</div>
+    <div class="ckv" data-spec="70:1"><b>투네이션 ID</b><span>${esc(S.cv.tid)}</span></div><div class="clb" data-spec="70:2">연결 계정</div>
+    <div class="gtw" style="left:${u(25)}" data-spec="70:2">${gtable(['선택', '플랫폼 ID', '계정 유형', '플랫폼'], [44, 108, 114, 79], G, S.cv.sel, { rs })}</div><div class="sbar" style="left:${u(377)};top:${u(234)};height:${u(115)}"></div>
+    <div class="cnote" style="top:${u(513)}">선택한 연결 계정 외의 다른 SNS 계정을 통합회원으로 전환하시려면, SNS 로그인을 통해 통합회원 전환 절차를 별도로 진행하셔야 합니다.</div>
+    <div class="cnote" style="top:${u(585)}" data-spec="71:0">선택 불가능한 계정은 탈퇴 유예 계정으로, SNS 로그인을 통해 탈퇴 복구를 진행해야 통합회원 전환이 가능합니다.</div>
+    <div class="cbt" style="left:${u(24)};right:${u(24)};top:${u(672)}"><button class="g" data-a="back" data-spec="70:4">뒤로가기</button><button data-a="pkgo" data-spec="${any ? '70:5 71:8' : '71:8'}" ${any ? '' : 'disabled'}>다음</button></div>`;
+}
+function tCnick(S) {
+  const C = S.cv, np = C.mode === 'nosns', off = np ? -25 : 0, m = C.nt ? vCnick(C.nick) : '';
+  return `${np ? '' : prog2(2, 3)}<div class="chd" style="left:${u(32)};top:${u(66 + off)}" data-spec="${CSP.nick0}">사용하실 닉네임을 설정해 주세요.</div>
+    <div class="cnf" style="top:${u(156 + off)}" data-spec="${CSP.nick1}"><label>닉네임</label><div class="row ${m ? 'err' : ''}"><input data-f="cnick" value="${esc(C.nick)}" placeholder="${C.nf ? '' : '이모지 제외, 특수문자 허용 최소 2자~16자'}" autocomplete="off"></div>${m ? `<div class="msg">${m}</div>` : ''}
+    <div class="nt">${np ? '' : '※ 이모지 제외, 특수문자 허용 최소 2자 ~ 16자<br>※ '}닉네임은 [마이페이지 &gt; 프로필 편집]에서<br>변경하실 수 있습니다.</div></div>
+    <div class="cbt" style="right:${u(28)}"><button class="g" data-a="back" data-spec="${CSP.nick2}">뒤로가기</button><button data-a="cngo" data-spec="${CSP.nick3}" ${vCnick(C.nick) ? 'disabled' : ''}>다음</button></div>`;
+}
+function plLine(p, id) { const k = PKO[p] || 'youtube', n = PLAT.find((x) => x[0] === k)[1]; return `<div class="cpl">${PICO[k]}<b>${n}</b><i>${esc(id)}</i></div>`; }
+function tCdone(S) {
+  const D = S.cv.done || { rows: [['크리에이터', '유튜브', '{플랫폼 ID}']] }, R = D.rows, tot = S.cv.mode === 'snsnew' ? 4 : 3;
+  const sp = R.length > 1 ? '73:1 85:1' : R[0][0] === '크리에이터' ? '73:2 85:1 94:1' : '73:3 85:1 94:2';
+  const h = R.length * 84, top = 261;
+  return `${prog2(tot, tot)}${LOGO}<h2 data-spec="${CSP.done0}">통합회원 전환이 완료되었습니다.</h2><p>SNS 계정으로 가입한 회원정보가<br>투네이션 ID로 통합되었습니다.</p>
+    <div class="cbx" style="top:${u(top)};height:${u(h)}" data-spec="${sp}">${R.map(([t, p, id]) => `<div class="sec"><b>${t}</b>${plLine(p, id)}</div>`).join('<hr>')}</div>
+    <div class="carr" style="top:${u(top + h + 16)}">${ARROW}</div>
+    <div class="cbx id" style="top:${u(top + h + 60)}" data-spec="85:2 ${sp}"><b>투네이션 ID</b><span>${esc(S.cv.tid)}</span></div>
+    <button class="one" data-a="cdfin" data-spec="${CSP.doneBtn}">통합회원 전환 완료</button>`;
+}
+function tSnsl(S) {
+  const C = S.cv;
+  return `<div class="slt" data-spec="${CSP.sl0}">SNS 간편 로그인을<br>추가할 수 있어요.</div>
+    <div class="sll" data-spec="${CSP.sl1}">${PLAT.map(([k, n]) => {
+      const id = C.ln[k], er = C.le[k];
+      return `<div class="sli ${er ? 'e' : ''}">${PICO[k]}<span class="nm">${n}</span>${id ? `<span class="pid" data-spec="${CSP.sl3}">${esc(id)}</span><span class="ok" data-spec="${CSP.sl4}">연결됨</span>` : `<button class="ad" data-a="slink" data-v="${k}" data-spec="${CSP.sl2}">+ 연결 추가</button>`}</div>${er ? `<div class="sle" data-spec="${CSP.sl2}">${er}</div>` : ''}`;
+    }).join('')}<div class="snote">SNS 간편 로그인 설정은 투네이션 ID로 로그인하신 후, [마이페이지 &gt; 간편 로그인]에서 언제든지 변경하실 수 있습니다.</div></div>
+    <button class="sst" data-a="sstart" data-spec="${CSP.sl5}">투네이션 시작하기</button>`;
+}
+function tIdpick(S) {
+  return `${prog2(1, 3)}<div class="chd" style="left:${u(31)}" data-spec="83:0">통합회원으로 전환할<br>투네이션 ID를 선택해 주세요.</div>
+    <div class="ckv" style="left:${u(31)}" data-spec="83:1"><b>SNS 계정</b><span>${SNSID}</span></div><div class="clb" style="left:${u(31)}" data-spec="83:2">투네이션 ID</div>
+    <div class="gtw" style="left:${u(15)}" data-spec="83:2">${gtable(['선택', '계정 유형', '플랫폼', '투네이션 ID'], [50, 117, 88, 101], IDP[S.cv.ic], S.cv.sel, { hs: 13.5, rs: () => '83:2' })}</div>
+    <div class="cbt"><button class="g" data-a="back" data-spec="83:0">뒤로가기</button><button data-a="ipgo" data-spec="83:0">다음</button></div>`;
+}
+function tCauth(S) {
+  const O = [['휴대폰 인증 (국내 만 14세 미만)', '본인 명의 휴대폰으로 인증하기'], ['국내 만14세 이상 회원', '본인 명의 휴대폰으로 인증'], ['해외 회원', '본인 명의 휴대폰으로 인증']];
+  return `${prog2(1, 4)}<div class="chd" style="left:${u(34)};top:${u(63)};font-size:${u(22.5)};line-height:${u(28)}" data-spec="91:0">통합회원 전환을 위해<br>인증해 주세요.</div>
+    <div class="copts" data-spec="91:0">${O.map(([b, s], i) => `<button class="opt ${S.cv.as === i ? 'on' : ''}" data-a="cvas" data-v="${i}"><b>${b}</b><small>${s}</small></button>`).join('')}</div>
+    <div class="cbt"><button class="g" data-a="back" data-spec="91:0">뒤로가기</button><button data-a="cago" data-spec="91:0">다음</button></div>`;
+}
+function tSnspick(S) {
+  return `${prog2(2, 4)}<div class="chd" style="left:${u(31)}" data-spec="92:0">통합회원으로 전환할<br>계정 정보를 선택해 주세요.</div>
+    <div class="ckv" style="left:${u(31)}" data-spec="92:1"><b>SNS 계정</b><span>${SNSID}</span></div><div class="clb" style="left:${u(31)}" data-spec="92:2">계정 정보</div>
+    <div class="gtw" style="left:${u(15)}" data-spec="92:2">${gtable(['선택', '계정 유형', '플랫폼', '투네이션 ID'], [50, 117, 88, 101], SPK[S.cv.sc], S.cv.sel, { hs: 13.5, rs: () => '92:2' })}</div>
+    <div class="cbt"><button class="g" data-a="back" data-spec="92:3">뒤로가기</button><button data-a="spgo" data-spec="92:4">다음</button></div>`;
+}
+function tCnew(S) {
+  const M = newIdMsgs(S), sp = '93:2';
+  return `${prog2(3, 4)}<div class="chd" style="left:${u(34)}" data-spec="93:0">투네이션 ID를 생성해 주세요.</div>
+    <div class="ckv" style="left:${u(34)};right:${u(35)};top:${u(124)};height:${u(34)}" data-spec="93:1"><b style="width:${u(98)}">SNS 계정</b><span>${SNSID}</span></div>
+    <div class="fl" style="left:${u(34)};right:${u(35)};top:${u(208)}">${field('nick', '닉네임', '이모지 제외, 최소 2자~16자', S.f.nick, M.nick, { spec: sp, tk: '닉네임' })}${field('id', '아이디', '영문 또는 숫자 4자~25자', S.f.id, M.id, { spec: sp, tk: '아이디' })}${field('pw', '비밀번호', '영문,특수문자, 숫자 조합 10자 이상', S.f.pw, M.pw, { spec: sp, tk: '비밀번호', pw: 1, show: S.eye.pw })}${field('pw2', '비밀번호 확인', '비밀번호 재입력', S.f.pw2, M.pw2, { spec: sp, tk: '비밀번호 확인', pw: 1, show: S.eye.pw2 })}</div>
+    <div class="cbt" data-spec="93:3"><button class="g" data-a="back">뒤로가기</button><button data-a="cnnext" ${newIdOk(S) ? '' : 'disabled'}>다음</button></div>`;
+}
+// 100·111·115p 클라이언트 리모컨 모달
+const RMD = {
+  conv: { p: 100, h: '통합회원 전환 필수 안내', t: '로그인하신 계정은 통합회원으로 전환 후 사용하실 수 있습니다.<br>아래 순서대로 통합회원 전환을 먼저 진행해 주세요.', tt: 89, bt: 146, bh: 213,
+    items: ['① [통합회원 전환하기] 버튼을 클릭하면 통합회원 전환 안내 화면으로 이동해요.', '② 이동한 안내 화면에서 통합회원 전환을 끝까지 진행해 주세요.', '③ 통합회원 전환을 완료하신 후, 리모컨으로 돌아와 다시 로그인해 주세요.'], btn: [['통합회원 전환하기', 157, 203, 385]] },
+  studio: { p: 111, h: '스튜디오 설정 요청 안내', t: '리모컨은 스튜디오 설정을 완료한 계정만 이용할 수 있습니다.<br>스튜디오에서 아래 항목을 완료하신 후, 리모컨을 이용해 주세요.', tt: 80, bt: 161, bh: 152, dot: 1,
+    items: ['• 통합회원 이용약관 (크리에이터)', '• 내 후원페이지 URL 설정', '• 채널 연동', '• 송출 채널 플랫폼 선택'], btn: [['다른 계정으로 로그인', 40, 222, 376, 'g', 'rother', '111:3'], ['스튜디오로 이동', 276, 200, 376, '', 'rgo', '111:4']] },
+  join: { p: 115, h: '회원가입 요청 안내', t: '로그인하신 SNS 계정으로 가입된 투네이션 ID가 없습니다.<br>아래 순서대로 회원가입을 먼저 진행해 주세요.', tt: 80, bt: 146, bh: 190,
+    items: ['① [회원가입 하러가기] 버튼을 클릭하면 회원가입 화면으로 이동해요.', '② 이동한 안내 화면에서 회원가입을 끝까지 진행해 주세요.', '③ 회원가입을 완료하신 후, 리모컨으로 돌아와 다시 로그인해 주세요.'], btn: [['회원가입 하러가기', 157, 203, 376]] },
+};
+function tRmt(S) {
+  const R = S.rm, D = RMD[R.k], P = D.p;
+  const base = `<div class="rtb" data-spec="${P}:0"><span class="lg">+oo</span>toonation<span class="ic"><span>⌖</span><span>—</span><span>☐</span><span>✕</span></span></div>${LOGO}<h2 data-spec="${P}:0">크리에이터 리모컨 로그인</h2>`;
+  if (!R.m) return `${base}<div class="rbase" data-spec="${P}:0">(프로토타입) 차세대 투네이션 로그인 화면 브라우저 창이 열렸어요.<br>브라우저에서 진행을 마친 뒤 리모컨에서 다시 로그인해 주세요.<br><button data-a="rre">리모컨 다시 로그인</button></div>`;
+  return `${base}<div class="rdim"></div><div class="rmd" data-spec="${P}:1"><h3>${D.h}</h3><div class="rt" style="top:${u(D.tt)}" data-spec="${P}:2">${D.t}</div>
+    <div class="rb ${D.dot ? 'dot' : ''}" style="top:${u(D.bt)};height:${u(D.bh)}" data-spec="${P}:2">${D.items.map((x) => `<div>${x}</div>`).join('')}</div>
+    ${D.btn.map(([t, l, w, top, c, a, sp]) => `<button class="rbt ${c || ''}" style="left:${u(l)};width:${u(w)};top:${u(top)}" data-a="${a || 'rgo'}" data-spec="${sp || P + ':3'}">${t}</button>`).join('')}</div>
+    <div class="rnote">※ 일부 플랫폼 로그인 기능의 "이 컴퓨터를 기억합니다" 기능은<br>작동되지 않습니다.</div>`;
+}
+// 116~118p 아이디·비밀번호 찾기 팝업
+const ftabs = (i) => `<div class="fdt">${['아이디 찾기', '비밀번호 찾기'].map((t, k) => `<button class="${i === k ? 'on' : ''}" data-a="fdtab" data-v="${k}">${t}</button>`).join('')}</div>`;
+const FOPT = [['국내 &nbsp;만14세 미만 회원', '법정대리인 명의 휴대폰으로 인증'], ['국내 &nbsp;만14세 이상 회원', '본인 명의 휴대폰으로 인증'], ['해외 회원', '본인 명의 휴대폰으로 인증']];
+function fOpts(S, top, sp, l) { return `<div class="fopts" style="top:${u(top)};${l ? `left:${u(l)};right:${u(l)}` : ''}" data-spec="${sp}">${FOPT.map(([b, s], i) => `<button class="opt ${S.fd.as === i ? 'on' : ''}" data-a="fdas" data-v="${i}"><b>${b}</b><small>${s}</small></button>`).join('')}</div>`; }
+function tFid(S) { return `${ftabs(0)}<div class="fh" data-spec="116:0">인증 유형을<br>선택해 주세요.</div>${fOpts(S, 205, '116:1')}<button class="fbtn" data-a="fdnext" data-spec="116:1">다음</button>`; }
+function tFidlist(S) {
+  const F = S.fd;
+  return `${ftabs(0)}<div class="fh" data-spec="116:2">보유ID를<br>확인해 주세요.</div>
+    <div class="gtw" style="left:${u(29)};top:${u(192)}" data-spec="116:2"><table class="gtb" style="width:${u(336)}"><colgroup><col style="width:${u(40)}"><col style="width:${u(95)}"><col style="width:${u(100)}"><col style="width:${u(101)}"></colgroup>
+      <tr><th></th><th>투네이션 ID</th><th>가입일</th><th>계정 상태</th></tr>
+      ${FIDS.map(([id, d, st], i) => `<tr data-a="fdsel" data-v="${i}"><td><i class="rd ${F.sel === i ? 'on' : ''}"></i></td><td>${id}</td><td>${d}</td><td style="white-space:nowrap">${st}${st === '탈퇴유예' ? '<span class="qm s" data-a="fdtip">?</span>' : ''}</td></tr>`).join('')}</table></div>
+    ${F.tip ? '<div class="ftip" data-spec="116:2">회원탈퇴를 신청한 SNS 계정입니다. 유예기간(30일) 이내에는 탈퇴 계정이 조회됩니다. 다시 서비스를 이용하시려면 로그인하여 탈퇴 계정을 복구해 주세요.</div>' : ''}
+    <div class="fbb" data-spec="116:3"><button class="l" data-a="fdreset">비밀번호 재설정</button><button data-a="fdlogin">로그인</button></div>`;
+}
+function tFidnone() { return `${ftabs(0)}<div class="fh" style="left:${u(51)}" data-spec="116:0">조회되는 정보가 없습니다.</div><div class="fsub">가입된 투네이션 ID가 없습니다.</div><button class="fbtn" data-a="fdclose" data-spec="116:0">닫기</button>`; }
+function tFpw(S) {
+  const F = S.fd, m = F.it ? vFid(F.id) : '';
+  return `${ftabs(1)}<div class="fh" data-spec="117:0">아이디를<br>입력해 주세요.</div>
+    <div class="ff" style="left:${u(59)};top:${u(230)}" data-spec="117:1"><label>아이디</label><div class="row ${m ? 'err' : ''}"><input data-f="fpid" value="${esc(F.id)}" placeholder="아이디 입력" autocomplete="off"></div>${m ? `<div class="msg">${m}</div>` : ''}</div>
+    <button class="fbtn" data-a="fpnext" data-spec="117:1">다음</button>`;
+}
+function tFpwauth(S) { return `${ftabs(1)}<div class="fh" data-spec="117:0">인증 유형을<br>선택해 주세요.</div>${fOpts(S, 185, '117:0', 25)}<button class="fbtn" data-a="fpanext" data-spec="117:0">다음</button>`; }
+function fpwMsg(F) { return vPw(F.pw, F.t.pw) || vPw2(F.pw2, F.pw, F.t.pw2); }
+function tFpwreset(S) {
+  const F = S.fd, m = fpwMsg(F);
+  const pf = (k, label, v) => `<label>${label}</label><div class="row"><input data-f="${k}" class="${F.eye[k] ? '' : 'pw'}" type="${F.eye[k] ? 'text' : 'password'}" value="${esc(v)}" placeholder="비밀번호 입력" autocomplete="off"><button class="eye" data-a="feye" data-k="${k}">${F.eye[k] ? EYEX : EYE}</button></div>`;
+  return `${ftabs(1)}<div class="fh" style="left:${u(51)}" data-spec="117:0">비밀번호를<br>재설정해 주세요.</div>
+    <div class="ff" style="left:${u(47)};right:${u(51)};top:${u(230)}" data-spec="117:2"><label>아이디</label><div class="row"><span class="rv">${esc(F.uid)}</span></div>
+      <div style="height:${u(16)}"></div>${pf('rpw', '비밀번호', F.pw)}<div class="fn">※ 영문, 특수문자, 숫자 조합 10자 이상<br>&nbsp;&nbsp;&nbsp;입력해주세요.</div>${pf('rpw2', '비밀번호 확인', F.pw2)}<div class="msg">${m}</div></div>
+    <button class="fbtn" data-a="frok" data-spec="117:2">확인</button>`;
+}
+function tFpwdone() { return `${ftabs(1)}<h2 data-spec="118:0">비밀번호가 변경되었습니다.</h2><p>새로운 비밀번호로 다시 로그인해주세요.</p><button class="fbtn" data-a="fdlogin" data-spec="118:0">로그인</button>`; }
+// 3장 프리셋 (state 이름) — 뒤에 .id/.nosns/.snsid/.snsnew 를 붙이면 전환 경로 지정
+function presetConv(scr, v) {
+  const S = scr.S, C = S.cv, F = S.fd;
+  const m = v.match(/^(pick|idpick|snspick)-(c\d)$/);
+  if (m) { S.view = m[1]; const k = { pick: 'pc', idpick: 'ic', snspick: 'sc' }[m[1]]; C[k] = m[2]; C.sel = firstOk((m[1] === 'pick' ? PK : m[1] === 'idpick' ? IDP : SPK)[m[2]]); return true; }
+  const d = v.match(/^cdone(4?)-c(\d)$/);
+  if (d) {
+    S.view = 'cdone'; if (d[1]) C.mode = 'snsnew';
+    const P = '{플랫폼 ID}';
+    C.done = { rows: d[1] ? [[d[2] === '1' ? '크리에이터' : '도네이터', '유튜브', P]] : d[2] === '1' ? [['크리에이터', '유튜브', P], ['도네이터', '유튜브', P]] : [[d[2] === '2' ? '크리에이터' : '도네이터', '유튜브', P]] };
+    return true;
+  }
+  switch (v) {
+    case 'conv': S.view = 'conv'; return true;
+    case 'conv-checked': S.view = 'conv'; C.terms = [1, 1, 0, 0]; return true;
+    case 'cnick': S.view = 'cnick'; return true;
+    case 'cnick-focus': S.view = 'cnick'; C.nick = ''; C.nt = 1; C.nf = 1; return true;
+    case 'cnick-blur': S.view = 'cnick'; C.nick = ''; C.nt = 1; return true;
+    case 'snsl': S.view = 'snsl'; return true;
+    case 'snsl-err': S.view = 'snsl'; PLAT.forEach(([k], i) => { C.le[k] = LERR[['unconv', 'dup', 'fail'][i % 3]]; }); return true;
+    case 'snsl-done': S.view = 'snsl'; PLAT.forEach(([k]) => { C.ln[k] = PID[k]; }); return true;
+    case 'cauth': S.view = 'cauth'; return true;
+    case 'pass-conv': S.view = 'pass'; S.passFor = 'conv'; return true;
+    case 'cnew': S.view = 'cnew'; S.f = { nick: '', id: '', pw: '', pw2: '' }; return true;
+    case 'cnew-filled': S.view = 'cnew'; S.f = { nick: '송송송', id: 'toonaone', pw: 'toona1234!!', pw2: 'toona1234!!' }; S.t = { nick: 1, id: 1, pw: 1, pw2: 1 }; return true;
+    case 'login-conv': S.view = 'login'; Object.assign(S.lg, { id: 'toonaone', pw: 'toonation1', cap: 'ok' }); return true;
+    case 'rmt-conv': case 'rmt-studio': case 'rmt-join': S.view = 'rmt'; S.rm = { k: v.slice(4), m: v.slice(4) }; return true;
+    case 'fid': S.view = 'fid'; return true;
+    case 'fidlist': case 'fidlist-tip': S.view = 'fidlist'; F.tip = v.endsWith('tip'); return true;
+    case 'fidnone': S.view = 'fidnone'; return true;
+    case 'fpw': S.view = 'fpw'; return true;
+    case 'fpw-err': S.view = 'fpw'; F.id = 'tunaking1'; F.toast = '존재하지 않는 사용자입니다.'; F.toastSpec = '117:1'; return true;
+    case 'fpwauth': S.view = 'fpwauth'; return true;
+    case 'fpwreset': S.view = 'fpwreset'; return true;
+    case 'fpwreset-err': S.view = 'fpwreset'; Object.assign(F, { pw: 'toona1234!', pw2: 'toona1234', t: { pw: 1, pw2: 1 } }); return true;
+    case 'fpwdone': S.view = 'fpwdone'; return true;
+  }
+  return false;
+}
 function modal(S) {
   const M = S.modal; if (!M) return '';
+  if (M === 'oauth') { const n = PLAT.find((x) => x[0] === S.cv.oauth)[1]; return `<div class="dim"></div><div class="snsp" style="top:${u(150)}" data-spec="${CSP.sl2}"><h3>${n} 로그인 (OAuth)</h3><p>(프로토타입) ${n} 로그인 결과를 골라 주세요.</p><button data-a="oa" data-v="ok">로그인 성공 — 연결</button><button class="g" data-a="oa" data-v="unconv">통합회원 미전환 SNS 계정</button><button class="g" data-a="oa" data-v="dup">다른 ID에 이미 연결된 계정</button><button class="g" data-a="oa" data-v="fail">세션 정보 가져오기 실패</button><button class="g" data-a="mclose">닫기</button></div>`; }
+  if (M === 'presult') { const id = S.passFor === 'fid'; return `<div class="dim"></div><div class="snsp" data-spec="${id ? '116:1-1' : '117:1-1'}"><h3>본인인증 결과</h3><p>(프로토타입) 본인인증 결과를 골라 주세요.</p>${id ? '<button data-a="pr" data-v="list">인증 성공 — 보유 ID 있음</button><button class="g" data-a="pr" data-v="none">인증 성공 — 조회 정보 없음</button>' : '<button data-a="pr" data-v="ok">인증 성공</button>'}<button class="g" data-a="pr" data-v="fail">본인인증 실패 (정보 불일치)</button></div>`; }
   if (M === 'guard') return `<div class="dim"></div><div class="mdl g" data-spec="30:2"><h3>법정대리인 인증</h3><p>만 14세 미만은 <b>부모님(법정대리인)</b>의<br>동의가 필요합니다.</p><div class="bb"><button class="g" data-a="gcancel" data-spec="30:3">취소</button><button data-a="gok" data-spec="30:4">인증하기</button></div></div>`;
   if (M === 'fail6') return `<div class="dim" style="background:rgba(140,140,140,.75)"></div><div class="mdl f" style="top:${u(207)}" data-spec="47:1"><h3>로그인 실패</h3><p>ID 또는 비밀번호를 6회 이상 잘못 입력<br>했습니다.</p><p style="margin-top:${u(20)}">ID 및 비밀번호를 확인해주세요.<br>※ 회원 정보 찾기로 이동됩니다.</p><button class="ok" data-a="f6ok">확인</button></div>`;
   if (M === 'withdrawn') return `<div class="dim" style="background:rgba(140,140,140,.75)"></div><div class="mdl f" style="top:${u(252)}" data-spec="48:1 49:1"><h3>로그인 실패</h3><p>이미 탈퇴 처리된 투네이션 ID입니다.</p><button class="ok" data-a="mclose">확인</button></div>`;
   if (M === 'err') return `<div class="dim" style="background:rgba(140,140,140,.75)"></div><div class="mdl f" style="top:${u(220)}" data-spec="47:3"><h3>로그인 실패</h3><p>로그인 도중 오류가 발생했습니다.<br>잠시 후 다시 시도해보시기 바랍니다.</p><button class="ok" data-a="mclose">확인</button></div>`;
   if (M === 'daily') return `<div class="dim" style="background:rgba(0,0,0,.25)"></div><div class="mdl b" style="top:${u(250)}" data-spec="35:3"><button class="x" data-a="mclose">×</button>해외인증 시도는 일 최대 10회까지 가능합니다.<br>이용을 계속하시려면 고객센터로 문의해 주세요.<br><button class="ok" data-a="mclose">확인</button></div>`;
   if (M === 'ofail') return `<div class="dim" style="background:rgba(0,0,0,.25)"></div><div class="mdl b" style="top:${u(250)}" data-spec="36:6"><button class="x" data-a="ofailok">×</button>인증이 실패되었습니다.<br>처음부터 다시 시도하여 주시기 바랍니다.<br><button class="ok" data-a="ofailok">확인</button></div>`;
-  if (M === 'sns') { const n = SNS.find((x) => x[0] === S.sns)[1]; return `<div class="dim"></div><div class="snsp" data-spec="54:0"><h3>${n} 로그인</h3><p>(프로토타입) ${n} 계정 로그인 화면 대신<br>결과를 골라 주세요.</p><button data-a="snsmem">투네이션 회원 (연결된 ID 있음)</button><button class="g" data-a="snsnew">비회원 (처음 로그인)</button><button class="g" data-a="mclose">닫기</button></div>`; }
+  if (M === 'sns') { const n = SNS.find((x) => x[0] === S.sns)[1]; return `<div class="dim"></div><div class="snsp" data-spec="54:0"><h3>${n} 로그인</h3><p>(프로토타입) ${n} 계정 로그인 화면 대신<br>결과를 골라 주세요.</p><button data-a="snsmem">투네이션 회원 (연결된 ID 있음)</button><button class="g" data-a="snsnew">비회원 (처음 로그인)</button><button class="g" data-a="snsconv">통합회원 미전환 (기존 ID 연결됨)</button><button class="g" data-a="snsconv2">통합회원 미전환 (투네이션 ID 미연결)</button><button class="g" data-a="mclose">닫기</button></div>`; }
   return '';
 }
 // 입력 중에는 다시 그리지 않고 메시지·버튼만 갱신
@@ -491,6 +846,7 @@ Screen.prototype.sync = function () {
   if (S.view === 'login') { const b = el.querySelector('.lbtn'); if (b) b.disabled = !(S.lg.id && S.lg.pw && S.lg.cap === 'ok'); }
   if (S.view === 'ovsp') { const b = el.querySelector('[data-a="pnext"]'); if (b) b.disabled = !(S.ovs.cc && S.ovs.ph); }
   if (S.view === 'ovsc') { const b = el.querySelector('[data-a="cnext"]'); if (b) b.disabled = !(S.oc.v.length === 6 && !S.oc.dead); }
+  if (S.view === 'cnick') { const b = el.querySelector('[data-a="cngo"]'); if (b) b.disabled = !!vCnick(S.cv.nick); }
   if (S.view === 'tfcode') { const b = el.querySelector('[data-a="tfok"]'); if (b) b.disabled = !(S.tf.code.length === 6 && S.tf.st !== 'wrong' && S.tf.st !== 'limit'); }
 };
 
@@ -506,8 +862,10 @@ Screen.prototype.act = function (a, b, e) {
     case 'doc': S.doc = +b.dataset.i; S.ddl = false; this.render(); break;
     case 'tnext': this.toast('약관 동의 저장 — 인증 유형 선택으로 이동'); S.sel = null; this.go('authsel'); break;
     case 'sel': S.sel = v; this.render(); break;
-    case 'anext': S.path = S.sel; if (S.sel === 'ovs') { S.ovs = { ...S.ovs, cc: '', ph: '', dd: false, msg: '' }; this.go('ovsp'); } else { this.go('pass'); this.toast('(프로토타입) PASS 앱(팝업) — 통신사를 골라 본인인증'); } break;
+    case 'anext': S.passFor = null; S.path = S.sel; if (S.sel === 'ovs') { S.ovs = { ...S.ovs, cc: '', ph: '', dd: false, msg: '' }; this.go('ovsp'); } else { this.go('pass'); this.toast('(프로토타입) PASS 앱(팝업) — 통신사를 골라 본인인증'); } break;
     case 'telco':
+      if (S.passFor === 'conv') { this.toast(`(프로토타입) ${v} 본인인증 완료 — 전환할 SNS 계정 정보 선택`); S.cv.sel = 0; setTimeout(() => this.go('snspick'), 500); break; }
+      if (S.passFor) { this.toast(`(프로토타입) ${v} 본인인증`); setTimeout(() => { S.modal = 'presult'; this.render(); }, 400); break; }
       if (S.view === 'plegal') { this.toast('법정대리인 본인인증 완료 — 동의 이력 저장'); setTimeout(() => this.go('newid'), 500); break; }
       this.toast(`(프로토타입) ${v} 본인인증 완료`);
       setTimeout(() => { if (S.path === 'u14') { S.modal = 'guard'; this.render(); } else this.go('newid'); }, 500);   // 투네이션 서버에서 생년월일 기준으로 법정대리인 인증 여부 판단
@@ -545,13 +903,84 @@ Screen.prototype.act = function (a, b, e) {
     case 'findpw': S.find = 1; this.go('find'); break;
     case 'ftab': S.find = +v; this.render(); break;
     case 'fsel': S.fsel = +v; this.render(); break;
-    case 'fnext': this.toast(`(프로토타입) ${S.find ? '비밀번호' : '아이디'} 찾기 — 3장(77~78p) 범위`); break;
+    case 'fnext':
+      if (S.find) { S.fd.id = ''; S.fd.it = 0; S.fd.toast = ''; this.go('fpw'); break; }
+      if (S.fsel == null) { this.toast('인증 유형을 선택해 주세요.'); break; }
+      S.passFor = 'fid'; this.go('pass'); this.toast('(프로토타입) PASS 본인인증 — 통신사를 골라 주세요'); break;
     case 'join': S.terms = [0, 0, 0, 0]; this.go('terms'); break;
     case 'sns': if (S.lg.cap !== 'ok') { this.toast('보안 인증을 확인하는 중입니다'); break; } S.sns = v; S.modal = 'sns'; this.render(); break;
     case 'snsmem': if (S.sns === 'payco') { S.modal = 'err'; this.render(); break; } S.modal = null; Object.assign(S.lg, { id: 'tunaone', pw: '••••••••••' }); this.render(); this.toast('기존 회원 — 통합 ID 자동 입력 후 로그인'); setTimeout(() => this.go('okp'), 900); break;
     case 'snsnew': S.modal = null; S.terms = [0, 0, 0, 0]; this.go('terms'); this.toast('비회원 — 회원가입 화면으로 이동 (가입 후 SNS 계정 자동 연결)', 3200); break;
     case 'relogin': S.hist = []; this.go('login', false); break;
     case 'tfm': S.tf.m = v; this.render(); break;
+    /* ----- 3장 통합회원 전환 ----- */
+    case 'snsconv': S.modal = null; S.cv.mode = 'snsid'; this.startConv('SNS 로그인 — 통합회원 미전환 (기존 투네이션 ID 연결 상태) → 전환 안내'); break;
+    case 'snsconv2': S.modal = null; S.cv.mode = 'snsnew'; this.startConv('SNS 로그인 — 통합회원 미전환 (투네이션 ID 미연결 상태) → 전환 안내'); break;
+    case 'cvall': { const on = !S.cv.terms.every(Boolean); S.cv.terms = S.cv.terms.map(() => (on ? 1 : 0)); this.render(); break; }
+    case 'cv1': S.cv.terms[+b.dataset.i] ^= 1; this.render(); break;
+    case 'cvout': S.hist = []; this.go('login', false); this.toast('로그아웃 — 통합 로그인 화면으로 이동'); break;
+    case 'cvgo': {
+      const C = S.cv; this.toast('약관 동의 저장' + (C.terms[2] ? '' : ' — 크리에이터 약관 미동의: 크리에이터 최초 진입 시 동의 필요'), 2800);
+      if (C.mode === 'nosns') { C.nick = '송송송'; C.nt = 0; C.nf = 0; this.go('cnick'); }
+      else if (C.mode === 'snsid') { C.ic = 'c1'; C.sel = 0; this.go('idpick'); }
+      else if (C.mode === 'snsnew') { C.as = 0; this.go('cauth'); }
+      else { C.pc = 'c1'; C.sel = firstOk(PK.c1); C.tid = 'toonaone'; this.go('pick'); }
+      break;
+    }
+    case 'gsel': S.cv.sel = +v; this.render(); break;
+    case 'pkgo': {
+      const C = S.cv, g = PK[C.pc][C.sel]; if (!g || g.dis) break;
+      C.done = { rows: g.r.map(([id, t, p]) => [t, p, id]) }; C.tid = 'toonaone'; C.nick = '송송송'; C.nt = 0; C.nf = 0; this.go('cnick'); break;
+    }
+    case 'ipgo': {
+      const C = S.cv, g = IDP[C.ic][C.sel];
+      C.done = { rows: g.r.map(([t, p]) => [t, p, SNSID]) }; C.tid = g.r[0][2]; C.nick = '송송송'; C.nt = 0; C.nf = 0; this.go('cnick'); break;
+    }
+    case 'cngo': this.toast('닉네임 저장 (닉네임 중복 가능)'); if (S.cv.mode === 'nosns') { S.cv.ln = {}; S.cv.le = {}; this.go('snsl'); } else this.go('cdone'); break;
+    case 'cdfin': S.cv.ln = {}; S.cv.le = {}; this.toast('통합회원 전환 완료 — SNS 간편 로그인 연결'); this.go('snsl'); break;
+    case 'slink': S.cv.oauth = v; S.modal = 'oauth'; this.render(); break;
+    case 'oa': {
+      const C = S.cv, k = C.oauth; S.modal = null;
+      if (v === 'ok') { C.ln[k] = PID[k]; delete C.le[k]; } else { C.le[k] = LERR[v]; }
+      this.render(); break;
+    }
+    case 'sstart': S.hist = []; this.go('login', false); this.toast('비로그인 상태로 통합 로그인 화면으로 이동 — 전환된 투네이션 ID로 로그인'); break;
+    case 'cvas': S.cv.as = +v; this.render(); break;
+    case 'cago': S.passFor = 'conv'; this.go('pass'); this.toast('(프로토타입) PASS 본인인증 — 통신사를 골라 주세요'); break;
+    case 'spgo': {
+      const C = S.cv, g = SPK[C.sc][C.sel];
+      C.done = { rows: g.r.map(([t, p]) => [t, p, SNSID]) }; S.f = { nick: '송송송', id: '', pw: '', pw2: '' }; S.t = { nick: 1 }; S.eye = {}; this.go('cnew'); break;
+    }
+    case 'cnnext': S.cv.tid = S.f.id; this.toast('입력 데이터 저장 — 신규 투네이션 ID 생성'); this.go('cdone'); break;
+    case 'rgo': { const k = S.rm.k; S.rm.m = null; this.render(); this.toast(k === 'studio' ? '차세대 투네이션 > 로그인 화면 브라우저 창 호출 — 로그인 후 스튜디오 최초 진입 플로우' : '모달 닫힘 — 차세대 투네이션 > 로그인 화면 브라우저 창 호출', 3200); break; }
+    case 'rother': S.rm.m = null; this.render(); this.toast('로그아웃 및 모달 닫힘'); break;
+    case 'rre': S.rm.m = S.rm.k; this.render(); break;
+    /* ----- 아이디·비밀번호 찾기 팝업 ----- */
+    case 'fdtab': S.hist = []; S.fd.toast = ''; if (+v) { S.fd.id = ''; S.fd.it = 0; this.go('fpw', false); } else { S.fd.as = 0; this.go('fid', false); } break;
+    case 'fdas': S.fd.as = +v; this.render(); break;
+    case 'fdnext': S.passFor = 'fid'; this.go('pass'); this.toast('(프로토타입) PASS 본인인증 — 통신사를 골라 주세요'); break;
+    case 'pr': {
+      S.modal = null;
+      if (v === 'list') { S.fd.sel = 0; S.fd.tip = false; this.go('fidlist'); break; }
+      if (v === 'none') { this.go('fidnone'); break; }
+      if (v === 'ok') { this.resetPw(); this.go('fpwreset'); break; }
+      const prev = S.hist.pop(); this.go(prev || (S.passFor === 'fid' ? 'fid' : 'fpwauth'), false);
+      this.ftoast('본인인증 정보와 아이디가 일치하지 않습니다', S.passFor === 'fid' ? '116:1-1' : '117:1-1'); break;
+    }
+    case 'fdsel': S.fd.sel = +v; this.render(); break;
+    case 'fdtip': if (e) e.stopPropagation(); S.fd.tip = !S.fd.tip; this.render(); break;
+    case 'fdreset': S.fd.uid = FIDS[S.fd.sel][0]; this.resetPw(); this.go('fpwreset'); this.toast('아이디 찾기 후 비밀번호 재설정 — 재인증 단계 없음'); break;
+    case 'fdlogin': { const id = S.view === 'fidlist' ? FIDS[S.fd.sel][0] : S.fd.uid; S.hist = []; this.go('login', false); S.lg.id = id; this.render(); break; }
+    case 'fdclose': S.hist = []; this.go('login', false); this.toast('(프로토타입) 팝업 닫힘'); break;
+    case 'fpnext': {
+      const F = S.fd; F.it = 1;
+      if (vFid(F.id)) { this.render(); break; }
+      if (!KNOWN.includes(F.id.toLowerCase())) { this.ftoast('존재하지 않는 사용자입니다.', '117:1'); break; }
+      F.uid = F.id; F.as = 0; F.toast = ''; this.go('fpwauth'); break;
+    }
+    case 'fpanext': S.passFor = 'fpw'; this.go('pass'); this.toast('(프로토타입) PASS 본인인증 — 통신사를 골라 주세요'); break;
+    case 'feye': S.fd.eye[b.dataset.k] = !S.fd.eye[b.dataset.k]; this.render(); break;
+    case 'frok': { const F = S.fd; F.t = { pw: 1, pw2: 1 }; if (fpwMsg(F)) { this.render(); break; } this.go('fpwdone'); break; }
     case 'tfgo': this.go('tfcode'); break;
     case 'tfback': this.go('tfsel'); break;
     case 'tfcancel': S.hist = []; this.go('login', false); this.toast('로그인 취소 — 로그인 페이지로 이동 (2차 인증 미완료 시 로그인 세션 없음)'); break;
@@ -565,6 +994,8 @@ Screen.prototype.doLogin = function () {
   const S = this.S, L = S.lg;
   L.mId = L.id ? '' : '아이디를 입력해주세요.'; L.mPw = L.pw ? '' : '비밀번호를 입력해주세요.';
   if (!L.id || !L.pw) { this.render(); return; }
+  const lid = L.id.toLowerCase();
+  if (lid === 'toonaone' || lid === 'solo') { L.fails = 0; S.cv.mode = lid === 'solo' || S.cv.mode === 'nosns' ? 'nosns' : 'id'; this.startConv(S.cv.mode === 'nosns' ? '통합회원 미전환 계정 (연결된 SNS 없음) — 통합회원 전환 안내로 이동' : '통합회원 미전환 계정 — 통합회원 전환 안내로 이동'); return; }
   if (L.id.toLowerCase() === 'bye') { S.modal = 'withdrawn'; this.render(); return; }   // 완전탈퇴 계정
   if (L.id.toLowerCase() === 'stop') { L.mPw = '로그인이 불가능합니다. 고객센터로 문의해 주세요.'; this.render(); return; }   // 27p 사용정지 (비밀번호 횟수 초과로 정지된 아이디)
   if (L.pw === '1234') { L.fails = 0; if (L.id.toLowerCase() === 'tunaone') { this.toast('2차 인증 ON 계정 — 2차 인증 미완료 시 로그인 세션 없음'); this.go('tfsel'); } else { this.go('okp'); } return; }
@@ -572,6 +1003,9 @@ Screen.prototype.doLogin = function () {
   if (L.fails >= 6) { S.modal = 'fail6'; this.render(); return; }
   L.mPw = '아이디 또는 비밀번호가 일치하지 않습니다.'; this.render(); this.toast(`로그인 실패 ${L.fails}회 (6회째에 실패 모달)`);
 };
+Screen.prototype.startConv = function (msg) { const S = this.S; S.cv.terms = [0, 0, 0, 0]; S.hist = ['login']; this.go('conv', false); this.toast(msg, 3200); };
+Screen.prototype.ftoast = function (m, sp) { const F = this.S.fd; F.toast = m; F.toastSpec = sp; this.render(); clearTimeout(this.ft); this.ft = setTimeout(() => { F.toast = ''; this.render(); }, 2600); };
+Screen.prototype.resetPw = function () { Object.assign(this.S.fd, { pw: '', pw2: '', t: {}, eye: {} }); };
 Screen.prototype.resend2 = function () {
   const T = this.S.tf; T.req++;
   if (T.req >= 10) { T.st = 'limit'; T.lock = 24 * 3600 - 1; T.code = ''; this.render(); return; }   // 1일 10번 이상: 재전송 버튼 비노출
@@ -590,11 +1024,22 @@ Screen.prototype.input = function (t) {
       let md = fb.querySelector('.msg'); fb.querySelector('.row').classList.toggle('err', !!m);
       if (m) { if (!md) { md = document.createElement('div'); md.className = 'msg'; fb.append(md); } md.textContent = m; md.dataset.spec = '39:' + { nick: '닉네임', id: '아이디', pw: '비밀번호', pw2: '비밀번호 확인' }[kk]; } else if (md) md.remove();
     });
-    const nb = this.el.querySelector('[data-a="nnext"]'); if (nb) nb.disabled = !newIdOk(S);
+    const nb = this.el.querySelector('[data-a="nnext"],[data-a="cnnext"]'); if (nb) nb.disabled = !newIdOk(S);
   }
   if (k === 'ph') { const c = t.value.replace(/\D/g, ''); if (c !== t.value) t.value = c; S.ovs.ph = c; }   // 숫자 외 문자 입력 불가
   if (k === 'oc') { const c = t.value.replace(/\D/g, '').slice(0, 6); if (c !== t.value) t.value = c; S.oc.v = c; }
   if (k === 'lid') { S.lg.id = t.value; if (t.value) S.lg.mId = ''; }
+  if (k === 'cnick') {
+    S.cv.nick = t.value; S.cv.nt = 1; const m = vCnick(t.value), box = this.el.querySelector('.cnf');
+    box.querySelector('.row').classList.toggle('err', !!m); let md = box.querySelector('.msg');
+    if (m) { if (!md) { md = document.createElement('div'); md.className = 'msg'; box.querySelector('.row').after(md); } md.textContent = m; } else if (md) md.remove();
+  }
+  if (k === 'fpid') {
+    S.fd.id = t.value; S.fd.it = 1; const m = vFid(t.value), box = this.el.querySelector('.ff');
+    box.querySelector('.row').classList.toggle('err', !!m); let md = box.querySelector('.msg');
+    if (m) { if (!md) { md = document.createElement('div'); md.className = 'msg'; box.append(md); } md.textContent = m; } else if (md) md.remove();
+  }
+  if (k === 'rpw' || k === 'rpw2') { const F = S.fd; F[k === 'rpw' ? 'pw' : 'pw2'] = t.value; F.t[k === 'rpw' ? 'pw' : 'pw2'] = 1; if (k === 'rpw' && F.pw2) F.t.pw2 = 1; const md = this.el.querySelector('.ff .msg'); if (md) md.textContent = fpwMsg(F); }
   if (k === 'lpw') S.lg.pw = t.value;
   if (t.dataset.c != null) {   // 2차 인증 6칸: 숫자만, 입력하면 다음 칸으로
     const T = S.tf, i = +t.dataset.c, d = t.value.replace(/\D/g, '').slice(-1);
@@ -633,6 +1078,7 @@ F.addEventListener('click', (e) => {
   if (S.view === 'ovsp' && S.ovs.dd && !e.target.closest('.dd')) { S.ovs.dd = false; s.render(); return; }
   if (S.view === 'detail' && S.ddl && !e.target.closest('.ddl,.sel')) { S.ddl = false; s.render(); return; }
   if (S.tf && S.tf.tip && !e.target.closest('.qm')) { S.tf.tip = false; s.render(); }
+  if (S.view === 'fidlist' && S.fd.tip && !e.target.closest('.qm,.ftip')) { S.fd.tip = false; s.render(); return; }
   const b = e.target.closest('[data-a]'); if (!b || b.disabled) return;
   s.act(b.dataset.a, b, e);
 });
@@ -640,7 +1086,7 @@ F.addEventListener('input', (e) => { const s = scrOf(e.target); if (s) s.input(e
 F.addEventListener('focusout', (e) => { const s = scrOf(e.target); if (s && e.target.dataset.f) s.blur(e.target); });
 F.addEventListener('focusin', (e) => {
   const s = scrOf(e.target); if (!s) return;
-  if (e.target.dataset.f === 'lid' && !s.S.lg.hint) { s.S.lg.hint = true; s.toast('(프로토타입) 비밀번호 1234 = 로그인 · tunaone = 2차 인증 ON · bye = 완전탈퇴 · stop = 사용정지 계정', 4500); }
+  if (e.target.dataset.f === 'lid' && !s.S.lg.hint) { s.S.lg.hint = true; s.toast('(프로토타입) 비밀번호 1234 = 로그인 · tunaone = 2차 인증 ON · bye = 완전탈퇴 · stop = 사용정지 · toonaone = 통합회원 미전환 · solo = 미전환(SNS 없음)', 5000); }
 });
 F.addEventListener('keydown', (e) => {
   const s = scrOf(e.target); if (!s) return;
@@ -714,6 +1160,25 @@ function runEvent(name, value) {
       break;
     }
     case 'sns': { const s = pick(['login']); if (s.S.view !== 'login') s.preset('login-filled'); s.S.lg.cap = 'ok'; s.act('sns', { dataset: { v: 'kakao' } }); setTimeout(() => s.act(value === 'new' ? 'snsnew' : 'snsmem', { dataset: {} }), 800); break; }
+    case 'conv': {
+      const s = pick(['login']); if (s.S.view !== 'login') s.preset('login-conv'); const L = s.S.lg; L.cap = 'ok';
+      if (value === 'id' || value === 'nosns') { s.S.cv.mode = 'id'; L.id = value === 'id' ? 'toonaone' : 'solo'; L.pw = 'toonation1'; s.render(); s.doLogin(); }
+      else { s.render(); s.act('sns', { dataset: { v: 'youtube' } }); setTimeout(() => s.act(value === 'snsid' ? 'snsconv' : 'snsconv2', { dataset: {} }), 700); }
+      break;
+    }
+    case 'pick': { const s = pick(['pick']); s.preset('pick-' + value); s.toast({ c1: '병합 조건 부합 — 병합 계정 리스트 최상단', c2: '병합 조건 미부합 — 연결 계정 리스트', c3: '탈퇴 유예 계정은 선택 불가', c4: '모든 연결 계정이 선택 불가 — [다음] 비활성화' }[value], 2800); break; }
+    case 'cnick': { const s = pick(['cnick']); if (s.S.view !== 'cnick') s.preset('cnick'); s.S.cv.nick = value === 'empty' ? '' : '송송😀'; s.S.cv.nt = 1; s.render(); break; }
+    case 'snsl': { const s = pick(['snsl']); if (s.S.view !== 'snsl') s.preset('snsl'); s.S.cv.oauth = value === 'ok' ? 'kakao' : 'twitch'; s.act('oa', { dataset: { v: value } }); break; }
+    case 'rmt': { const s = pick(['rmt']); s.preset('rmt-' + value); break; }
+    case 'find': {
+      const s = pick(['fid', 'fidlist', 'fidnone', 'fpw', 'fpwauth', 'fpwreset', 'fpwdone']); const F = s.S.fd;
+      if (value.startsWith('id-')) { s.preset('fid'); s.act('fdnext', { dataset: {} }); setTimeout(() => { s.S.modal = 'presult'; s.render(); setTimeout(() => s.act('pr', { dataset: { v: { 'id-ok': 'list', 'id-none': 'none', 'id-fail': 'fail' }[value] } }), 600); }, 500); }
+      if (value === 'pw-invalid') { s.preset('fpw'); F.id = 'ab!'; s.act('fpnext', { dataset: {} }); }
+      if (value === 'pw-unknown') { s.preset('fpw'); F.id = 'nouser77'; s.act('fpnext', { dataset: {} }); }
+      if (value === 'pw-fail') { s.preset('fpwauth'); s.act('fpanext', { dataset: {} }); setTimeout(() => { s.S.modal = 'presult'; s.render(); setTimeout(() => s.act('pr', { dataset: { v: 'fail' } }), 600); }, 500); }
+      if (value === 'pw-reset') { s.preset('fpwreset'); Object.assign(F, { pw: 'abcdefghij', pw2: 'abc' }); s.act('frok', { dataset: {} }); }
+      break;
+    }
     case '2fa': {
       const s = pick(['tfcode', 'tfsel']);
       if (value === 'phone' || value === 'email') { if (s.S.view !== 'tfsel') s.preset('2fa-select'); s.S.tf.m = value; s.render(); setTimeout(() => s.act('tfgo', { dataset: {} }), 400); break; }
