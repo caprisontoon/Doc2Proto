@@ -1,5 +1,197 @@
 {
  "apps": {
+  "auth": {
+   "title": "통합 회원가입 · 로그인",
+   "src": "live/auth/index.html",
+   "size": [
+    703.5,
+    442.5
+   ],
+   "clear": true,
+   "events": [
+    {
+     "group": "약관 · 인증 유형",
+     "items": [
+      {
+       "label": "전체 동의하기",
+       "name": "terms",
+       "value": "all",
+       "page": 28
+      },
+      {
+       "label": "약관 상세 보기",
+       "name": "terms",
+       "value": "detail",
+       "page": 28
+      },
+      {
+       "label": "국내 만14세 미만 → PASS",
+       "name": "flow",
+       "value": "u14",
+       "page": 30
+      },
+      {
+       "label": "국내 만14세 이상 → PASS",
+       "name": "flow",
+       "value": "o14",
+       "page": 33
+      },
+      {
+       "label": "해외 회원 → 해외 휴대폰",
+       "name": "flow",
+       "value": "ovs",
+       "page": 35
+      }
+     ]
+    },
+    {
+     "group": "해외 휴대폰 인증",
+     "items": [
+      {
+       "label": "인증번호 오입력",
+       "name": "ovs",
+       "value": "wrong",
+       "page": 36
+      },
+      {
+       "label": "입력시간 초과",
+       "name": "ovs",
+       "value": "timeout",
+       "page": 38
+      },
+      {
+       "label": "재전송 10회 초과",
+       "name": "ovs",
+       "value": "resend",
+       "page": 38
+      },
+      {
+       "label": "4회 초과 인증 실패",
+       "name": "ovs",
+       "value": "fail",
+       "page": 38
+      },
+      {
+       "label": "발송 10회 초과 (1일)",
+       "name": "ovs",
+       "value": "daily",
+       "page": 38
+      }
+     ]
+    },
+    {
+     "group": "신규 ID 생성",
+     "items": [
+      {
+       "label": "안내 메시지(에러) 예시",
+       "name": "newid",
+       "value": "errors",
+       "page": 31
+      },
+      {
+       "label": "올바르게 입력",
+       "name": "newid",
+       "value": "fill",
+       "page": 31
+      }
+     ]
+    },
+    {
+     "group": "통합 로그인",
+     "items": [
+      {
+       "label": "아이디·비밀번호 누락",
+       "name": "login",
+       "value": "empty",
+       "page": 45
+      },
+      {
+       "label": "아이디·비밀번호 불일치",
+       "name": "login",
+       "value": "wrong",
+       "page": 45
+      },
+      {
+       "label": "6회 이상 실패 → 회원 정보 찾기",
+       "name": "login",
+       "value": "fail6",
+       "page": 47
+      },
+      {
+       "label": "그 외 오류 (페이코)",
+       "name": "login",
+       "value": "payco",
+       "page": 47
+      },
+      {
+       "label": "완전탈퇴 계정",
+       "name": "login",
+       "value": "withdrawn",
+       "page": 48
+      },
+      {
+       "label": "2차 인증 ON 계정",
+       "name": "login",
+       "value": "2fa",
+       "page": 50
+      },
+      {
+       "label": "SNS 로그인 — 기존 회원",
+       "name": "sns",
+       "value": "member",
+       "page": 54
+      },
+      {
+       "label": "SNS 로그인 — 비회원(회원가입)",
+       "name": "sns",
+       "value": "new",
+       "page": 54
+      }
+     ]
+    },
+    {
+     "group": "2차 인증",
+     "items": [
+      {
+       "label": "휴대폰 인증번호 입력",
+       "name": "2fa",
+       "value": "phone",
+       "page": 51
+      },
+      {
+       "label": "이메일 인증번호 입력",
+       "name": "2fa",
+       "value": "email",
+       "page": 51
+      },
+      {
+       "label": "인증 시간 만료",
+       "name": "2fa",
+       "value": "expire",
+       "page": 52
+      },
+      {
+       "label": "인증번호 잘못 입력",
+       "name": "2fa",
+       "value": "wrong",
+       "page": 52
+      },
+      {
+       "label": "1일 8회째 요청",
+       "name": "2fa",
+       "value": "req8",
+       "page": 52
+      },
+      {
+       "label": "1일 10회 이상 요청",
+       "name": "2fa",
+       "value": "req10",
+       "page": 52
+      }
+     ]
+    }
+   ]
+  },
   "home": {
    "title": "통합 홈",
    "src": "live/home/index.html",
@@ -211,6 +403,215 @@
   }
  },
  "frames": [
+  {
+   "page": 28,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "terms@48,48|terms-checked@503,48|terms-detail@958,48",
+   "app": "auth"
+  },
+  {
+   "page": 29,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "authsel@503,48",
+   "app": "auth"
+  },
+  {
+   "page": 30,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "auth-u14@48,48|pass-u14@503,48|pass-guard@958,48",
+   "app": "auth"
+  },
+  {
+   "page": 31,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "pass-legal@48,48|newid@503,48|newid-filled@958,48",
+   "app": "auth"
+  },
+  {
+   "page": 32,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "done@48,48",
+   "app": "auth"
+  },
+  {
+   "page": 33,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "auth-o14@48,48|pass-o14@503,48|newid@958,48",
+   "app": "auth"
+  },
+  {
+   "page": 34,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "newid-filled@48,48|done@501,48",
+   "app": "auth"
+  },
+  {
+   "page": 35,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "auth-ovs@48,48|ovs-phone@503,48|ovs-code@958,48",
+   "app": "auth"
+  },
+  {
+   "page": 36,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "auth-ovs@48,48|ovs-phone@503,48|ovs-code@958,48",
+   "app": "auth"
+  },
+  {
+   "page": 37,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "newid@48,48|newid-filled@503,48|done@958,48",
+   "app": "auth"
+  },
+  {
+   "page": 38,
+   "rect": {
+    "l": 2.083,
+    "t": 12.963,
+    "w": 70.833,
+    "h": 67.593
+   },
+   "state": "1360x730|ovs-phone-err@24,10,400,706|ovs-code@921,10,400,706",
+   "app": "auth"
+  },
+  {
+   "page": 45,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "login@201,62,400,744|login-filled@809,62,400,744",
+   "app": "auth"
+  },
+  {
+   "page": 47,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "login-err@48,62,400,735|fail6@508,62,400,705|find@970,62,397,703",
+   "app": "auth"
+  },
+  {
+   "page": 48,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "login-filled@201,62,400,705|withdrawn@809,62,400,705",
+   "app": "auth"
+  },
+  {
+   "page": 49,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "withdrawn@503,62,400,705",
+   "app": "auth"
+  },
+  {
+   "page": 50,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "login-filled@201,62,400,705|2fa-select@809,62,400,705",
+   "app": "auth"
+  },
+  {
+   "page": 51,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "2fa-select@81,62,400,705|2fa-phone@510,62,400,705|2fa-email-filled@939,62,400,705",
+   "app": "auth"
+  },
+  {
+   "page": 52,
+   "rect": {
+    "l": 3.125,
+    "t": 17.593,
+    "w": 69.792,
+    "h": 79.167
+   },
+   "state": "1340x855|c-wait@25,10,400,386|c-expired@469,10,400,386|c-wrong@919,10,400,386|c-toast@25,462,400,386|c-limit@469,462,400,386",
+   "app": "auth"
+  },
+  {
+   "page": 54,
+   "rect": {
+    "l": 1.302,
+    "t": 12.037,
+    "w": 73.281,
+    "h": 81.944
+   },
+   "state": "login@56,62,400,705",
+   "app": "auth"
+  },
   {
    "page": 119,
    "rect": {

@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>차세대 투네이션 통합 회원가입·로그인 — 동작 프로토타입</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:transparent}</style>
+</head>
+<body>
+<div id="F"></div>
+<script>
+/* 차세대 투네이션 통합 회원가입·로그인·인증 동작 프로토타입 (차세대 투네이션 통합 홈 v3.5 27~58p)
+   한 슬라이드에 그려진 화면 여러 개를 각각 독립된 동작 화면으로 띄운다 (사이 화살표·설명은 투명 배경 아래 스냅샷이 보임)
+   state = "[프레임폭x높이|]화면상태@x,y[,w,h]|화면상태@x,y..."  · 단위 = 기획서 스냅샷 px (슬라이드 1920px 기준)
+   data-spec="페이지:항목" 은 기획서 Description 항목 */
+(function () {
+'use strict';
+const q = new URLSearchParams(location.search || location.hash.slice(1));
+const EMBED = q.has('embed');
+const PARTS = (q.get('state') || 'terms@48,48|authsel@503,48|login@958,48').split('|');
+let FW = 1407, FH = 885;
+if (/^\d+x\d+$/.test(PARTS[0])) [FW, FH] = PARTS.shift().split('x').map(Number);
+const DEFS = PARTS.map((p) => { const [v, pos] = p.split('@'); const n = (pos || '0,0').split(',').map(Number); return { v, x: n[0] || 0, y: n[1] || 0, w: n[2] || 400, h: n[3] || 705 }; });
+const u = (n) => `calc(${n}*var(--u))`;
+
+const CSS = `
+:root{--u:1px}
+*{box-sizing:border-box}
+body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo','Noto Sans KR',sans-serif;-webkit-font-smoothing:antialiased}
+#F{position:relative;width:${u(FW)};height:${u(FH)};overflow:hidden;user-select:none;-webkit-user-select:none}
+${EMBED ? '' : '#F{margin:0 auto;background:#eef0f3}body{display:flex;align-items:center;justify-content:center;background:#e9ebef}'}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input{font:inherit;color:inherit;border:0;outline:0;background:none;padding:0;min-width:0}
+svg{display:block}
+.scr{position:absolute;background:#fff;border:${u(3)} solid #a6a6a6;overflow:hidden;color:#1d1d1f;font-size:${u(16)}}
+.scr.cut{border-width:${u(3)}}
+.in{position:absolute;inset:0}
+/* 공통: 회원가입 머리 */
+.ttl{position:absolute;left:0;right:0;top:${u(27)};text-align:center;font-size:${u(20)}}
+.prog{position:absolute;left:${u(27)};right:${u(27)};top:${u(75)};height:${u(7)};display:flex;gap:${u(2)}}
+.prog i{flex:1;background:#dcdcdc}.prog i.on{background:#4a90f0}
+.h1{position:absolute;left:${u(37)};top:${u(115)};font-size:${u(26)};line-height:${u(30)}}
+.btns{position:absolute;left:${u(30)};right:${u(30)};bottom:${u(26)};display:flex;gap:${u(12)}}
+.btns button{flex:1;height:${u(53)};border-radius:${u(9)};font-size:${u(18)};color:#fff;background:#3d3d3d}
+.btns button.g,.btns button:disabled{background:#bdbdbd;cursor:default}
+.btns button.g{cursor:pointer}
+/* 약관 */
+.chk{display:inline-block;width:${u(15)};height:${u(15)};border:${u(1.6)} solid #444;vertical-align:middle;margin-right:${u(7)};position:relative;top:${u(-1)};flex:none}
+.chk.on{background:#222}
+.agall{position:absolute;left:${u(37)};top:${u(216)};font-size:${u(21)};font-weight:700;display:flex;align-items:center}
+.agsub{position:absolute;left:${u(58)};top:${u(254)};font-size:${u(15)};line-height:${u(20)};color:#555;letter-spacing:${u(-.3)}}
+.agl{position:absolute;left:${u(37)};right:${u(34)};top:${u(328)}}
+.agi{display:flex;align-items:center;height:${u(43)};font-size:${u(15.5)};font-weight:700;letter-spacing:${u(-.6)};white-space:nowrap}
+.agi em{font-style:normal;font-weight:400;margin-right:${u(6)};color:#999;flex:none}
+.agi em.r{color:#1a6bff}
+.agi .gt{margin-left:auto;font-weight:400;width:${u(22)};height:${u(30)};display:flex;align-items:center;justify-content:center;color:#555}
+/* 약관 상세 */
+.dt .lg{position:absolute;left:${u(28)};top:${u(20)};display:flex;align-items:center;gap:${u(5)};font-weight:700;font-size:${u(15)}}
+.dt .gl{position:absolute;right:${u(20)};top:${u(20)};color:#555}
+.dt .gl svg{width:${u(20)};height:${u(20)}}
+.dt .cl{position:absolute;right:${u(48)};top:${u(16)};font-size:${u(20)};color:#777}
+.dt hr{position:absolute;left:0;right:0;top:${u(55)};margin:0;border:0;border-top:${u(1)} solid #e6e6e6}
+.dt h4{position:absolute;left:${u(28)};top:${u(94)};margin:0;font-size:${u(19)}}
+.dt .sel{position:absolute;left:${u(28)};right:${u(22)};top:${u(136)};height:${u(39)};background:#222;color:#fff;border-radius:${u(6)};display:flex;align-items:center;justify-content:space-between;padding:0 ${u(14)};font-size:${u(12)};font-weight:700}
+.dt .ddl{position:absolute;left:${u(28)};right:${u(22)};top:${u(176)};background:#fff;border:${u(1)} solid #ccc;z-index:3;font-size:${u(13)}}
+.dt .ddl button{display:block;width:100%;text-align:left;padding:${u(8)} ${u(14)}}
+.dt .ddl button:hover{background:#f2f2f2}
+.dt .bx{position:absolute;left:${u(30)};right:${u(22)};top:${u(192)};height:${u(123)};background:#fafafa;border:${u(1)} solid #e6e6e6;border-radius:${u(6)};padding:${u(18)} ${u(18)};font-size:${u(10.5)};line-height:${u(16)};color:#555}
+.dt .bx .d{display:flex;align-items:center;margin-top:${u(20)};gap:${u(16)};font-size:${u(12)}}
+.dt .bx .d span{flex:1;height:${u(39)};border:${u(1)} solid #ddd;border-radius:${u(6)};background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 ${u(12)};font-weight:700;color:#333}
+.dt .tx{position:absolute;left:${u(30)};right:${u(22)};top:${u(340)};bottom:${u(20)};overflow:auto;font-size:${u(10.5)};line-height:${u(21)};color:#777;scrollbar-width:thin}
+.dt .tx b{display:block;margin:${u(30)} 0 ${u(8)};color:#333;font-size:${u(12.5)}}
+/* 인증 유형 */
+.opts{position:absolute;left:${u(30)};right:${u(30)};top:${u(195)}}
+.opt{display:block;width:100%;height:${u(121)};margin-bottom:${u(11)};border:${u(1.4)} solid #bbb;border-radius:${u(14)};text-align:left;padding:${u(36)} 0 0 ${u(28)}}
+.opt b{display:block;font-size:${u(19)};letter-spacing:${u(.5)}}
+.opt small{display:block;color:#999;font-size:${u(18)};margin-top:${u(12)};letter-spacing:${u(.5)}}
+.opt.on{background:#eef5ff;border-color:#5b8def}
+/* PASS */
+.pass .pl{position:absolute;left:${u(37)};top:${u(33)};display:flex;gap:${u(2)}}
+.pass .pl i{width:${u(22)};height:${u(30)};background:#e4141e;color:#fff;font-style:normal;font-weight:800;font-size:${u(22)};display:flex;align-items:center;justify-content:center}
+.pass .tg{position:absolute;right:${u(25)};top:${u(32)};font-size:${u(11)};line-height:${u(15)};color:#555;text-align:right}
+.pass .ph{position:absolute;left:${u(37)};top:${u(103)};font-size:${u(24)};line-height:${u(31)}}
+.pass .tl{position:absolute;left:${u(37)};right:${u(35)};top:${u(197)};display:grid;grid-template-columns:repeat(3,1fr);gap:${u(8)}}
+.pass .tl button{height:${u(104)};background:#f7f7f7;border:${u(1)} solid #e4e4e4;border-radius:${u(8)};font-weight:800;font-size:${u(19)};line-height:1.15}
+.pass .tl button.s{font-size:${u(15)}}
+.pass .tl button:hover{background:#eef3ff;border-color:#9bb7f0}
+.pass .mv{position:absolute;right:${u(26)};top:${u(430)};font-size:${u(13)};color:#666;display:flex;align-items:center;gap:${u(4)}}
+.pass .mv i{width:${u(14)};height:${u(14)};border-radius:50%;background:#aaa;color:#fff;font-style:normal;font-size:${u(10)};display:flex;align-items:center;justify-content:center}
+.pass .ft{position:absolute;left:0;right:0;bottom:0;height:${u(63)};background:#f2f2f2;font-size:${u(10)};line-height:${u(18)};padding:${u(13)} ${u(16)};color:#666}
+.pass .ft b{color:#333}
+.pass .ft em{position:absolute;right:${u(18)};top:${u(20)};font-style:normal;color:#e4141e;font-weight:800;font-size:${u(16)};letter-spacing:${u(-1)}}
+/* 모달 */
+.dim{position:absolute;inset:0;background:rgba(80,80,80,.55);z-index:20}
+.mdl{position:absolute;left:${u(12)};right:${u(12)};background:#fff;border-radius:${u(22)};z-index:21;box-shadow:0 ${u(4)} ${u(16)} rgba(0,0,0,.25)}
+.mdl.g{top:${u(210)};height:${u(222)};padding:${u(32)} ${u(32)} 0}
+.mdl.g h3{margin:0;font-size:${u(21)}}
+.mdl.g p{margin:${u(24)} 0 0;font-size:${u(18)};line-height:${u(22)}}
+.mdl.g p b{color:#2a5ee8}
+.mdl.g .bb{position:absolute;left:${u(26)};right:${u(26)};bottom:${u(17)};display:flex;gap:${u(19)}}
+.mdl.g .bb button{flex:1;height:${u(53)};border-radius:${u(9)};font-size:${u(18)};color:#fff;background:#3d3d3d}
+.mdl.g .bb button.g{background:#bdbdbd}
+.mdl.f{left:${u(28)};right:${u(28)};border-radius:${u(10)};text-align:center;padding:${u(28)} ${u(14)} ${u(22)}}
+.mdl.f h3{margin:0 0 ${u(18)};font-size:${u(20)};font-weight:700}
+.mdl.f p{margin:0 0 ${u(12)};font-size:${u(16)};line-height:${u(20)};color:#333}
+.mdl.f .ok{margin-top:${u(10)};width:${u(86)};height:${u(42)};border-radius:${u(6)};background:#4da3ff;color:#fff;font-weight:700;font-size:${u(16)}}
+.mdl.b{left:${u(18)};right:${u(18)};border-radius:0;border:${u(1)} solid #999;text-align:center;padding:${u(48)} ${u(10)} ${u(22)};font-size:${u(14.5)};line-height:${u(26)}}
+.mdl.b .x{position:absolute;right:${u(14)};top:${u(10)};font-size:${u(24)};color:#333}
+.mdl.b .ok{margin-top:${u(18)};width:${u(82)};height:${u(26)};background:#444;color:#fff;font-size:${u(11)}}
+/* 입력 필드 (신규 ID·해외 인증) */
+.fl{position:absolute;left:${u(51)};right:${u(58)};top:${u(214)}}
+.fb{margin-bottom:${u(16)}}
+.fb label{display:block;font-weight:700;font-size:${u(17)};height:${u(27)}}
+.fb .row{display:flex;align-items:center;height:${u(34)};border-bottom:${u(1.6)} solid #c8c8c8}
+.fb .row input{flex:1;font-size:${u(16)};letter-spacing:${u(.8)}}
+.fb .row input::placeholder{color:#a8a8a8;letter-spacing:${u(.5)}}
+.fb .row input.pw{font-size:${u(22)};letter-spacing:${u(3)}}
+.fb .row input.pw::placeholder{font-size:${u(16)};letter-spacing:${u(.5)}}
+.fb .eye{width:${u(22)};color:#111}
+.fb .eye svg{width:${u(22)};height:${u(22)}}
+.fb .msg{color:#e4141e;font-size:${u(14)};margin-top:${u(8)};letter-spacing:${u(.2)}}
+.fb .row.err{border-bottom-color:#e4141e}
+.dd{position:relative}
+.dd .row{cursor:pointer}
+.dd .row span{flex:1;color:#a8a8a8}
+.dd .row span.v{color:#1d1d1f}
+.ddl2{position:absolute;left:0;right:0;top:${u(62)};max-height:${u(250)};overflow:auto;background:#fff;border:${u(1)} solid #bbb;z-index:6;box-shadow:0 ${u(3)} ${u(10)} rgba(0,0,0,.15);scrollbar-width:thin}
+.ddl2 button{display:block;width:100%;text-align:left;padding:${u(7)} ${u(12)};font-size:${u(14)}}
+.ddl2 button:hover{background:#f2f5ff}
+.info{position:absolute;left:${u(30)};right:${u(30)};top:${u(244)};height:${u(96)};background:#f2f2f2;border-radius:${u(12)};text-align:center;padding-top:${u(25)};font-size:${u(17)}}
+.info b{display:block;font-size:${u(18)};font-weight:400;margin-bottom:${u(12)};letter-spacing:${u(.6)}}
+.cfl{position:absolute;left:${u(37)};right:${u(30)};top:${u(362)}}
+.cfl label{display:block;font-weight:700;font-size:${u(16)}}
+.cfl .row{display:flex;align-items:center;height:${u(36)};border-bottom:${u(1.6)} solid #c8c8c8;margin-top:${u(10)}}
+.cfl .row input{flex:1;font-size:${u(16)};letter-spacing:${u(1)}}
+.cfl .row input::placeholder{color:#a8a8a8}
+.cfl .rs{position:absolute;right:0;top:${u(14)};width:${u(110)};height:${u(37)};background:#dedede;border-radius:${u(8)};font-size:${u(16)}}
+.cfl .tm{color:#e4141e;font-size:${u(13)};margin-top:${u(13)}}
+.cfl .msg{color:#e4141e;font-size:${u(14)};margin-top:${u(12)};line-height:${u(19)}}
+/* 가입 완료 */
+.logo{display:flex;align-items:center;justify-content:center;gap:${u(1)}}
+.logo .p{width:${u(36)};height:${u(36)};position:relative}
+.logo .p::before,.logo .p::after{content:'';position:absolute;background:#3b7cf0;border-radius:${u(4)}}
+.logo .p::before{left:${u(13)};top:0;width:${u(10)};height:100%}
+.logo .p::after{top:${u(13)};left:0;height:${u(10)};width:100%}
+.logo .o{width:${u(36)};height:${u(36)};border-radius:50%;border:${u(10)} solid #3b7cf0;margin-left:${u(1)}}
+.logo .o.l{border-color:#8fb5f7}
+.dn .logo{position:absolute;left:0;right:0;top:${u(174)}}
+.dn h2{position:absolute;left:0;right:0;top:${u(238)};margin:0;text-align:center;font-size:${u(24)};letter-spacing:${u(-1.2)}}
+.dn p{position:absolute;left:0;right:0;top:${u(280)};margin:0;text-align:center;font-size:${u(14)};line-height:${u(28)};letter-spacing:${u(-.8)}}
+.dn .idb{position:absolute;left:${u(19)};right:${u(19)};top:${u(372)};height:${u(96)};background:#f2f2f2;border-radius:${u(12)};text-align:center;padding-top:${u(22)}}
+.dn .idb b{display:block;font-size:${u(18)}}
+.dn .idb span{display:block;font-size:${u(17)};letter-spacing:${u(2)};margin-top:${u(11)};color:#444}
+.dn .one{position:absolute;left:${u(26)};right:${u(29)};bottom:${u(24)};height:${u(53)};border-radius:${u(9)};background:#3d3d3d;color:#fff;font-size:${u(18)}}
+/* 로그인 */
+.lgn .logo{position:absolute;left:0;right:0;top:${u(34)}}
+.lgn h2{position:absolute;left:0;right:0;top:${u(96)};margin:0;text-align:center;font-size:${u(24)}}
+.lgn .sb{position:absolute;left:0;right:0;top:${u(131)};text-align:center;font-size:${u(14.5)};color:#999;letter-spacing:${u(-.9)}}
+.lgn .body{position:absolute;left:${u(50)};right:${u(50)};top:${u(176)}}
+.lr{display:flex;align-items:center;height:${u(46)};border-bottom:${u(1.6)} solid #c8c8c8;gap:${u(28)}}
+.lr label{font-weight:700;font-size:${u(17)};width:${u(49)};flex:none;white-space:nowrap}
+.lr.p{gap:${u(13)}}
+.lr.p label{width:auto}
+.lup{min-height:${u(250)}}
+.lr input{flex:1;font-size:${u(17)};letter-spacing:${u(1.5)}}
+.lr input::placeholder{color:#a8a8a8;letter-spacing:0}
+.lr input.pw{font-size:${u(22)};letter-spacing:${u(3)}}
+.lr input.pw::placeholder{font-size:${u(17)}}
+.lr .eye svg{width:${u(22)};height:${u(22)}}
+.lr + .lr{margin-top:${u(6)}}
+.lm{color:#e4141e;font-size:${u(14)};margin:${u(10)} 0 ${u(6)}}
+.keep{display:flex;align-items:center;font-size:${u(14)};margin-top:${u(14)};color:#333}
+.keep .chk{width:${u(12)};height:${u(12)};border-width:${u(1.2)};margin-right:${u(5)}}
+.cap{margin:${u(16)} ${u(-3)} 0;height:${u(67)};background:#f8f8f8;border:${u(1)} solid #ddd;display:flex;align-items:center;padding:0 ${u(10)} 0 ${u(14)};gap:${u(9)};font-size:${u(14.5)}}
+.cap .sp{width:${u(30)};height:${u(30)};border-radius:50%;border:${u(3)} dotted #2c9a5a;animation:spin 1.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cap .ok{width:${u(32)};height:${u(32)};border-radius:50%;background:#1f8f4e;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:${u(18)}}
+.cap .cf{margin-left:auto;text-align:right;font-size:${u(9)};font-weight:800;letter-spacing:${u(.6)};color:#333;line-height:1.3}
+.cap .cf i{display:block;width:${u(30)};height:${u(14)};border-radius:${u(14)} ${u(14)} 0 0;background:#f58220;margin:0 0 ${u(1)} auto}
+.cap .cf small{display:block;font-weight:400;font-size:${u(7)};letter-spacing:0;text-decoration:underline}
+.capt{text-align:center;font-size:${u(13)};color:#555;margin-top:${u(10)};letter-spacing:${u(-.6)}}
+.lbtn{display:block;margin:${u(13)} ${u(-23)} 0;width:calc(100% + ${u(46)});height:${u(53)};border-radius:${u(10)};background:#3d3d3d;color:#fff;font-size:${u(18)}}
+.lbtn:disabled{background:#bdbdbd;cursor:default}
+.lk{display:flex;justify-content:center;gap:${u(11)};margin-top:${u(14)};font-size:${u(14.5)};font-weight:700;color:#333}
+.lk i{font-style:normal;color:#bbb;font-weight:400}
+.snsw{position:absolute;left:${u(24)};right:${u(24)};top:${u(573)}}
+.snsh{display:flex;align-items:center;gap:${u(10)};color:#666;font-size:${u(16)};white-space:nowrap}
+.snsh::before,.snsh::after{content:'';flex:1;border-top:${u(1)} solid #bbb}
+.sns{display:flex;flex-wrap:wrap;justify-content:center;gap:${u(13)} ${u(15)};margin-top:${u(20)}}
+.sns button{width:${u(43)};height:${u(43)};border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:${u(20)};color:#fff}
+.sns button:nth-child(-n+3){margin:0 ${u(1)}}
+.sns .r1{flex-basis:100%;height:0}
+/* 회원 정보 찾기 창 */
+.win .wt{position:absolute;left:0;right:0;top:0;height:${u(30)};background:#6b6b6b;color:#fff;font-size:${u(14)};padding:${u(6)} ${u(10)};font-weight:700}
+.win .wt span{position:absolute;right:${u(10)};top:${u(6)};font-weight:400;letter-spacing:${u(2)}}
+.win .wb{position:absolute;left:${u(14)};right:${u(14)};top:${u(37)};bottom:${u(12)};border:${u(1)} solid #999;background:#fff}
+.win .tabs{display:flex}
+.win .tabs button{flex:1;height:${u(42)};background:#a8a8a8;color:#fff;font-weight:700;font-size:${u(16)}}
+.win .tabs button.on{background:#333}
+.win .h1{left:${u(26)};top:${u(98)}}
+.win .opts{left:${u(18)};right:${u(18)};top:${u(185)}}
+.win .opt{height:${u(116)};padding-top:${u(33)}}
+.win .nx{position:absolute;left:${u(26)};right:${u(26)};bottom:${u(24)};height:${u(50)};border-radius:${u(8)};background:#3d3d3d;color:#fff;font-size:${u(18)}}
+/* 2차 인증 */
+.tf .hd{position:absolute;left:0;right:0;top:0;height:${u(69)};border-bottom:${u(1.5)} solid #9a9a9a;text-align:center;font-size:${u(20)};font-weight:700;padding-top:${u(22)}}
+.tf .bk{position:absolute;left:${u(16)};top:${u(20)};font-size:${u(24)};color:#666;font-weight:400}
+.tf h2{position:absolute;left:${u(34)};top:${u(96)};margin:0;font-size:${u(26)}}
+.tf .sb{position:absolute;left:${u(34)};top:${u(140)};font-size:${u(14.5)};color:#999;letter-spacing:${u(-1)}}
+.tf .cards{position:absolute;left:${u(32)};right:${u(25)};top:${u(178)}}
+.tf .cd{display:block;width:100%;height:${u(106)};border:${u(1.4)} solid #bbb;border-radius:${u(14)};text-align:left;padding:${u(26)} 0 0 ${u(27)};margin-bottom:${u(14)}}
+.tf .cd b{display:block;font-size:${u(20)};font-weight:700}
+.tf .cd span{display:block;font-size:${u(17)};margin-top:${u(4)}}
+.tf .cd.on{background:#eef5ff;border-color:#5b8def}
+.tf .hw{position:absolute;left:${u(32)};top:${u(420)};font-size:${u(13.5)};font-weight:700;display:flex;align-items:center;gap:${u(6)};z-index:5}
+.qm{width:${u(21)};height:${u(21)};border-radius:50%;background:#555;color:#fff;font-weight:700;font-size:${u(14)};display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ttip{position:absolute;left:${u(28)};top:${u(-58)};width:${u(300)};background:#f4f4f4;border:${u(1)} solid #999;font-size:${u(14)};font-weight:400;line-height:${u(19)};padding:${u(6)} ${u(12)};color:#333}
+.ttip b{display:block;background:#c00;color:#fff;font-size:${u(13)};padding:${u(2)} ${u(8)};margin:${u(-6)} ${u(-12)} ${u(5)};width:max-content}
+.tf .help{position:absolute;left:0;right:0;top:${u(566)};height:${u(42)};background:#e9e9e9;text-align:center;font-size:${u(16)};line-height:${u(42)};color:#444}
+.tf .help a{color:#1a5bd8;text-decoration:underline;cursor:pointer}
+.tf .bb{position:absolute;left:${u(30)};right:${u(30)};top:${u(627)};display:flex;gap:${u(10)}}
+.tf .bb button{flex:1;height:${u(52)};border-radius:${u(9)};font-size:${u(18)};color:#fff;background:#3d3d3d}
+.tf .bb button.g{background:#bdbdbd}
+.tf .bb button:disabled{background:#8a8a8a;cursor:default}
+.tf .tg2{position:absolute;left:0;right:0;top:${u(237)};text-align:center;font-size:${u(20)};font-weight:700}
+.tf .bx{position:absolute;left:${u(43)};top:${u(276)};display:flex;gap:${u(8.5)}}
+.tf .bx input{width:${u(46)};height:${u(62)};border:${u(1.3)} solid #c4c4c4;border-radius:${u(5)};text-align:center;font-size:${u(20)};background:#fff;caret-color:#333}
+.tf .bx input:focus,.tf .bx input.fc{border-color:#5b8def;background:#f4f8ff}
+.tf .bx.red input{border-color:#e46b6b;background:#fbe3e3}
+.tf .bx input:disabled{opacity:1}
+.tf .ms{position:absolute;left:${u(10)};right:${u(4)};top:${u(352)};text-align:center;color:#e4141e;font-size:${u(15)};line-height:${u(19)};letter-spacing:${u(-.4)}}
+.tf .tmr{position:absolute;left:${u(43)};top:${u(380)};font-size:${u(17)}}
+.tf .tmr em{font-style:normal}
+.tf .tmr em.r{color:#e4141e}
+.tf .rsd{position:absolute;right:${u(34)};top:${u(378)};font-size:${u(17)};color:#1a5bd8;text-decoration:underline}
+.tf .wt2{position:absolute;right:${u(8)};top:${u(380)};font-size:${u(16)};color:#888}
+.tf.cut .hd,.tf.cut .help,.tf.cut .bb,.tf.cut .sb2{display:none}
+.tf.cut h2{top:${u(64)}}
+.tf.cut .sb{top:${u(102)}}
+.tf.cut .tg2{top:${u(141)}}
+.tf.cut .bx{top:${u(180)}}
+.tf.cut .ms{top:${u(252)}}
+.tf.cut .tmr,.tf.cut .rsd,.tf.cut .wt2{top:${u(294)}}
+.tf.cut .hw{top:${u(334)}}
+.ptoast{position:absolute;left:${u(36)};right:${u(36)};top:${u(155)};z-index:25;background:#fff;border-radius:${u(20)};text-align:center;height:${u(36)};line-height:${u(36)};font-size:${u(16)};font-weight:700}
+/* 로그인 완료·SNS */
+.okp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:${u(14)};text-align:center;font-size:${u(16)};color:#444}
+.okp b{font-size:${u(22)};color:#111}
+.okp button{margin-top:${u(18)};height:${u(46)};padding:0 ${u(26)};border-radius:${u(9)};background:#3d3d3d;color:#fff;font-size:${u(16)}}
+.snsp{position:absolute;left:${u(20)};right:${u(20)};top:${u(160)};background:#fff;border-radius:${u(14)};z-index:21;padding:${u(22)} ${u(20)};text-align:center;box-shadow:0 ${u(6)} ${u(20)} rgba(0,0,0,.3)}
+.snsp h3{margin:0 0 ${u(6)};font-size:${u(20)}}
+.snsp p{margin:0 0 ${u(16)};font-size:${u(14)};color:#666;line-height:${u(20)}}
+.snsp button{display:block;width:100%;height:${u(46)};border-radius:${u(9)};margin-top:${u(8)};font-size:${u(16)};background:#3d3d3d;color:#fff}
+.snsp button.g{background:#e6e6e6;color:#333}
+/* 토스트·기획서 연결 */
+.toast{position:absolute;left:50%;bottom:${u(90)};transform:translateX(-50%);background:rgba(20,20,20,.88);color:#fff;font-size:${u(13)};padding:${u(8)} ${u(14)};border-radius:${u(8)};z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;width:max-content;max-width:94%;text-align:center;line-height:1.4}
+.toast.show{opacity:1}
+[data-chg]{outline:${u(2.5)} dashed #e08a00!important;outline-offset:${u(-2)}}
+.spec-flash{outline:${u(4)} solid #f2c94c!important;outline-offset:${u(-2)};animation:flash 1s ease 3}
+@keyframes flash{50%{outline-color:transparent}}
+.inspect [data-spec]:hover{outline:${u(2)} dashed #4a55e0;outline-offset:${u(-2)}}
+#chip{position:absolute;z-index:95;background:#4a55e0;color:#fff;font-size:${u(13)};padding:${u(3)} ${u(8)};border-radius:${u(5)};pointer-events:none;display:none;white-space:nowrap}
+`;
+document.head.insertAdjacentHTML('beforeend', `<style>${CSS}</style>`);
+
+const F = document.getElementById('F');
+function fit() { const k = EMBED ? Math.min(innerWidth / FW, innerHeight / FH) : Math.min((innerWidth - 16) / FW, (innerHeight - 16) / FH); document.documentElement.style.setProperty('--u', k + 'px'); }
+addEventListener('resize', fit); fit();
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const EYE = '<svg viewBox="0 0 24 24"><path d="M12 5C6.5 5 2.7 9.2 1.5 12c1.2 2.8 5 7 10.5 7s9.3-4.2 10.5-7C21.3 9.2 17.5 5 12 5z" fill="currentColor"/><circle cx="12" cy="12" r="4.2" fill="#fff"/><circle cx="12" cy="12" r="2.3" fill="currentColor"/></svg>';
+const EYEX = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>';
+const GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.2 3.6 3.2 14.4 0 18M12 3c-3.2 3.6-3.2 14.4 0 18"/></svg>';
+const LOGO = '<div class="logo"><i class="p"></i><i class="o l"></i><i class="o"></i></div>';
+const LOGOS = '<div class="logo" style="transform:scale(.4);transform-origin:left center;width:120px"><i class="p"></i><i class="o l"></i><i class="o"></i></div>';
+const prog = (n) => `<div class="prog">${[1, 2, 3, 4].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</div>`;
+
+/* ---------------- 데이터·규칙 ---------------- */
+const TERMS = [['필수', '개인정보 처리 방침'], ['필수', '통합회원 이용약관(도네이터)'], ['선택', '통합회원 이용약관(크리에이터)'], ['선택', '광고성 정보 수신 및 마케팅 활용 동의']];
+const TERM_DOCS = ['개인정보 처리 방침', '통합회원 이용약관(도네이터)', '통합회원 이용약관(크리에이터)', '광고성 정보 수신 및 마케팅 활용 동의', '유료서비스 이용약관'];
+// 35p 국가번호: 슈어엠 지원 국가 (대한민국 제외), 아프리카 + 아프가니스탄 차단
+const CC = [['+1', '미국·캐나다'], ['+81', '일본'], ['+86', '중국'], ['+886', '대만'], ['+852', '홍콩'], ['+853', '마카오'], ['+65', '싱가포르'], ['+66', '태국'], ['+84', '베트남'], ['+63', '필리핀'], ['+62', '인도네시아'], ['+60', '말레이시아'], ['+91', '인도'], ['+975', '부탄'], ['+976', '몽골'], ['+7', '러시아'], ['+44', '영국'], ['+33', '프랑스'], ['+49', '독일'], ['+39', '이탈리아'], ['+34', '스페인'], ['+61', '호주'], ['+64', '뉴질랜드'], ['+55', '브라질'], ['+52', '멕시코']];
+const CODE = '482917';   // (프로토타입) 인증번호
+const TAKEN = ['toona', 'tunaone', 'toonation', 'admin', 'toonaone'];
+const BAD = ['바보', '멍청', '욕설', 'fuck', 'shit'];
+const EMOJI = /\p{Extended_Pictographic}/u;
+// 27p 회원가입 메시지 레이블 영역 별 표기 문구
+function vNick(v, t) { if (!t) return ''; if (EMOJI.test(v)) return '이모지는 사용하실 수 없습니다.'; const n = [...v].length; if (n < 2 || n > 16) return '닉네임은 2자에서 16자 사이여야 합니다.'; if (BAD.some((b) => v.toLowerCase().includes(b))) return '부적절한 표현이 포함되어 있습니다.'; return ''; }
+function vId(v, t) { if (!t) return ''; if (!v) return '아이디를 입력해 주세요.'; if (/[^A-Za-z0-9]/.test(v)) return '아이디에는 영문 또는 숫자만 쓸 수 있습니다.'; if (v.length < 4 || v.length > 25) return '아이디는 4자에서 25자 사이여야 합니다.'; if (TAKEN.includes(v.toLowerCase())) return '사용할 수 없는 아이디입니다.'; return ''; }
+function vPw(v, t) { if (!t) return ''; if (!v) return '비밀번호를 입력해 주세요.'; const k = [/[A-Za-z]/, /[0-9]/, /[^A-Za-z0-9]/].filter((r) => r.test(v)).length; if (k < 2) return '영문, 특수문자, 숫자 중 2가지 이상을 조합하세요.'; if (v.length < 10 || v.length > 25) return '비밀번호는 10자에서 25자 사이여야 합니다.'; return ''; }
+function vPw2(v, pw, t) { if (!t) return ''; if (!v) return '비밀번호를 다시 한번 입력해 주세요.'; if (v !== pw) return '비밀번호가 일치 하지 않습니다.'; return ''; }
+const mmss = (s) => `${String(Math.floor(Math.max(0, s) / 60)).padStart(2, '0')}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
+const m1ss = (s) => `${Math.floor(Math.max(0, s) / 60)}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
+
+/* ---------------- 화면 (한 슬라이드에 여러 개) ---------------- */
+const SCR = [];
+function Screen(def, i) {
+  const el = document.createElement('div');
+  el.className = 'scr'; el.dataset.i = i;
+  Object.assign(el.style, { left: u(def.x), top: u(def.y), width: u(def.w), height: u(def.h) });
+  F.append(el);
+  this.el = el; this.def = def; this.i = i;
+  this.preset(def.v);
+}
+Screen.prototype.fresh = function () {
+  this.S = {
+    view: 'terms', hist: [], path: null, terms: [0, 0, 0, 0], doc: 4, ddl: false, sel: null, modal: null,
+    f: { nick: '', id: '', pw: '', pw2: '' }, t: {}, eye: {}, newId: '',
+    ovs: { cc: '', ph: '', dd: false, sends: 0, block: 0, msg: '' }, oc: { v: '', left: 600, retry: 3, resend: 0, msg: '', dead: false },
+    lg: { id: '', pw: '', keep: false, cap: 'wait', fails: 0, mId: '', mPw: '', eye: false, hint: false },
+    tf: { m: 'phone', code: '', left: 600, wait: 0, req: 1, st: '', tip: false, toast: '' }, cut: false, find: 0, fsel: null, sns: null,
+  };
+};
+Screen.prototype.preset = function (v) {
+  this.fresh(); const S = this.S;
+  const P = { terms: ['terms'], 'terms-checked': ['terms'], 'terms-detail': ['detail'], authsel: ['authsel'], 'auth-u14': ['authsel'], 'auth-o14': ['authsel'], 'auth-ovs': ['authsel'],
+    'pass-u14': ['pass'], 'pass-o14': ['pass'], 'pass-guard': ['pass'], 'pass-legal': ['plegal'], newid: ['newid'], 'newid-filled': ['newid'], done: ['done'], 'ovs-phone': ['ovsp'], 'ovs-phone-err': ['ovsp'], 'ovs-code': ['ovsc'],
+    login: ['login'], 'login-filled': ['login'], 'login-err': ['login'], fail6: ['login'], withdrawn: ['login'], find: ['find'], '2fa-select': ['tfsel'], '2fa-phone': ['tfcode'], '2fa-email-filled': ['tfcode'],
+    'c-wait': ['tfcode'], 'c-expired': ['tfcode'], 'c-wrong': ['tfcode'], 'c-toast': ['tfcode'], 'c-limit': ['tfcode'] }[v] || ['terms'];
+  S.view = P[0];
+  if (v === 'terms-checked') S.terms = [1, 1, 0, 0];
+  if (v === 'auth-u14') S.sel = 'u14'; if (v === 'auth-o14') S.sel = 'o14'; if (v === 'auth-ovs') S.sel = 'ovs';
+  if (v.startsWith('pass-')) S.path = v === 'pass-o14' ? 'o14' : 'u14';
+  if (v === 'pass-guard') S.modal = 'guard';
+  if (v === 'newid-filled') { S.f = { nick: '송송송', id: 'tunaone2', pw: 'toona1234!', pw2: 'toona1234!' }; S.t = { nick: 1, id: 1, pw: 1, pw2: 1 }; }
+  if (v === 'done') S.newId = 'tunaone';
+  if (v === 'ovs-code') { S.ovs.cc = '+975'; S.ovs.ph = '1012121111'; S.ovs.sends = 1; }
+  if (v === 'ovs-phone-err') S.ovs.msg = ' ';
+  if (['login-filled', 'login-err', 'fail6', 'withdrawn'].includes(v)) Object.assign(S.lg, { id: 'tunaone', pw: 'toonation12', cap: 'ok' });
+  if (v === 'login-err') { S.lg.mPw = '아이디 또는 비밀번호가 일치하지 않습니다.'; S.lg.fails = 5; }
+  if (v === 'fail6') { S.modal = 'fail6'; S.lg.fails = 6; }
+  if (v === 'withdrawn') S.modal = 'withdrawn';
+  if (v === '2fa-email-filled') { S.tf.m = 'email'; S.tf.code = '677777'; }
+  if (v.startsWith('c-')) { S.cut = true; this.el.classList.add('cut'); }
+  if (v === 'c-expired') { S.tf.left = 0; S.tf.st = 'expired'; }
+  if (v === 'c-wrong') { S.tf.code = '1'; S.tf.st = 'wrong'; }
+  if (v === 'c-toast') { S.tf.req = 8; S.tf.toast = '요청이 너무 많습니다. (남은 횟수 :2회)'; S.tf.code = ''; }
+  if (v === 'c-limit') { S.tf.req = 10; S.tf.st = 'limit'; S.tf.lock = 23 * 3600 + 59 * 60 + 59; }
+  if (S.view === 'login' && S.lg.cap === 'wait') setTimeout(() => { if (S.view === 'login' && S.lg.cap === 'wait') { S.lg.cap = 'ok'; this.render(); } }, 1600);
+  this.render();
+};
+Screen.prototype.go = function (view, push = true) {
+  const S = this.S;
+  if (push) S.hist.push(S.view);
+  S.view = view; S.modal = null;
+  if (view === 'login') { S.lg = { id: '', pw: '', keep: false, cap: 'wait', fails: S.lg.fails, mId: '', mPw: '', eye: false, hint: S.lg.hint }; setTimeout(() => { if (S.view === 'login' && S.lg.cap === 'wait') { S.lg.cap = 'ok'; this.render(); } }, 1600); }
+  if (view === 'ovsc') S.oc = { v: '', left: 600, retry: 3, resend: 0, msg: '', dead: false };
+  if (view === 'tfcode') { S.tf = { ...S.tf, code: '', left: 600, wait: 0, st: '', toast: '' }; this.toast(`(프로토타입) ${S.tf.m === 'phone' ? '휴대폰' : '이메일'}으로 받은 인증번호: ${CODE}`, 3500); }
+  this.render();
+  if (view === 'tfcode') setTimeout(() => { const b = this.el.querySelector('.bx input'); if (b) b.focus(); }, 30);   // 1-1 로드 시 첫 번째 칸 포커스
+};
+Screen.prototype.back = function () { const p = this.S.hist.pop(); if (p) this.go(p, false); else this.toast('(프로토타입) 이전 화면으로 이동'); };
+Screen.prototype.toast = function (m, ms) {
+  let t = this.el.querySelector('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; this.el.append(t); }
+  t.textContent = m; t.classList.add('show'); clearTimeout(this.tt); this.tt = setTimeout(() => t.classList.remove('show'), ms || 2600);
+};
+
+/* ----- 그리기 ----- */
+Screen.prototype.render = function () {
+  const S = this.S, V = S.view;
+  const html = { terms: tTerms, detail: tDetail, authsel: tAuth, pass: tPass, plegal: tPass, newid: tNewId, done: tDone, ovsp: tOvsP, ovsc: tOvsC, login: tLogin, find: tFind, tfsel: tTfSel, tfcode: tTfCode, okp: tOk }[V](S, this);
+  this.el.innerHTML = `<div class="in ${V === 'detail' ? 'dt' : V === 'pass' || V === 'plegal' ? 'pass' : V === 'done' ? 'dn' : V === 'login' ? 'lgn' : V === 'find' ? 'win' : V.startsWith('tf') ? 'tf' + (S.cut ? ' cut' : '') : ''}">${html}</div>${modal(S)}<div class="toast"></div>`;
+  this.el.classList.toggle('cut', S.cut);
+  this.sync();
+};
+function tTerms(S) {
+  const all = S.terms.every(Boolean), ok = S.terms[0] && S.terms[1];
+  return `<div class="ttl" data-spec="28:0">약관 동의</div>${prog(1)}<div class="h1">약관에<br>동의해 주세요.</div>
+    <button class="agall" data-a="tall" data-spec="28:1"><i class="chk ${all ? 'on' : ''}"></i>전체 동의하기</button>
+    <div class="agsub" data-spec="28:1">크리에이터 서비스 약관, 광고성 정보 수신 및<br>마케팅 활용(선택) 동의를 포함합니다.</div>
+    <div class="agl" data-spec="28:2">${TERMS.map(([k, t], i) => `<div class="agi"><button data-a="t1" data-i="${i}" style="display:flex;align-items:center"><i class="chk ${S.terms[i] ? 'on' : ''}"></i><em class="${k === '필수' ? 'r' : ''}">${k}</em>${t}</button><button class="gt" data-a="tdoc" data-i="${i}" data-spec="28:4" title="상세 보기">&gt;</button></div>`).join('')}</div>
+    <div class="btns" data-spec="28:3"><button class="g" data-a="back">뒤로가기</button><button data-a="tnext" ${ok ? '' : 'disabled'}>다음</button></div>`;
+}
+function tDetail(S) {
+  const name = TERM_DOCS[S.doc];
+  return `<div class="lg" data-spec="28:4">${LOGOS}<span style="margin-left:-72px">toonation</span></div><button class="cl" data-a="back" title="닫기">×</button><span class="gl">${GLOBE}</span><hr>
+    <h4 data-spec="28:4">투네이션 약관 및 개인정보 보호</h4>
+    <button class="sel" data-a="ddl">${esc(name)}<span>∨</span></button>
+    ${S.ddl ? `<div class="ddl">${TERM_DOCS.map((d, i) => `<button data-a="doc" data-i="${i}">${d}</button>`).join('')}</div>` : ''}
+    <div class="bx">투네이션 및 투네이션 관련 제반 서비스의 이용과 관련하여 필요한 사항을<br>규정합니다.<div class="d">시행일<span>2025년 08월 13일 <i style="font-style:normal">▾</i></span></div></div>
+    <div class="tx">● 반드시 결제를 진행하는 본인 명의로 결제하여야 하며, 타인 명의를 도용하여 결제하는 경우 민·형사상의 책임을 물을 수 있습니다.<b>제1조 (목적)</b>이 약관은 주식회사 투네이션(이하 '회사'라 칭함)의 크리에이터 후원 서비스 투네이션 서비스 이용을 위한 '투네이션 캐시'의 이용조건 및 절차에 관한 사항을 규정합니다.<b>제2조 (정의)</b>(프로토타입) ${esc(name)} 본문 — 실제 약관 내용은 관리자에 등록된 문서를 노출합니다.</div>`;
+}
+function tAuth(S) {
+  const O = [['u14', '국내 만14세 미만 회원', '법정대리인 명의 휴대폰으로 인증', '29:1 30:1'], ['o14', '국내 만14세 이상 회원', '본인 명의 휴대폰으로 인증', '29:1 33:1'], ['ovs', '해외 회원', '본인 명의 휴대폰으로 인증', '29:1 35:1']];
+  return `<div class="ttl" data-spec="29:0">인증 수단 선택</div>${prog(2)}<div class="h1" style="top:${u(108)}">인증 유형을<br>선택해 주세요.</div>
+    <div class="opts">${O.map(([k, b, s, sp]) => `<button class="opt ${S.sel === k ? 'on' : ''}" data-a="sel" data-v="${k}" data-spec="${sp}"><b>${b}</b><small>${s}</small></button>`).join('')}</div>
+    <div class="btns" data-spec="29:2"><button class="g" data-a="back">뒤로가기</button><button data-a="anext" ${S.sel ? '' : 'disabled'}>다음</button></div>`;
+}
+function tPass(S) {
+  return `<div class="pl" data-spec="${S.view === 'plegal' ? '31:0' : '30:1 33:1'}">${'PASS'.split('').map((c) => `<i>${c}</i>`).join('')}</div><div class="tg">인증을 넘어<br>일상으로 PASS</div>
+    <div class="ph"><b>이용중인 통신사</b>를<br>선택해 주세요</div>
+    <div class="tl" data-spec="${S.view === 'plegal' ? '31:0' : '30:1 33:1'}">${['SKT', 'KT', 'LG U+'].map((t) => `<button data-a="telco" data-v="${t}">${t}</button>`).join('')}${['SKT', 'KT', 'LG U+'].map((t) => `<button class="s" data-a="telco" data-v="${t} 알뜰폰">${t}<br>알뜰폰</button>`).join('')}</div>
+    <div class="mv"><i>i</i>알뜰폰 사업자 확인</div>
+    <div class="ft">이용약관 &nbsp;<b>개인정보처리방침</b> &nbsp;API 도입문의<br>VeriSign 256-bit SSL 암호화 적용<em>KCB</em></div>`;
+}
+function field(k, label, ph, val, msg, o = {}) {
+  return `<div class="fb" data-spec="${o.spec}"><label>${label}</label><div class="row ${msg.trim() ? 'err' : ''}"><input data-f="${k}" class="${o.pw && !o.show ? 'pw' : ''}" type="${o.pw && !o.show ? 'password' : 'text'}" placeholder="${ph}" value="${esc(val)}" autocomplete="off" ${o.num ? 'inputmode="numeric"' : ''}>${o.pw ? `<button class="eye" data-a="eye" data-k="${k}">${o.show ? EYEX : EYE}</button>` : ''}</div>${msg ? `<div class="msg" data-spec="39:${o.tk}">${msg}</div>` : ''}</div>`;
+}
+function newIdMsgs(S) { const f = S.f, t = S.t; return { nick: vNick(f.nick, t.nick), id: vId(f.id, t.id), pw: vPw(f.pw, t.pw), pw2: vPw2(f.pw2, f.pw, t.pw2) }; }
+function newIdOk(S) { const f = S.f; return !vNick(f.nick, 1) && f.nick && !vId(f.id, 1) && !vPw(f.pw, 1) && !vPw2(f.pw2, f.pw, 1); }
+function tNewId(S) {
+  const M = newIdMsgs(S), sp = '31:1 33:2 37:1';
+  return `<div class="ttl" data-spec="31:0">회원가입</div>${prog(3)}<div class="h1" style="left:${u(45)};top:${u(119)}">신규ID를<br>생성해 주세요.</div>
+    <div class="fl">${field('nick', '닉네임', '이모지 제외, 최소 2자~16자', S.f.nick, M.nick, { spec: sp, tk: '닉네임' })}${field('id', '아이디', '영문 또는 숫자 4자~25자', S.f.id, M.id, { spec: sp, tk: '아이디' })}${field('pw', '비밀번호', '영문,특수문자, 숫자 조합 10자', S.f.pw, M.pw, { spec: sp, tk: '비밀번호', pw: 1, show: S.eye.pw })}${field('pw2', '비밀번호 확인', '비밀번호 재입력', S.f.pw2, M.pw2, { spec: sp, tk: '비밀번호 확인', pw: 1, show: S.eye.pw2 })}</div>
+    <div class="btns" data-spec="31:2 33:3 37:2"><button class="g" data-a="back">뒤로가기</button><button data-a="nnext" ${newIdOk(S) ? '' : 'disabled'}>다음</button></div>`;
+}
+function tDone(S) {
+  return `<div class="ttl" data-spec="32:0 34:0">가입 완료</div>${prog(4)}${LOGO}
+    <h2 data-spec="32:1 34:1 37:3">회원가입이 완료되었습니다.</h2><p>SNS 계정과 연결하여 편리하게 로그인할 수 있습니다.<br>생성하신 ID로 로그인해주세요.</p>
+    <div class="idb" data-spec="32:1 34:1 37:3"><b>투네이션 ID</b><span>${esc(S.newId || 'tunaone')}</span></div>
+    <button class="one" data-a="dfin" data-spec="32:2 34:2 37:4">가입 완료</button>`;
+}
+function tOvsP(S) {
+  const o = S.ovs, ok = o.cc && o.ph;
+  const cn = CC.find((c) => c[0] === o.cc);
+  return `<div class="ttl">본인 인증</div>${prog(2)}<div class="h1" style="left:${u(42)}">해외 휴대폰<br>인증해 주세요.</div>
+    <div class="fl" style="left:${u(37)};right:${u(37)};top:${u(219)}" data-spec="35:2">
+      <div class="fb dd"><label>국가번호</label><div class="row" data-a="ccdd"><span class="${cn ? 'v' : ''}">${cn ? `${cn[0]} ${cn[1]}` : '선택'}</span><b style="font-weight:400">∨</b></div>${o.dd ? `<div class="ddl2">${CC.map(([c, n]) => `<button data-a="cc" data-v="${c}">${c} &nbsp;${n}</button>`).join('')}</div>` : ''}</div>
+      <div class="fb"><label>전화번호</label><div class="row"><input data-f="ph" inputmode="numeric" placeholder="특수문자 없이 번호만 입력" value="${esc(o.ph)}" autocomplete="off"></div>${o.msg ? `<div class="msg" style="line-height:1.4">${o.msg.trim() || '%안내 메시지 노출 영역%'}</div>` : ''}</div></div>
+    <div class="btns" data-spec="35:3"><button class="g" data-a="back">뒤로가기</button><button data-a="pnext" ${ok ? '' : 'disabled'}>다음</button></div>`;
+}
+function tOvsC(S) {
+  const o = S.oc;
+  return `<div class="ttl">본인 인증</div>${prog(2)}<div class="h1" style="left:${u(37)}">해외 휴대폰<br>인증해 주세요.</div>
+    <div class="info" data-spec="35:4 36:4"><b>${esc(S.ovs.cc)} ${esc(S.ovs.ph)}</b>전송받은 인증 번호를 입력해주세요.</div>
+    <div class="cfl" data-spec="35:5 36:5 35:5a 36:5a"><label>인증번호</label><div class="row"><input data-f="oc" inputmode="numeric" maxlength="6" placeholder="인증 번호 입력" value="${esc(o.v)}" autocomplete="off" ${o.dead ? 'disabled' : ''}></div>
+      <button class="rs" data-a="oresend" data-spec="35:5b 36:5b">재전송</button>
+      <div class="tm" data-tm="oc">남은 시간 : ${mmss(o.left)} / 재시도 가능 횟수 : ${o.retry}</div>${o.msg ? `<div class="msg">${o.msg}</div>` : ''}</div>
+    <div class="btns" data-spec="35:6 36:6"><button class="g" data-a="back">뒤로가기</button><button data-a="cnext" ${o.v.length === 6 && !o.dead ? '' : 'disabled'}>다음</button></div>`;
+}
+const SNS = [['twitch', '트위치', '#9146ff', '⧉'], ['youtube', '유튜브', '#fff', '▶'], ['kakao', '카카오톡', '#fee500', '●'], ['br'], ['payco', '페이코', '#f42e2e', 'P'], ['naver', '네이버', '#03c75a', 'N'], ['chear', 'CHEAR', '#fff', 'C'], ['kick', 'KICK', '#111', 'K']];
+function tLogin(S) {
+  const L = S.lg, ok = L.id && L.pw && L.cap === 'ok';
+  const icon = ([k, n, bg, g]) => k === 'br' ? '<i class="r1"></i>' : `<button data-a="sns" data-v="${k}" title="${n}" style="background:${bg};${k === 'youtube' || k === 'chear' ? 'border:1px solid #ddd;' : ''}color:${k === 'youtube' ? '#f00' : k === 'kakao' ? '#3a1d1d' : k === 'chear' ? '#e8457a' : k === 'kick' ? '#53fc18' : '#fff'}">${g}</button>`;
+  return `${LOGO}<h2 data-spec="45:0">로그인</h2><div class="sb">투네이션 통합계정으로 로그인이 가능합니다.</div>
+    <div class="body"><div class="lup"><div data-spec="45:1">
+      <div class="lr"><label>아이디</label><input data-f="lid" placeholder="아이디 입력" value="${esc(L.id)}" autocomplete="off"></div>${L.mId ? `<div class="lm" data-spec="45:아이디를 누락했을 경우 46:아이디를 누락했을 경우">${L.mId}</div>` : ''}
+      <div class="lr p"><label>비밀번호</label><input data-f="lpw" class="${L.eye ? '' : 'pw'}" type="${L.eye ? 'text' : 'password'}" placeholder="비밀번호 입력" value="${esc(L.pw)}" autocomplete="off"><button class="eye" data-a="leye">${L.eye ? EYEX : EYE}</button></div>${L.mPw ? `<div class="lm" data-spec="${L.mPw.includes('불가능') ? '39:사용정지' : L.mPw.includes('일치') ? '45:아이디 또는 비밀번호가 일치하지 않을 경우 46:아이디 또는 비밀번호가 일치하지 않을 경우' : '45:비밀번호를 누락했을 경우 46:비밀번호를 누락했을 경우'}">${L.mPw}</div>` : ''}
+      <button class="keep" data-a="keep"><i class="chk ${L.keep ? 'on' : ''}"></i>로그인 상태 유지</button></div>
+      <div class="cap">${L.cap === 'ok' ? '<span class="ok">✓</span>성공!' : '<span class="sp"></span>확인 중...'}<div class="cf"><i></i>CLOUDFLARE<small>개인 정보 · 도움말</small></div></div>
+      ${L.cap === 'ok' ? '' : '<div class="capt">보안 인증을 확인하는 중입니다.</div>'}</div>
+      <button class="lbtn" data-a="login" data-spec="45:2" ${ok ? '' : 'disabled'}>로그인</button>
+      <div class="lk" data-spec="45:3"><button data-a="findid">아이디 찾기</button><i>|</i><button data-a="findpw">비밀번호 찾기</button><i>|</i><button data-a="join">회원가입</button></div>
+      </div><div class="snsw"><div class="snsh" data-spec="45:4 54:0">SNS 계정으로 로그인</div><div class="sns" data-spec="45:4 54:0">${SNS.map(icon).join('')}</div></div>`;
+}
+function tFind(S) {
+  const O = [['국내 만14세 미만 회원', '법정대리인 명의 휴대폰으로 인증'], ['국내 만14세 이상 회원', '본인 명의 휴대폰으로 인증'], ['해외 회원', '본인 명의 휴대폰으로 인증']];
+  return `<div class="wt" data-spec="47:2">Window<span>– ▫ ×</span></div><div class="wb" data-spec="47:2"><div class="tabs">${['아이디 찾기', '비밀번호 찾기'].map((t, i) => `<button class="${S.find === i ? 'on' : ''}" data-a="ftab" data-v="${i}">${t}</button>`).join('')}</div>
+    <div class="h1">인증 유형을<br>선택해 주세요.</div><div class="opts">${O.map(([b, s], i) => `<button class="opt ${S.fsel === i ? 'on' : ''}" data-a="fsel" data-v="${i}"><b>${b}</b><small>${s}</small></button>`).join('')}</div>
+    <button class="nx" data-a="fnext">다음</button></div>`;
+}
+function tTfSel(S) {
+  return `<div class="hd" data-spec="50:0 51:0">2차 인증</div><h2>인증 방법 선택</h2><div class="sb">계정 보안을 위해 추가 인증이 필요합니다.</div>
+    <div class="cards" data-spec="50:1">${[['phone', '휴대폰', '010-****-0000'], ['email', '이메일', 'to*******@naver.com']].map(([k, b, s]) => `<button class="cd ${S.tf.m === k ? 'on' : ''}" data-a="tfm" data-v="${k}"><b>${b}</b><span>${s}</span></button>`).join('')}</div>
+    ${helpLine(S, 'top:' + u(430))}<div class="help" data-spec="51:6">도움이 필요하신가요? <a data-a="cs">고객센터 문의하기</a></div>
+    <div class="bb"><button class="g" data-a="tfcancel" data-spec="51:7 51:3">로그인취소</button><button data-a="tfgo" data-spec="50:1">인증 진행</button></div>`;
+}
+function helpLine(S, st) { return `<div class="hw" data-spec="51:5" style="${st || ''}">2차 인증 해지 방법 <span class="qm" data-a="tip">?</span>${S.tf.tip ? '<div class="ttip"><b>안내 메세지</b>마이페이지 &gt; 계정 관리 &gt; 2차 인증<br>설정에서 해제</div>' : ''}</div>`; }
+function tTfCode(S) {
+  const T = S.tf, red = T.st === 'expired' || T.st === 'wrong' || T.st === 'limit';
+  const target = T.m === 'phone' ? '010-****-0000' : 'to*******@naver.com';
+  const msg = T.st === 'expired' ? ['인증시간이 만료되었습니다. 다시 시도해 주세요.', '52:2']
+    : T.st === 'wrong' ? ['인증번호가 올바르지 않습니다, 인증번호를 재전송 해주세요.', '52:3']
+    : T.st === 'limit' ? [`1일당 요청 횟수를 초과했습니다.<br>(${lockText(T.lock)} 이후 다시 시도하실 수 있습니다.)`, '52:5'] : null;
+  const digits = T.code.padEnd(6, ' ').split('');
+  return `<div class="hd" data-spec="51:0 52:0"><button class="bk" data-a="tfback" data-spec="51:4" title="다른 인증 방법 선택">‹</button>2차 인증</div>
+    <h2>인증번호 입력</h2><div class="sb">선택한 인증 수단으로 6자리 인증번호를 전송했습니다.</div>
+    <div class="tg2" data-spec="${T.m === 'phone' ? '51:1' : '51:2'}">${target}</div>
+    <div class="bx ${red ? 'red' : ''}" data-spec="${T.m === 'phone' ? '51:1' : '51:2'} 52:1">${digits.map((d, i) => `<input data-c="${i}" class="${S.cut && !red && !T.toast && i === 0 ? 'fc' : ''}" inputmode="numeric" maxlength="1" value="${d.trim()}" ${T.st === 'wrong' || T.st === 'limit' ? 'disabled' : ''}>`).join('')}</div>
+    ${msg ? `<div class="ms" data-spec="${msg[1]}">${msg[0]}</div>` : ''}
+    <div class="tmr" data-spec="52:1">남은 시간 <em class="${T.left < 60 ? 'r' : ''}" data-tm="tf">${mmss(T.left)}</em></div>
+    ${T.st === 'limit' ? '' : T.wait > 0 ? `<div class="wt2" data-tm="tw" data-spec="52:2">재전송 대기 (${m1ss(T.wait)})</div>` : `<button class="rsd" data-a="tfresend" data-spec="52:2 51:1">재전송하기</button>`}
+    ${helpLine(S)}<div class="help" data-spec="51:6">도움이 필요하신가요? <a data-a="cs">고객센터 문의하기</a></div>
+    <div class="bb"><button class="g" data-a="tfcancel" data-spec="51:7 51:3">로그인취소</button><button data-a="tfok" data-spec="51:8" ${T.code.length === 6 && T.st !== 'wrong' && T.st !== 'limit' ? '' : 'disabled'}>확인</button></div>
+    ${T.toast ? `<div class="dim" style="z-index:24"></div><div class="ptoast" data-spec="52:4">${T.toast}</div>` : ''}`;
+}
+const lockText = (s) => `${String(Math.floor(s / 3600)).padStart(2, '0')}시간 ${String(Math.floor(s / 60) % 60).padStart(2, '0')}분 ${String(s % 60).padStart(2, '0')}초`;
+function tOk(S) { return `<div class="okp">${LOGO}<b>로그인되었습니다</b>(프로토타입) 통합 홈 화면으로 이동해요${S.lg.keep ? '<br><small>로그인 상태 유지 ON</small>' : ''}<button data-a="relogin">처음으로</button></div>`; }
+function modal(S) {
+  const M = S.modal; if (!M) return '';
+  if (M === 'guard') return `<div class="dim"></div><div class="mdl g" data-spec="30:2"><h3>법정대리인 인증</h3><p>만 14세 미만은 <b>부모님(법정대리인)</b>의<br>동의가 필요합니다.</p><div class="bb"><button class="g" data-a="gcancel" data-spec="30:3">취소</button><button data-a="gok" data-spec="30:4">인증하기</button></div></div>`;
+  if (M === 'fail6') return `<div class="dim" style="background:rgba(140,140,140,.75)"></div><div class="mdl f" style="top:${u(207)}" data-spec="47:1"><h3>로그인 실패</h3><p>ID 또는 비밀번호를 6회 이상 잘못 입력<br>했습니다.</p><p style="margin-top:${u(20)}">ID 및 비밀번호를 확인해주세요.<br>※ 회원 정보 찾기로 이동됩니다.</p><button class="ok" data-a="f6ok">확인</button></div>`;
+  if (M === 'withdrawn') return `<div class="dim" style="background:rgba(140,140,140,.75)"></div><div class="mdl f" style="top:${u(252)}" data-spec="48:1 49:1"><h3>로그인 실패</h3><p>이미 탈퇴 처리된 투네이션 ID입니다.</p><button class="ok" data-a="mclose">확인</button></div>`;
+  if (M === 'err') return `<div class="dim" style="background:rgba(140,140,140,.75)"></div><div class="mdl f" style="top:${u(220)}" data-spec="47:3"><h3>로그인 실패</h3><p>로그인 도중 오류가 발생했습니다.<br>잠시 후 다시 시도해보시기 바랍니다.</p><button class="ok" data-a="mclose">확인</button></div>`;
+  if (M === 'daily') return `<div class="dim" style="background:rgba(0,0,0,.25)"></div><div class="mdl b" style="top:${u(250)}" data-spec="35:3"><button class="x" data-a="mclose">×</button>해외인증 시도는 일 최대 10회까지 가능합니다.<br>이용을 계속하시려면 고객센터로 문의해 주세요.<br><button class="ok" data-a="mclose">확인</button></div>`;
+  if (M === 'ofail') return `<div class="dim" style="background:rgba(0,0,0,.25)"></div><div class="mdl b" style="top:${u(250)}" data-spec="36:6"><button class="x" data-a="ofailok">×</button>인증이 실패되었습니다.<br>처음부터 다시 시도하여 주시기 바랍니다.<br><button class="ok" data-a="ofailok">확인</button></div>`;
+  if (M === 'sns') { const n = SNS.find((x) => x[0] === S.sns)[1]; return `<div class="dim"></div><div class="snsp" data-spec="54:0"><h3>${n} 로그인</h3><p>(프로토타입) ${n} 계정 로그인 화면 대신<br>결과를 골라 주세요.</p><button data-a="snsmem">투네이션 회원 (연결된 ID 있음)</button><button class="g" data-a="snsnew">비회원 (처음 로그인)</button><button class="g" data-a="mclose">닫기</button></div>`; }
+  return '';
+}
+// 입력 중에는 다시 그리지 않고 메시지·버튼만 갱신
+Screen.prototype.sync = function () {
+  const S = this.S, el = this.el;
+  if (S.view === 'login') { const b = el.querySelector('.lbtn'); if (b) b.disabled = !(S.lg.id && S.lg.pw && S.lg.cap === 'ok'); }
+  if (S.view === 'ovsp') { const b = el.querySelector('[data-a="pnext"]'); if (b) b.disabled = !(S.ovs.cc && S.ovs.ph); }
+  if (S.view === 'ovsc') { const b = el.querySelector('[data-a="cnext"]'); if (b) b.disabled = !(S.oc.v.length === 6 && !S.oc.dead); }
+  if (S.view === 'tfcode') { const b = el.querySelector('[data-a="tfok"]'); if (b) b.disabled = !(S.tf.code.length === 6 && S.tf.st !== 'wrong' && S.tf.st !== 'limit'); }
+};
+
+/* ----- 동작 ----- */
+Screen.prototype.act = function (a, b, e) {
+  const S = this.S, v = b.dataset.v;
+  switch (a) {
+    case 'back': this.back(); break;
+    case 'tall': { const on = !S.terms.every(Boolean); S.terms = S.terms.map(() => (on ? 1 : 0)); this.render(); break; }
+    case 't1': S.terms[+b.dataset.i] ^= 1; this.render(); break;
+    case 'tdoc': S.doc = +b.dataset.i; S.ddl = false; this.go('detail'); break;
+    case 'ddl': S.ddl = !S.ddl; this.render(); break;
+    case 'doc': S.doc = +b.dataset.i; S.ddl = false; this.render(); break;
+    case 'tnext': this.toast('약관 동의 저장 — 인증 유형 선택으로 이동'); S.sel = null; this.go('authsel'); break;
+    case 'sel': S.sel = v; this.render(); break;
+    case 'anext': S.path = S.sel; if (S.sel === 'ovs') { S.ovs = { ...S.ovs, cc: '', ph: '', dd: false, msg: '' }; this.go('ovsp'); } else { this.go('pass'); this.toast('(프로토타입) PASS 앱(팝업) — 통신사를 골라 본인인증'); } break;
+    case 'telco':
+      if (S.view === 'plegal') { this.toast('법정대리인 본인인증 완료 — 동의 이력 저장'); setTimeout(() => this.go('newid'), 500); break; }
+      this.toast(`(프로토타입) ${v} 본인인증 완료`);
+      setTimeout(() => { if (S.path === 'u14') { S.modal = 'guard'; this.render(); } else this.go('newid'); }, 500);   // 투네이션 서버에서 생년월일 기준으로 법정대리인 인증 여부 판단
+      break;
+    case 'gcancel': S.modal = null; S.hist = []; this.go('authsel', false); break;
+    case 'gok': S.modal = null; this.go('plegal'); this.toast('PASS 앱 법정대리인 동의 화면 — 법정대리인 명의로 인증'); break;
+    case 'eye': S.eye[b.dataset.k] = !S.eye[b.dataset.k]; this.render(); break;
+    case 'nnext': S.newId = S.f.id; this.go('done'); this.toast('입력 데이터 저장 — 고유식별번호 생성 (닉네임#' + Math.random().toString(36).slice(2, 8) + ')'); break;
+    case 'dfin': S.hist = []; this.go('login'); this.toast('비로그인 상태로 통합 로그인 화면으로 이동'); break;
+    case 'ccdd': S.ovs.dd = !S.ovs.dd; this.render(); break;
+    case 'cc': S.ovs.cc = v; S.ovs.dd = false; this.render(); break;
+    case 'pnext': {
+      if (S.ovs.block > Date.now()) { S.ovs.msg = '인증 실패 시, 추가 인증은 3분 후에 다시 시도할 수 있습니다. 잠시 후 다시 시도해 주세요.'; this.render(); break; }
+      if (S.ovs.sends >= 10) { S.modal = 'daily'; this.render(); break; }   // 1계정당 1일 10회
+      S.ovs.sends++; S.ovs.msg = ''; this.go('ovsc'); this.toast(`인증번호 전송 (오늘 ${S.ovs.sends}/10회) — (프로토타입) 인증번호 ${CODE}`, 3200); break;
+    }
+    case 'oresend': {
+      const o = S.oc; o.resend++;
+      if (o.resend > 10) { o.msg = '재전송 요청건수를 초과하였습니다.<br>처음부터 다시 시도하여 주시기 바랍니다.'; o.dead = true; this.render(); break; }
+      Object.assign(o, { left: 600, retry: 3, msg: '', v: '', dead: false }); this.render(); this.toast(`인증번호를 재전송했어요 (${o.resend}/10)`); break;
+    }
+    case 'cnext': {
+      const o = S.oc;
+      if (o.v === CODE) { this.toast('인증 완료 — 신규 ID 생성으로 이동'); this.go('newid'); break; }
+      if (o.retry <= 0) { S.modal = 'ofail'; this.render(); break; }   // 4회 초과 인증 실패
+      o.retry--; o.msg = '인증번호가 일치하지 않습니다.<br>확인 후 다시 입력해 주세요.'; o.v = ''; this.render(); break;
+    }
+    case 'ofailok': S.modal = null; S.ovs.block = Date.now() + 180000; S.ovs.msg = '인증 실패 시, 추가 인증은 3분 후에 다시 시도할 수 있습니다. 잠시 후 다시 시도해 주세요.'; S.hist.pop(); this.go('ovsp', false); break;
+    case 'mclose': S.modal = null; this.render(); break;
+    case 'leye': S.lg.eye = !S.lg.eye; this.render(); break;
+    case 'keep': S.lg.keep = !S.lg.keep; this.render(); break;
+    case 'login': this.doLogin(); break;
+    case 'f6ok': S.modal = null; S.find = 0; this.go('find'); this.toast('회원 정보 찾기 브라우저 창 — 아이디 찾기 탭'); break;
+    case 'findid': S.find = 0; this.go('find'); break;
+    case 'findpw': S.find = 1; this.go('find'); break;
+    case 'ftab': S.find = +v; this.render(); break;
+    case 'fsel': S.fsel = +v; this.render(); break;
+    case 'fnext': this.toast(`(프로토타입) ${S.find ? '비밀번호' : '아이디'} 찾기 — 3장(77~78p) 범위`); break;
+    case 'join': S.terms = [0, 0, 0, 0]; this.go('terms'); break;
+    case 'sns': if (S.lg.cap !== 'ok') { this.toast('보안 인증을 확인하는 중입니다'); break; } S.sns = v; S.modal = 'sns'; this.render(); break;
+    case 'snsmem': if (S.sns === 'payco') { S.modal = 'err'; this.render(); break; } S.modal = null; Object.assign(S.lg, { id: 'tunaone', pw: '••••••••••' }); this.render(); this.toast('기존 회원 — 통합 ID 자동 입력 후 로그인'); setTimeout(() => this.go('okp'), 900); break;
+    case 'snsnew': S.modal = null; S.terms = [0, 0, 0, 0]; this.go('terms'); this.toast('비회원 — 회원가입 화면으로 이동 (가입 후 SNS 계정 자동 연결)', 3200); break;
+    case 'relogin': S.hist = []; this.go('login', false); break;
+    case 'tfm': S.tf.m = v; this.render(); break;
+    case 'tfgo': this.go('tfcode'); break;
+    case 'tfback': this.go('tfsel'); break;
+    case 'tfcancel': S.hist = []; this.go('login', false); this.toast('로그인 취소 — 로그인 페이지로 이동 (2차 인증 미완료 시 로그인 세션 없음)'); break;
+    case 'tip': S.tf.tip = !S.tf.tip; this.render(); break;
+    case 'cs': this.toast('(프로토타입) 고객센터 페이지로 이동'); break;
+    case 'tfresend': this.resend2(); break;
+    case 'tfok': if (S.tf.code === CODE || S.tf.code === '677777') { this.toast('2차 인증 완료 — 로그인 처리'); this.go('okp'); } else { S.tf.st = 'wrong'; this.render(); } break;
+  }
+};
+Screen.prototype.doLogin = function () {
+  const S = this.S, L = S.lg;
+  L.mId = L.id ? '' : '아이디를 입력해주세요.'; L.mPw = L.pw ? '' : '비밀번호를 입력해주세요.';
+  if (!L.id || !L.pw) { this.render(); return; }
+  if (L.id.toLowerCase() === 'bye') { S.modal = 'withdrawn'; this.render(); return; }   // 완전탈퇴 계정
+  if (L.id.toLowerCase() === 'stop') { L.mPw = '로그인이 불가능합니다. 고객센터로 문의해 주세요.'; this.render(); return; }   // 27p 사용정지 (비밀번호 횟수 초과로 정지된 아이디)
+  if (L.pw === '1234') { L.fails = 0; if (L.id.toLowerCase() === 'tunaone') { this.toast('2차 인증 ON 계정 — 2차 인증 미완료 시 로그인 세션 없음'); this.go('tfsel'); } else { this.go('okp'); } return; }
+  L.fails++;
+  if (L.fails >= 6) { S.modal = 'fail6'; this.render(); return; }
+  L.mPw = '아이디 또는 비밀번호가 일치하지 않습니다.'; this.render(); this.toast(`로그인 실패 ${L.fails}회 (6회째에 실패 모달)`);
+};
+Screen.prototype.resend2 = function () {
+  const T = this.S.tf; T.req++;
+  if (T.req >= 10) { T.st = 'limit'; T.lock = 24 * 3600 - 1; T.code = ''; this.render(); return; }   // 1일 10번 이상: 재전송 버튼 비노출
+  Object.assign(T, { left: 600, wait: 180, st: '', code: '' });   // 남은 시간·재전송 대기 리셋
+  if (T.req >= 8) T.toast = `요청이 너무 많습니다. (남은 횟수 :${10 - T.req}회)`;
+  this.render();
+  if (T.toast) setTimeout(() => { T.toast = ''; this.render(); }, 1800); else this.toast(`새 인증번호를 보냈어요 (오늘 ${T.req}회) — ${CODE}`);
+};
+Screen.prototype.input = function (t) {
+  const S = this.S, k = t.dataset.f;
+  if (k && ['nick', 'id', 'pw', 'pw2'].includes(k)) {
+    S.f[k] = t.value; S.t[k] = 1; if (k === 'pw' && S.f.pw2) S.t.pw2 = 1;
+    const M = newIdMsgs(S);
+    this.el.querySelectorAll('.fb').forEach((fb) => {
+      const inp = fb.querySelector('input'); if (!inp) return; const kk = inp.dataset.f, m = M[kk];
+      let md = fb.querySelector('.msg'); fb.querySelector('.row').classList.toggle('err', !!m);
+      if (m) { if (!md) { md = document.createElement('div'); md.className = 'msg'; fb.append(md); } md.textContent = m; md.dataset.spec = '39:' + { nick: '닉네임', id: '아이디', pw: '비밀번호', pw2: '비밀번호 확인' }[kk]; } else if (md) md.remove();
+    });
+    const nb = this.el.querySelector('[data-a="nnext"]'); if (nb) nb.disabled = !newIdOk(S);
+  }
+  if (k === 'ph') { const c = t.value.replace(/\D/g, ''); if (c !== t.value) t.value = c; S.ovs.ph = c; }   // 숫자 외 문자 입력 불가
+  if (k === 'oc') { const c = t.value.replace(/\D/g, '').slice(0, 6); if (c !== t.value) t.value = c; S.oc.v = c; }
+  if (k === 'lid') { S.lg.id = t.value; if (t.value) S.lg.mId = ''; }
+  if (k === 'lpw') S.lg.pw = t.value;
+  if (t.dataset.c != null) {   // 2차 인증 6칸: 숫자만, 입력하면 다음 칸으로
+    const T = S.tf, i = +t.dataset.c, d = t.value.replace(/\D/g, '').slice(-1);
+    t.value = d;
+    const arr = T.code.padEnd(6, ' ').split(''); arr[i] = d || ' '; T.code = arr.join('').replace(/\s+$/, '');
+    if (T.st === 'expired') { T.st = ''; this.el.querySelector('.bx').classList.remove('red'); const m = this.el.querySelector('.ms'); if (m) m.remove(); }   // 다시 입력 시도 → 원래 색·메시지 삭제
+    if (d && i < 5) { const n = this.el.querySelector(`.bx input[data-c="${i + 1}"]`); if (n) n.focus(); }
+  }
+  this.sync();
+};
+Screen.prototype.blur = function (t) {
+  const S = this.S, k = t.dataset.f;
+  if (k === 'lid' && !S.lg.id) { S.lg.mId = '아이디를 입력해주세요.'; this.render(); }
+  if (['nick', 'id', 'pw', 'pw2'].includes(k) && !S.t[k]) { S.t[k] = 1; this.input(t); }   // 포커스 후 비우면 메시지
+};
+Screen.prototype.tick = function () {
+  const S = this.S;
+  if (S.view === 'ovsc' && !S.oc.dead && S.oc.left > 0) {
+    S.oc.left--; const tm = this.el.querySelector('[data-tm="oc"]'); if (tm) tm.textContent = `남은 시간 : ${mmss(S.oc.left)} / 재시도 가능 횟수 : ${S.oc.retry}`;
+    if (S.oc.left === 0) { S.oc.dead = true; S.oc.msg = '인증번호 입력시간이 초과되었습니다.<br>처음부터 다시 시도하여 주시기 바랍니다.'; this.render(); }
+  }
+  if (S.view === 'tfcode' && !S.cut) {
+    const T = S.tf;
+    if (T.left > 0 && T.st !== 'limit') { T.left--; const e = this.el.querySelector('[data-tm="tf"]'); if (e) { e.textContent = mmss(T.left); e.classList.toggle('r', T.left < 60); } if (T.left === 0) { T.st = 'expired'; this.render(); } }
+    if (T.wait > 0) { T.wait--; const w = this.el.querySelector('[data-tm="tw"]'); if (w) w.textContent = `재전송 대기 (${m1ss(T.wait)})`; if (T.wait === 0) this.render(); }
+    if (T.st === 'limit' && T.lock > 0) { T.lock--; const m = this.el.querySelector('.ms'); if (m) m.innerHTML = `1일당 요청 횟수를 초과했습니다.<br>(${lockText(T.lock)} 이후 다시 시도하실 수 있습니다.)`; }
+  }
+};
+setInterval(() => SCR.forEach((s) => s.tick()), 1000);
+
+/* ---------------- 이벤트 위임 ---------------- */
+const scrOf = (t) => { const e = t.closest('.scr'); return e && SCR[+e.dataset.i]; };
+F.addEventListener('click', (e) => {
+  const s = scrOf(e.target); if (!s) return;
+  const S = s.S;
+  if (S.view === 'ovsp' && S.ovs.dd && !e.target.closest('.dd')) { S.ovs.dd = false; s.render(); return; }
+  if (S.view === 'detail' && S.ddl && !e.target.closest('.ddl,.sel')) { S.ddl = false; s.render(); return; }
+  if (S.tf && S.tf.tip && !e.target.closest('.qm')) { S.tf.tip = false; s.render(); }
+  const b = e.target.closest('[data-a]'); if (!b || b.disabled) return;
+  s.act(b.dataset.a, b, e);
+});
+F.addEventListener('input', (e) => { const s = scrOf(e.target); if (s) s.input(e.target); });
+F.addEventListener('focusout', (e) => { const s = scrOf(e.target); if (s && e.target.dataset.f) s.blur(e.target); });
+F.addEventListener('focusin', (e) => {
+  const s = scrOf(e.target); if (!s) return;
+  if (e.target.dataset.f === 'lid' && !s.S.lg.hint) { s.S.lg.hint = true; s.toast('(프로토타입) 비밀번호 1234 = 로그인 · tunaone = 2차 인증 ON · bye = 완전탈퇴 · stop = 사용정지 계정', 4500); }
+});
+F.addEventListener('keydown', (e) => {
+  const s = scrOf(e.target); if (!s) return;
+  if (e.target.dataset.c != null && e.key === 'Backspace' && !e.target.value) { const p = s.el.querySelector(`.bx input[data-c="${+e.target.dataset.c - 1}"]`); if (p) { p.focus(); p.value = ''; s.input(p); } }
+  if (e.key === 'Enter' && (e.target.dataset.f === 'lid' || e.target.dataset.f === 'lpw')) { const b = s.el.querySelector('.lbtn'); if (b && !b.disabled) s.doLogin(); }
+});
+F.addEventListener('paste', (e) => {
+  const s = scrOf(e.target); if (!s || e.target.dataset.c == null) return;
+  const d = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6); if (!d) return;
+  e.preventDefault(); s.S.tf.code = d; if (s.S.tf.st === 'expired') s.S.tf.st = ''; s.render();
+});
+
+/* ---------------- 기획서 연결 ---------------- */
+const post = (m) => { try { parent.postMessage(Object.assign({ d2p: true }, m), '*'); } catch (_) {} };
+const refsOf = (x) => x.dataset.spec.split(/\s+(?=\d+:)/);
+const chip = document.createElement('div'); chip.id = 'chip';
+F.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-spec]'); if (!el) return;
+  post({ type: 'spec', refs: refsOf(el), label: (el.title || el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 30) });
+}, true);
+F.addEventListener('mouseover', (e) => {
+  if (!F.classList.contains('inspect')) return;
+  const el = e.target.closest('[data-spec]');
+  if (!el) { chip.style.display = 'none'; return; }
+  const r = el.getBoundingClientRect(), fr = F.getBoundingClientRect();
+  chip.textContent = refsOf(el).map((x) => x.replace(':', 'p ')).join(' · ');
+  chip.style.display = 'block'; chip.style.left = Math.max(0, Math.min(r.left - fr.left, fr.width - chip.offsetWidth)) + 'px'; chip.style.top = Math.max(0, r.top - fr.top - 14) + 'px';
+});
+const HINT = { '51:5': (s) => { s.S.tf.tip = true; s.render(); } };
+addEventListener('message', (e) => {
+  const m = e.data; if (!m || !m.d2p) return;
+  if (m.type === 'focus') {
+    const find = () => [...F.querySelectorAll('[data-spec]')].filter((x) => refsOf(x).includes(m.ref) && x.offsetParent !== null);
+    let els = find();
+    if ((!els.length || HINT[m.ref]) && HINT[m.ref]) { SCR.forEach((s) => { if (s.S.view.startsWith('tf')) HINT[m.ref](s); }); els = find(); }
+    els.slice(0, 6).forEach((x) => { x.classList.remove('spec-flash'); void x.offsetWidth; x.classList.add('spec-flash'); setTimeout(() => x.classList.remove('spec-flash'), 3200); });
+    post({ type: 'focused', ref: m.ref, count: els.length });
+  } else if (m.type === 'inspect') F.classList.toggle('inspect', !!m.on);
+  else if (m.type === 'event') runEvent(m.name, m.value);
+  else if (m.type === 'changed') {
+    F.querySelectorAll('[data-chg]').forEach((x) => x.removeAttribute('data-chg'));
+    const set = new Set(m.refs || []);
+    F.querySelectorAll('[data-spec]').forEach((x) => { if (refsOf(x).some((r) => set.has(r))) x.setAttribute('data-chg', '변경'); });
+  }
+});
+// 이벤트 버튼: 해당 동작을 할 수 있는 화면을 골라 실행 (없으면 첫 화면을 그 상태로 바꿈)
+const pick = (views) => SCR.find((s) => views.includes(s.S.view)) || SCR[0];
+function runEvent(name, value) {
+  switch (name) {
+    case 'terms': { const s = pick(['terms']); if (s.S.view !== 'terms') s.preset('terms'); if (value === 'all') { s.S.terms = [1, 1, 1, 1]; s.render(); s.toast('전체 동의 — 일괄 체크, 다음 버튼 활성화'); } else s.act('tdoc', { dataset: { i: '1' } }); break; }
+    case 'flow': { const s = SCR[0]; s.preset('authsel'); s.S.sel = value; s.render(); setTimeout(() => s.act('anext', { dataset: {} }), 400); break; }
+    case 'ovs': {
+      const s = pick(['ovsc', 'ovsp']);
+      if (value === 'daily') { if (s.S.view !== 'ovsp') s.preset('ovs-phone'); Object.assign(s.S.ovs, { cc: '+975', ph: '1012121111', sends: 10 }); s.render(); s.act('pnext', { dataset: {} }); break; }
+      if (s.S.view !== 'ovsc') s.preset('ovs-code');
+      if (value === 'wrong') { s.S.oc.v = '111111'; s.act('cnext', { dataset: {} }); }
+      if (value === 'timeout') { s.S.oc.left = 3; s.render(); s.toast('입력 제한시간 10분 — 3초 남김 (프로토타입)'); }
+      if (value === 'resend') { s.S.oc.resend = 10; s.act('oresend', { dataset: {} }); }
+      if (value === 'fail') { s.S.oc.retry = 0; s.S.oc.v = '111111'; s.act('cnext', { dataset: {} }); }
+      break;
+    }
+    case 'newid': { const s = pick(['newid']); if (s.S.view !== 'newid') s.preset('newid'); s.S.f = value === 'errors' ? { nick: '바보😀', id: 'toona!', pw: 'abcdefghij', pw2: 'abcdefghik' } : { nick: '송송송', id: 'tunaone2', pw: 'toona1234!', pw2: 'toona1234!' }; s.S.t = { nick: 1, id: 1, pw: 1, pw2: 1 }; s.render(); s.toast(value === 'errors' ? '27p 안내 메시지(에러) 예시' : '모든 필수 항목 입력 — 다음 버튼 활성화'); break; }
+    case 'login': {
+      const s = pick(['login']); if (s.S.view !== 'login') s.preset('login-filled'); const L = s.S.lg; L.cap = 'ok';
+      if (value === 'empty') { L.id = ''; L.pw = ''; s.doLogin(); }
+      if (value === 'wrong') { L.id = 'tunaone'; L.pw = 'wrongpass12'; s.doLogin(); }
+      if (value === 'fail6') { L.id = 'tunaone'; L.pw = 'wrongpass12'; L.fails = 5; s.doLogin(); }
+      if (value === 'withdrawn') { L.id = 'bye'; L.pw = '1234'; s.render(); s.doLogin(); }
+      if (value === '2fa') { L.id = 'tunaone'; L.pw = '1234'; s.doLogin(); }
+      if (value === 'payco') { s.render(); s.act('sns', { dataset: { v: 'payco' } }); setTimeout(() => s.act('snsmem', { dataset: {} }), 700); }
+      break;
+    }
+    case 'sns': { const s = pick(['login']); if (s.S.view !== 'login') s.preset('login-filled'); s.S.lg.cap = 'ok'; s.act('sns', { dataset: { v: 'kakao' } }); setTimeout(() => s.act(value === 'new' ? 'snsnew' : 'snsmem', { dataset: {} }), 800); break; }
+    case '2fa': {
+      const s = pick(['tfcode', 'tfsel']);
+      if (value === 'phone' || value === 'email') { if (s.S.view !== 'tfsel') s.preset('2fa-select'); s.S.tf.m = value; s.render(); setTimeout(() => s.act('tfgo', { dataset: {} }), 400); break; }
+      if (s.S.view !== 'tfcode') s.preset('2fa-phone');
+      const T = s.S.tf;
+      if (value === 'expire') { T.left = 0; T.st = 'expired'; s.render(); }
+      if (value === 'wrong') { T.code = '123456'; s.act('tfok', { dataset: {} }); }
+      if (value === 'req8') { T.req = 7; s.resend2(); }
+      if (value === 'req10') { T.req = 9; s.resend2(); }
+      break;
+    }
+  }
+}
+
+/* ---------------- 시작 ---------------- */
+DEFS.forEach((d, i) => SCR.push(new Screen(d, i)));
+F.append(chip);
+if (q.has('inspect')) F.classList.add('inspect');
+post({ type: 'ready' });
+})();
+</script>
+</body>
+</html>

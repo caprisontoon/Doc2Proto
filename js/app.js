@@ -125,6 +125,7 @@
   .d2p .lnk:hover{background:rgba(14,122,143,.16)}
   /* 동작 화면 */
   .d2p iframe.live{position:absolute;border:0;z-index:8;background:#fff;display:none}
+  .d2p iframe.live.clear{background:transparent}
   .d2p.live-on iframe.live{display:block}
   .d2p .livebadge{position:absolute;z-index:13;font-size:11px;font-weight:800;background:var(--link);color:#fff;border-radius:5px;padding:1px 7px;pointer-events:none;transform:translate(-100%,-125%);display:none}
   .d2p.live-on .livebadge{display:block}
@@ -826,6 +827,7 @@
       f.src = src.startsWith('blob:') ? `${src}#${qs}` : `${src}${src.includes('?') ? '&' : '?'}${qs}`;
       f.setAttribute('title', '동작 화면');
       f.setAttribute('allow', 'clipboard-write');
+      if (S.frame.clear || LIVE.apps[appOf(S.frame)].clear) f.classList.add('clear');   // 투명: 한 슬라이드에 화면 여러 개를 그리고 사이의 화살표·설명은 스냅샷이 보이게
       S.stage.append(f); S.iframe = f; S.ready = false;
     }
     function unmountLive(S) { if (S.iframe) { S.iframe.remove(); S.iframe = null; } }
