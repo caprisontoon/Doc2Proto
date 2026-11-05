@@ -1,0 +1,1453 @@
+{
+ "apps": {
+  "remote": {
+   "title": "클라이언트 리모컨",
+   "src": "live/remote/index.html",
+   "size": [
+    585.3,
+    356
+   ],
+   "events": [
+    {
+     "group": "실행 화면",
+     "items": [
+      {
+       "label": "스플래시",
+       "name": "boot",
+       "value": "splash",
+       "page": 30
+      },
+      {
+       "label": "로그인",
+       "name": "boot",
+       "value": "login",
+       "page": 31
+      },
+      {
+       "label": "광고 팝업",
+       "name": "boot",
+       "value": "adpop",
+       "page": 33
+      },
+      {
+       "label": "점검",
+       "name": "boot",
+       "value": "maint",
+       "page": 34
+      },
+      {
+       "label": "버전 업데이트",
+       "name": "boot",
+       "value": "update",
+       "page": 35
+      },
+      {
+       "label": "로그인 만료",
+       "name": "boot",
+       "value": "expired",
+       "page": 36
+      }
+     ]
+    },
+    {
+     "group": "레이아웃",
+     "items": [
+      {
+       "label": "기본 구성",
+       "name": "layout",
+       "value": "default",
+       "page": 9
+      },
+      {
+       "label": "초기 셋팅 위젯",
+       "name": "layout",
+       "value": "initial",
+       "page": 20
+      },
+      {
+       "label": "프리셋 · 엑셀 방송",
+       "name": "preset",
+       "value": "엑셀 방송",
+       "page": 12
+      }
+     ]
+    },
+    {
+     "group": "위젯 동작",
+     "items": [
+      {
+       "label": "추가 · 뽑기 잔여 수량",
+       "name": "add",
+       "value": "gacha",
+       "page": 21
+      },
+      {
+       "label": "삭제 · 볼륨 제어",
+       "name": "remove",
+       "value": "vol",
+       "page": 22
+      },
+      {
+       "label": "교환 · 대기↔후원 사용",
+       "name": "swap",
+       "value": "wait,use",
+       "page": 23
+      },
+      {
+       "label": "이동 · 볼륨 → 대기 아래",
+       "name": "move",
+       "value": "vol,wait,d",
+       "page": 24
+      },
+      {
+       "label": "창 분리 · 후원 사용",
+       "name": "detach",
+       "value": "use",
+       "page": 26
+      },
+      {
+       "label": "분리 창 모두 붙이기",
+       "name": "dockall",
+       "page": 26
+      }
+     ]
+    },
+    {
+     "group": "상태",
+     "items": [
+      {
+       "label": "대기 중인 후원 +1",
+       "name": "waitadd",
+       "page": 10
+      },
+      {
+       "label": "Dock 압정 on/off",
+       "name": "dockpin",
+       "page": 10
+      },
+      {
+       "label": "새 알림 도착",
+       "name": "notify",
+       "page": 13
+      },
+      {
+       "label": "다크 / 라이트 모드",
+       "name": "theme",
+       "page": 14
+      }
+     ]
+    }
+   ]
+  },
+  "list": {
+   "title": "후원 리스트 위젯",
+   "src": "live/list/index.html",
+   "size": [
+    459.3,
+    354.3
+   ],
+   "events": [
+    {
+     "group": "후원 도착",
+     "items": [
+      {
+       "label": "통합 알림 +1",
+       "name": "new",
+       "value": "all",
+       "page": 42
+      },
+      {
+       "label": "게임 +1",
+       "name": "new",
+       "value": "game",
+       "page": 42
+      },
+      {
+       "label": "뽑기 10연차",
+       "name": "new",
+       "value": "gacha",
+       "page": 43
+      }
+     ]
+    },
+    {
+     "group": "재생 중인 후원",
+     "items": [
+      {
+       "label": "다음 후원 재생",
+       "name": "playnext",
+       "page": 43
+      },
+      {
+       "label": "재생 종료",
+       "name": "playstop",
+       "page": 43
+      }
+     ]
+    },
+    {
+     "group": "반응형",
+     "items": [
+      {
+       "label": "넓은 위젯 (표)",
+       "name": "view",
+       "value": "wide",
+       "page": 38
+      },
+      {
+       "label": "좁은 위젯 (카드)",
+       "name": "view",
+       "value": "narrow",
+       "page": 38
+      }
+     ]
+    },
+    {
+     "group": "뽑기 검색",
+     "items": [
+      {
+       "label": "검색 결과 1,000건 초과",
+       "name": "bigsearch",
+       "page": 49
+      }
+     ]
+    }
+   ]
+  },
+  "widget": {
+   "title": "기타 위젯",
+   "src": "live/widget/index.html",
+   "size": [
+    165,
+    450
+   ],
+   "events": [
+    {
+     "group": "대기 중인 후원",
+     "items": [
+      {
+       "label": "영상 후원 도착",
+       "name": "wadd",
+       "value": "video",
+       "page": 62
+      },
+      {
+       "label": "퀘스트 도착",
+       "name": "wadd",
+       "value": "quest",
+       "page": 65
+      },
+      {
+       "label": "럭키박스 도착",
+       "name": "wadd",
+       "value": "lucky",
+       "page": 66
+      },
+      {
+       "label": "플레이 도착",
+       "name": "wadd",
+       "value": "play",
+       "page": 67
+      },
+      {
+       "label": "남은 시간 초과",
+       "name": "timeout",
+       "page": 65
+      }
+     ]
+    },
+    {
+     "group": "뽑기 잔여 수량",
+     "items": [
+      {
+       "label": "소진형 뽑기 없음/있음",
+       "name": "nogacha",
+       "page": 73
+      }
+     ]
+    },
+    {
+     "group": "투표",
+     "items": [
+      {
+       "label": "프리셋 내용 채우기",
+       "name": "votefill",
+       "page": 77
+      }
+     ]
+    },
+    {
+     "group": "크루 후원",
+     "items": [
+      {
+       "label": "방송 설정 없음/있음",
+       "name": "crewset",
+       "page": 79
+      }
+     ]
+    },
+    {
+     "group": "투네애드",
+     "items": [
+      {
+       "label": "새 광고 도착",
+       "name": "adnew",
+       "page": 82
+      }
+     ]
+    }
+   ]
+  },
+  "mobile": {
+   "title": "모바일 웹 리모컨",
+   "src": "live/mobile/index.html",
+   "size": [
+    195,
+    373
+   ],
+   "events": [
+    {
+     "group": "실행 화면",
+     "items": [
+      {
+       "label": "스플래시",
+       "name": "boot",
+       "value": "splash",
+       "page": 90
+      },
+      {
+       "label": "로그인",
+       "name": "boot",
+       "value": "login",
+       "page": 90
+      },
+      {
+       "label": "광고 팝업",
+       "name": "boot",
+       "value": "adpop",
+       "page": 91
+      },
+      {
+       "label": "점검",
+       "name": "boot",
+       "value": "maint",
+       "page": 91
+      },
+      {
+       "label": "업데이트",
+       "name": "boot",
+       "value": "update",
+       "page": 91
+      },
+      {
+       "label": "로그인 만료",
+       "name": "boot",
+       "value": "expired",
+       "page": 92
+      }
+     ]
+    },
+    {
+     "group": "리모컨 위젯 열기",
+     "items": [
+      {
+       "label": "대기 중인 후원",
+       "name": "widget",
+       "value": "wait",
+       "page": 108
+      },
+      {
+       "label": "볼륨 제어",
+       "name": "widget",
+       "value": "vol",
+       "page": 108
+      },
+      {
+       "label": "후원 사용",
+       "name": "widget",
+       "value": "use",
+       "page": 108
+      },
+      {
+       "label": "후원 알림",
+       "name": "widget",
+       "value": "alert",
+       "page": 109
+      },
+      {
+       "label": "영상 후원 제어",
+       "name": "widget",
+       "value": "video",
+       "page": 109
+      },
+      {
+       "label": "뽑기 잔여 수량",
+       "name": "widget",
+       "value": "gqty",
+       "page": 109
+      },
+      {
+       "label": "투표",
+       "name": "widget",
+       "value": "vote",
+       "page": 110
+      },
+      {
+       "label": "크루 후원",
+       "name": "widget",
+       "value": "crew",
+       "page": 111
+      },
+      {
+       "label": "투네애드",
+       "name": "widget",
+       "value": "ad",
+       "page": 112
+      }
+     ]
+    },
+    {
+     "group": "상태",
+     "items": [
+      {
+       "label": "새 후원 도착",
+       "name": "list",
+       "value": "new:all",
+       "page": 96
+      },
+      {
+       "label": "새 알림 도착",
+       "name": "notify",
+       "page": 106
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "frames": [
+  {
+   "page": 9,
+   "rect": {
+    "l": 15.2,
+    "t": 26.05,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 10,
+   "rect": {
+    "l": 5.47,
+    "t": 20.19,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 11,
+   "rect": {
+    "l": 2.7,
+    "t": 19.55,
+    "w": 61.05,
+    "h": 66.14
+   },
+   "state": "indicator",
+   "app": "remote"
+  },
+  {
+   "page": 12,
+   "rect": {
+    "l": 5.96,
+    "t": 20.49,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "preset",
+   "app": "remote"
+  },
+  {
+   "page": 13,
+   "rect": {
+    "l": 4.7,
+    "t": 23.26,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "notice",
+   "app": "remote"
+  },
+  {
+   "page": 14,
+   "rect": {
+    "l": 7.49,
+    "t": 19.17,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "settings",
+   "app": "remote"
+  },
+  {
+   "page": 15,
+   "rect": {
+    "l": 7.49,
+    "t": 19.17,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "keys",
+   "app": "remote"
+  },
+  {
+   "page": 16,
+   "rect": {
+    "l": 7.49,
+    "t": 19.17,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "info",
+   "app": "remote"
+  },
+  {
+   "page": 20,
+   "rect": {
+    "l": 6.59,
+    "t": 21.65,
+    "w": 56.12,
+    "h": 61.42
+   },
+   "state": "initial",
+   "app": "remote"
+  },
+  {
+   "page": 21,
+   "rect": {
+    "l": 7.4,
+    "t": 20.11,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "add",
+   "app": "remote"
+  },
+  {
+   "page": 22,
+   "rect": {
+    "l": 6.61,
+    "t": 20.49,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 23,
+   "rect": {
+    "l": 5.43,
+    "t": 23.37,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 24,
+   "rect": {
+    "l": 0.89,
+    "t": 21.24,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "live",
+   "app": "remote"
+  },
+  {
+   "page": 25,
+   "rect": {
+    "l": 2.65,
+    "t": 18.37,
+    "w": 60.97,
+    "h": 65.93
+   },
+   "state": "resize",
+   "app": "remote"
+  },
+  {
+   "page": 26,
+   "rect": {
+    "l": 1.16,
+    "t": 18.68,
+    "w": 77.5,
+    "h": 67.04
+   },
+   "state": "desktop",
+   "app": "remote"
+  },
+  {
+   "page": 27,
+   "rect": {
+    "l": 1.2,
+    "t": 24.5,
+    "w": 77.5,
+    "h": 67.04
+   },
+   "state": "magnet",
+   "app": "remote"
+  },
+  {
+   "page": 28,
+   "rect": {
+    "l": 22.4,
+    "t": 25.3,
+    "w": 34.1,
+    "h": 62.0
+   },
+   "state": "window",
+   "app": "remote"
+  },
+  {
+   "page": 30,
+   "rect": {
+    "l": 7.8,
+    "t": 21.6,
+    "w": 61.0,
+    "h": 65.9
+   },
+   "state": "splash",
+   "app": "remote"
+  },
+  {
+   "page": 31,
+   "rect": {
+    "l": 7.8,
+    "t": 21.6,
+    "w": 61.0,
+    "h": 65.9
+   },
+   "state": "login",
+   "app": "remote"
+  },
+  {
+   "page": 33,
+   "rect": {
+    "l": 7.8,
+    "t": 21.6,
+    "w": 61.0,
+    "h": 65.9
+   },
+   "state": "account",
+   "app": "remote"
+  },
+  {
+   "page": 34,
+   "rect": {
+    "l": 7.7,
+    "t": 21.6,
+    "w": 61.1,
+    "h": 66.1
+   },
+   "state": "adpop",
+   "app": "remote"
+  },
+  {
+   "page": 35,
+   "rect": {
+    "l": 7.7,
+    "t": 21.6,
+    "w": 61.1,
+    "h": 66.1
+   },
+   "state": "maint",
+   "app": "remote"
+  },
+  {
+   "page": 36,
+   "rect": {
+    "l": 7.7,
+    "t": 21.6,
+    "w": 61.1,
+    "h": 66.1
+   },
+   "state": "update",
+   "app": "remote"
+  },
+  {
+   "page": 37,
+   "rect": {
+    "l": 7.7,
+    "t": 21.6,
+    "w": 61.1,
+    "h": 66.1
+   },
+   "state": "expired",
+   "app": "remote"
+  },
+  {
+   "page": 41,
+   "rect": {
+    "l": 9.46,
+    "t": 26.36,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "plain",
+   "app": "list"
+  },
+  {
+   "page": 44,
+   "rect": {
+    "l": 13.43,
+    "t": 19.02,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "all",
+   "app": "list"
+  },
+  {
+   "page": 45,
+   "rect": {
+    "l": 10.52,
+    "t": 22.18,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "filter",
+   "app": "list"
+  },
+  {
+   "page": 46,
+   "rect": {
+    "l": 7.75,
+    "t": 23.44,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "sync",
+   "app": "list"
+  },
+  {
+   "page": 47,
+   "rect": {
+    "l": 9.46,
+    "t": 21.12,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "game",
+   "app": "list"
+  },
+  {
+   "page": 48,
+   "rect": {
+    "l": 9.46,
+    "t": 21.12,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "gacha",
+   "app": "list"
+  },
+  {
+   "page": 49,
+   "rect": {
+    "l": 9.46,
+    "t": 21.12,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "gacha-qty",
+   "app": "list"
+  },
+  {
+   "page": 50,
+   "rect": {
+    "l": 9.46,
+    "t": 21.12,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "search",
+   "app": "list"
+  },
+  {
+   "page": 51,
+   "rect": {
+    "l": 9.46,
+    "t": 21.12,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "search-opt",
+   "app": "list"
+  },
+  {
+   "page": 52,
+   "rect": {
+    "l": 9.46,
+    "t": 21.12,
+    "w": 47.84,
+    "h": 65.62
+   },
+   "state": "search-result",
+   "app": "list"
+  },
+  {
+   "page": 53,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-plain",
+   "app": "list"
+  },
+  {
+   "page": 54,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-block",
+   "app": "list"
+  },
+  {
+   "page": 55,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-badge",
+   "app": "list"
+  },
+  {
+   "page": 56,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-game",
+   "app": "list"
+  },
+  {
+   "page": 57,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-gacha",
+   "app": "list"
+  },
+  {
+   "page": 58,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-gacha-check",
+   "app": "list"
+  },
+  {
+   "page": 59,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-gacha-qty",
+   "app": "list"
+  },
+  {
+   "page": 60,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-search",
+   "app": "list"
+  },
+  {
+   "page": 61,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-search",
+   "app": "list"
+  },
+  {
+   "page": 62,
+   "rect": {
+    "l": 4.2,
+    "t": 22.03,
+    "w": 21.05,
+    "h": 68.92
+   },
+   "state": "n-search-result",
+   "app": "list"
+  },
+  {
+   "page": 64,
+   "rect": {
+    "l": 38.7,
+    "t": 31.9,
+    "w": 37.9,
+    "h": 14.9
+   },
+   "state": "quick|364",
+   "app": "widget"
+  },
+  {
+   "page": 65,
+   "rect": {
+    "l": 13.6,
+    "t": 14.3,
+    "w": 17.2,
+    "h": 83.0
+   },
+   "state": "wait|165",
+   "app": "widget"
+  },
+  {
+   "page": 66,
+   "rect": {
+    "l": 13.6,
+    "t": 14.3,
+    "w": 17.2,
+    "h": 83.0
+   },
+   "state": "wait|165",
+   "app": "widget"
+  },
+  {
+   "page": 67,
+   "rect": {
+    "l": 2.2,
+    "t": 15.5,
+    "w": 17.2,
+    "h": 57.2
+   },
+   "state": "wvideo|165",
+   "app": "widget"
+  },
+  {
+   "page": 68,
+   "rect": {
+    "l": 2.2,
+    "t": 15.3,
+    "w": 17.2,
+    "h": 44.0
+   },
+   "state": "quest|165",
+   "app": "widget"
+  },
+  {
+   "page": 69,
+   "rect": {
+    "l": 2.2,
+    "t": 15.3,
+    "w": 17.2,
+    "h": 44.0
+   },
+   "state": "lucky|165",
+   "app": "widget"
+  },
+  {
+   "page": 70,
+   "rect": {
+    "l": 2.2,
+    "t": 15.3,
+    "w": 17.2,
+    "h": 44.0
+   },
+   "state": "play|165",
+   "app": "widget"
+  },
+  {
+   "page": 71,
+   "rect": {
+    "l": 50.0,
+    "t": 17.8,
+    "w": 17.2,
+    "h": 32.2
+   },
+   "state": "vol|165",
+   "app": "widget"
+  },
+  {
+   "page": 72,
+   "rect": {
+    "l": 17.3,
+    "t": 23.8,
+    "w": 17.2,
+    "h": 62.2
+   },
+   "state": "use|165",
+   "app": "widget"
+  },
+  {
+   "page": 73,
+   "rect": {
+    "l": 28.6,
+    "t": 30.0,
+    "w": 17.2,
+    "h": 62.2
+   },
+   "state": "use|165",
+   "app": "widget"
+  },
+  {
+   "page": 74,
+   "rect": {
+    "l": 27.0,
+    "t": 22.2,
+    "w": 16.9,
+    "h": 71.9
+   },
+   "state": "alert|162",
+   "app": "widget"
+  },
+  {
+   "page": 75,
+   "rect": {
+    "l": 46.6,
+    "t": 71.5,
+    "w": 11.9,
+    "h": 15.3
+   },
+   "state": "video|114",
+   "app": "widget"
+  },
+  {
+   "page": 76,
+   "rect": {
+    "l": 60.0,
+    "t": 56.3,
+    "w": 17.2,
+    "h": 36.6
+   },
+   "state": "gqty|165",
+   "app": "widget"
+  },
+  {
+   "page": 77,
+   "rect": {
+    "l": 16.8,
+    "t": 15.1,
+    "w": 17.3,
+    "h": 83.9
+   },
+   "state": "vote|166",
+   "app": "widget"
+  },
+  {
+   "page": 78,
+   "rect": {
+    "l": 29.1,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 75.1
+   },
+   "state": "vote|203",
+   "app": "widget"
+  },
+  {
+   "page": 79,
+   "rect": {
+    "l": 4.2,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 73.0
+   },
+   "state": "vote-toast|203",
+   "app": "widget"
+  },
+  {
+   "page": 80,
+   "rect": {
+    "l": 4.2,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 73.0
+   },
+   "state": "vote-filled|203",
+   "app": "widget"
+  },
+  {
+   "page": 82,
+   "rect": {
+    "l": 19.1,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 75.1
+   },
+   "state": "crew-none|203",
+   "app": "widget"
+  },
+  {
+   "page": 83,
+   "rect": {
+    "l": 10.1,
+    "t": 17.9,
+    "w": 21.1,
+    "h": 75.1
+   },
+   "state": "crew-live|203",
+   "app": "widget"
+  },
+  {
+   "page": 84,
+   "rect": {
+    "l": 9.5,
+    "t": 24.7,
+    "w": 47.8,
+    "h": 62.1
+   },
+   "state": "ad|459",
+   "app": "widget"
+  },
+  {
+   "page": 85,
+   "rect": {
+    "l": 9.5,
+    "t": 24.7,
+    "w": 47.8,
+    "h": 62.1
+   },
+   "state": "ad|459",
+   "app": "widget"
+  },
+  {
+   "page": 86,
+   "rect": {
+    "l": 9.5,
+    "t": 24.7,
+    "w": 47.8,
+    "h": 62.1
+   },
+   "state": "ad-detail|459",
+   "app": "widget"
+  },
+  {
+   "page": 87,
+   "rect": {
+    "l": 10.4,
+    "t": 21.1,
+    "w": 21.1,
+    "h": 68.2
+   },
+   "state": "n-ad|203",
+   "app": "widget"
+  },
+  {
+   "page": 89,
+   "rect": {
+    "l": 42.0,
+    "t": 22.2,
+    "w": 50.9,
+    "h": 56.0
+   },
+   "state": "web",
+   "app": "remote"
+  },
+  {
+   "page": 90,
+   "rect": {
+    "l": 16.4,
+    "t": 27.5,
+    "w": 62.2,
+    "h": 69.1
+   },
+   "state": "web-keys",
+   "app": "remote"
+  },
+  {
+   "page": 92,
+   "rect": {
+    "l": 47.1,
+    "t": 26.9,
+    "w": 19.7,
+    "h": 57.9
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 93,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "splash",
+   "app": "mobile"
+  },
+  {
+   "page": 94,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "adpop",
+   "app": "mobile"
+  },
+  {
+   "page": 95,
+   "rect": {
+    "l": 4.6,
+    "t": 21.5,
+    "w": 20.5,
+    "h": 69.3
+   },
+   "state": "expired",
+   "app": "mobile"
+  },
+  {
+   "page": 96,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 97,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 98,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "block",
+   "app": "mobile"
+  },
+  {
+   "page": 99,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "badge",
+   "app": "mobile"
+  },
+  {
+   "page": 100,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "game",
+   "app": "mobile"
+  },
+  {
+   "page": 101,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "gacha",
+   "app": "mobile"
+  },
+  {
+   "page": 102,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "gacha-check",
+   "app": "mobile"
+  },
+  {
+   "page": 103,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "gacha-qty",
+   "app": "mobile"
+  },
+  {
+   "page": 104,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "search",
+   "app": "mobile"
+  },
+  {
+   "page": 105,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "search",
+   "app": "mobile"
+  },
+  {
+   "page": 106,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "search-result",
+   "app": "mobile"
+  },
+  {
+   "page": 107,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 108,
+   "rect": {
+    "l": 4.6,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 77.7
+   },
+   "state": "set-basic",
+   "app": "mobile"
+  },
+  {
+   "page": 109,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 110,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "main",
+   "app": "mobile"
+  },
+  {
+   "page": 111,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "w-wait",
+   "app": "mobile"
+  },
+  {
+   "page": 112,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 73.4
+   },
+   "state": "w-alert",
+   "app": "mobile"
+  },
+  {
+   "page": 113,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "w-vote",
+   "app": "mobile"
+  },
+  {
+   "page": 114,
+   "rect": {
+    "l": 2.6,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 73.4
+   },
+   "state": "w-crew",
+   "app": "mobile"
+  },
+  {
+   "page": 115,
+   "rect": {
+    "l": 4.7,
+    "t": 21.0,
+    "w": 20.3,
+    "h": 69.1
+   },
+   "state": "w-ad",
+   "app": "mobile"
+  }
+ ]
+}
